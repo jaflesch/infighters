@@ -7,7 +7,7 @@
 
 void* memory_alloc(u32 size)
 {
-	return malloc(size);
+	return calloc(1, size);
 }
 
 void memory_free(void* block) 
@@ -51,6 +51,25 @@ string make_string(s8* v) {
 string make_string(s8* v, s64 length) {
 	string res;
 	res.data = (u8*)memory_alloc(length + 1);
+	memcpy(res.data, v, length + 1);
+	res.length = length;
+	res.data[length] = 0;
+	return res;
+}
+
+string make_string(Memory_Arena* arena, s8* v) {
+	string res;
+	s64 length = strlen(v);
+	res.data = (u8*)arena_alloc(arena, length + 1);
+	memcpy(res.data, v, length + 1);
+	res.length = length;
+	res.data[length] = 0;
+	return res;
+}
+
+string make_string(Memory_Arena* arena, s8* v, s64 length) {
+	string res;
+	res.data = (u8*)arena_alloc(arena, length + 1);
 	memcpy(res.data, v, length + 1);
 	res.length = length;
 	res.data[length] = 0;
@@ -244,4 +263,12 @@ u8 hex_from_ascii(u8 c) {
 	if (c >= 'a' && c <= 'f')
 		return c - 0x57;
 	return 0;
+}
+
+s64 next_2_pow(s64 num) {
+	s64 res = 2;
+	while (res < num) {
+		res <<= 1;
+	}
+	return res;
 }

@@ -4,8 +4,9 @@
 
 #define MAX(X, Y) ((X > Y) ? (X) : (Y))
 
-s32 Lexer::start(s8* filename)
+s32 Lexer::start(s8* filename, Memory_Arena* arena)
 {
+	this->arena = arena;
 	this->filename = make_string(filename);
 	file_size = ho_getfilesize(filename);
 	HANDLE filehandle = ho_openfile(filename, OPEN_EXISTING);
@@ -14,7 +15,7 @@ s32 Lexer::start(s8* filename)
 		return -1;
 	}
 	this->file_size = file_size;
-	void* file_memory = malloc(file_size + 1);
+	void* file_memory = ho_bigalloc_rw(file_size + 1);
 	*((char*)file_memory + file_size) = 0;
 	filedata = (u8*)ho_readentirefile(filehandle, file_size, file_memory);
 	ho_closefile(filehandle);
@@ -24,12 +25,17 @@ s32 Lexer::start(s8* filename)
 	return 0;
 }
 
+Lexer::~Lexer() {
+	free_string(&filename);
+	memory_free(token_array);
+}
+
 static int remove_comments(u8** start, s64* col_ptr);
 static int remove_white_space(u8** start, s64* col_ptr);
 
 void Lexer::lex_file()
 {
-	token_array = (Token*)malloc(sizeof(Token) * (MAX(file_size, 64) + 4));
+	token_array = (Token*)memory_alloc(sizeof(Token) * (MAX(file_size, 64) + 4));
 	u8* at = filedata;
 
 	current_col = 0;
@@ -39,6 +45,7 @@ void Lexer::lex_file()
 		lexing = read_token(&at);
 		current_token++;
 	} while (lexing);
+	ho_bigfree(filedata, file_size);
 }
 
 // return lines that advanced
@@ -253,7 +260,7 @@ bool Lexer::read_token(u8** begin)
 	}break;
 	}
 
-	token.value = make_string((s8*)at, length);
+	token.value = make_string(arena, (s8*)at, length);
 	token.type = type;
 	token.line = line_count;
 	token.column = current_col;

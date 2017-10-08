@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <direct.h>
 #include <string.h>
+#include <Shlwapi.h>
 
 #ifdef _DEBUG
 #define assert(x) if(!(x)) { DebugBreak(); }
@@ -48,6 +49,7 @@ HANDLE HO_API ho_createfile(const char* filename, int access_flags, int action_f
 HANDLE HO_API ho_openfile(const char* filename, int access_flags);
 void HO_API ho_closefile(HANDLE file);
 u64 HO_API ho_getfilesize(const char* filename);
+bool HO_API ho_file_exist(const char* filename);
 
 /*
 	If mem is 0 this functions allocates file_size bytes for the file
@@ -194,6 +196,10 @@ u64 HO_API ho_getfilesize(const char* filename)
 	u64 size = 0;
 	size = (u64)info.nFileSizeLow | ((u64)info.nFileSizeHigh << 32);
 	return size;
+}
+
+bool HO_API ho_file_exist(const char* filename) {
+	return PathFileExistsA(filename);
 }
 
 /*

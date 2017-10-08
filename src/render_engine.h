@@ -11,11 +11,19 @@ void texture_create_rgba(Texture* texture, s32 width, s32 height, u8* data);
 struct Texture {
 	GLuint id;
 	s32 width, height, channels;
+	bool valid;
+	u8* data;
 
-	Texture() {}
+	Texture() { valid = false; }
 	Texture(const char* filename) {
-		u8* data = stbi_load(filename, &width, &height, &channels, 4);
-		texture_create_rgba(this, width, height, data);
+		data = stbi_load(filename, &width, &height, &channels, 4);
+		if (data == 0) {
+			valid = false;
+		} else {
+			texture_create_rgba(this, width, height, data);
+			valid = true;
+			stbi_image_free(data);
+		}
 	}
 };
 
@@ -69,6 +77,7 @@ namespace engine {
 	void border_prepare_render();
 	void border_render(Border_2D* border);
 	void border_change_data(Border_2D* border, hm::vec3 pos, r32 width, r32 height);
+	void border_delete(Border_2D* border);
 
 	void render_engine_init();
 	void update_window_size();

@@ -11,6 +11,7 @@ struct Font_List {
 };
 
 Font_List fonts;
+Font_Table font_table(512);
 
 GLuint get_font_shader() {
 	return fonts.shader;
@@ -73,7 +74,7 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 
 	error = FT_Set_Pixel_Sizes(font->face, 0, pixel_point);
 
-	s32 size = ATLAS_SIZE;
+	
 	s32 x_adv = 0, y_adv = 0;
 	s32 previous_max_height = 0;
 
@@ -81,6 +82,9 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 	s32 max_width = font->face->size->metrics.max_advance >> 6;
 	s32 num_glyphs = font->face->num_glyphs;
 	s32 num_glyphs_loaded = 0;
+	s32 size = next_2_pow((s32)sqrtf(max_width * num_glyphs));
+	r32 atlasf_size = (r32)size;
+	font->atlas_size = size;
 
 	font->font_size = pixel_point;
 	font->max_height = max_height;
@@ -104,7 +108,7 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 
 		if (width && height) {
 			// if got to the end of the first row, reset x_advance and sum y
-			if (x_adv + width >= ATLAS_SIZE) {
+			if (x_adv + width >= size) {
 				y_adv += previous_max_height;
 				x_adv = 0;
 			}
@@ -113,10 +117,10 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 				u8* b = font->face->glyph->bitmap.buffer;
 				memory_copy(font->atlas_data + (size * (h + y_adv)) + x_adv, b + width * h, width);
 			}
-			font->characters[i].botl = { x_adv / ATLASF_SIZE,			  y_adv / ATLASF_SIZE };
-			font->characters[i].botr = { (x_adv + width) / ATLASF_SIZE, y_adv / ATLASF_SIZE };
-			font->characters[i].topl = { x_adv / ATLASF_SIZE,			  (y_adv + height) / ATLASF_SIZE };
-			font->characters[i].topr = { (x_adv + width) / ATLASF_SIZE, (y_adv + height) / ATLASF_SIZE };
+			font->characters[i].botl = { x_adv / atlasf_size,			  y_adv / atlasf_size };
+			font->characters[i].botr = { (x_adv + width) / atlasf_size, y_adv / atlasf_size };
+			font->characters[i].topl = { x_adv / atlasf_size,			  (y_adv + height) / atlasf_size };
+			font->characters[i].topr = { (x_adv + width) / atlasf_size, (y_adv + height) / atlasf_size };
 
 			// keep the packing by getting the max height of the previous row of packing
 			if (height > previous_max_height) previous_max_height = height;
@@ -267,7 +271,7 @@ void font_finish_load(Font_Info* font)
 {
 	if (font->finish_load) {
 		font->finish_load = false;
-		u32 size = ATLAS_SIZE;
+		u32 size = font->atlas_size;
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &font->atlas_full_id);
 		glBindTexture(GL_TEXTURE_2D, font->atlas_full_id);
@@ -344,6 +348,15 @@ void font_rendering_init() {
 
 void font_rendering_release() {
 	glDeleteProgram(fonts.shader);
+}
+
+Font_ID load_font_not_repeat(string name, u32 type_size) {
+	Font_ID id = font_table.entry_exist(name, type_size);
+	if (id == -1) {
+		id = load_font((const char*)name.data, type_size);
+		font_table.insert(id, name, type_size);
+	}
+	return id;
 }
 
 Font_ID load_font(const char* name, u32 type_size) {
@@ -454,4 +467,51 @@ void font_rendering_flush() {
 		}
 	}
 	glDisable(GL_BLEND);
+}
+
+u32 djb2_hash(u8 *str, int size)
+{
+	u32 hash = 5381;
+	int c;
+	int i = 0;
+	while (i < size) {
+		c = *str++;
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+		++i;
+	}
+	return hash;
+}
+
+Font_Table::Font_Table(int max_entries) : max_entries(max_entries){
+	entries = (Font_Table_Entry*)memory_alloc(max_entries * sizeof(Font_Table_Entry));
+}
+
+Font_ID Font_Table::entry_exist(string name, int size) {
+	u32 hash = (djb2_hash(name.data, name.length) + size) % max_entries;
+	if (entries[hash].used) {
+		if (equal(&name, &entries[hash].name)) {
+			return entries[hash].id;
+		} else {
+			while (entries[hash].used) {
+				hash += 1;
+				if (hash >= max_entries) hash = 0;
+				if (equal(&name, &entries[hash].name)) {
+					return entries[hash].id;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+void Font_Table::insert(Font_ID id, string name, int size) {
+	u32 hash = (djb2_hash(name.data, name.length) + size) % max_entries;
+	while (entries[hash].used) {
+		hash += 1;
+		if (hash >= max_entries) hash = 0;
+	}
+	entries[hash].used = true;
+	entries[hash].id = id;
+	entries[hash].name = name;
+	entries[hash].size = size;
 }

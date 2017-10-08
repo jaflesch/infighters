@@ -21,6 +21,10 @@ void texture_create_rgba(Texture* texture, s32 width, s32 height, u8* data) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+void texture_delete(Texture* texture) {
+	glDeleteTextures(1, &texture->id);
+}
+
 namespace engine {
 	const char quad_vshader[] = R"(
 	#version 330 core
@@ -249,6 +253,12 @@ namespace engine {
 		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
+	}
+
+	void border_delete(Border_2D* border) {
+		glDeleteBuffers(1, &border->ebo);
+		glDeleteBuffers(1, &border->vbo);
+		glDeleteVertexArrays(1, &border->vao);
 	}
 
 	void quad_create(Quad_2D* quad, hm::vec3 pos, r32 width, r32 height) {

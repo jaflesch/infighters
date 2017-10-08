@@ -8,6 +8,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+typedef int Font_ID;
+
 struct Character {
 	hm::vec2 botl, botr, topl, topr;
 	s32 size[2];
@@ -19,14 +21,30 @@ struct Character {
 const u32 FONT_ASCII_ONLY = FLAG(0);
 const u32 FONT_UTF8       = FLAG(1);
 
-#define ATLAS_SIZE 4096
-#define ATLASF_SIZE 4096.0f
 #define MAX_UNICODE 65536
+
+struct Font_Table_Entry {
+	Font_ID id;
+	int size;
+	string name;
+	bool used;
+};
+
+struct Font_Table {
+	int num_entries;
+	int max_entries;
+	Font_Table_Entry* entries;
+	
+	Font_Table(int max_entries);
+	Font_ID entry_exist(string name, int size);
+	void insert(Font_ID id, string name, int size);
+};
 
 struct Font_Info {
 	string name;
 
 	s64 font_size;
+	s64 atlas_size;
 	s64 max_height;
 	s64 max_width;
 
@@ -102,9 +120,6 @@ void text_draw(Font_Info* font, s64 offset, u8* text, s32 length, hm::vec2& posi
 
 extern "C" u32 load_font_thread(void *arg);
 
-
-typedef int Font_ID;
-
 void font_rendering_init();
 void font_rendering_release();
 void font_rendering_flush();
@@ -114,6 +129,8 @@ void font_rendering_flush();
 // -1 the font list is full
 // -2 could not find the font
 Font_ID load_font(const char* name, u32 type_size);
+
+Font_ID load_font_not_repeat(string name, u32 type_size);
 
 // return value:
 // always the font id, even if errored

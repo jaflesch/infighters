@@ -3,6 +3,9 @@
 #include <stdarg.h>
 #include "../util.h"
 #include "../render_engine.h"
+#include <dynamic_array.h>
+#include <new>
+#include <ho_system.h>
 
 Parser::Parser(Lexer* lexer) {
 	this->lexer = lexer;
@@ -58,11 +61,21 @@ hm::vec4 hex_to_vec4(string s) {
 
 s32 Parser::parse_margin(gui::Div_Style* style) {
 	Token* next = lexer->eat_token();
+	bool negate_next = false;
 	if (next->type == ':') {
 		r32 margin_value = 0.0f;
 		next = lexer->eat_token();
+		if (next->type == '-') {
+			negate_next = true;
+			next = lexer->eat_token();
+		}
 		if (next->type == TOKEN_INT_LITERAL) {
 			margin_value = str_to_r32(next->value);
+			if (negate_next) {
+				margin_value = -margin_value;
+				negate_next = false;
+			}
+			style->margin_size.x = margin_value;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
@@ -77,35 +90,63 @@ s32 Parser::parse_margin(gui::Div_Style* style) {
 			return -1;
 		}
 		next = lexer->eat_token();
+		if (next->type == '-') {
+			negate_next = true;
+			next = lexer->eat_token();
+		}
 		if (next->type == TOKEN_INT_LITERAL) {
 			r32 margin_value_right = str_to_r32(next->value);
+			if (negate_next) {
+				margin_value_right = -margin_value_right;
+				negate_next = false;
+			}
+			style->margin_size.y = margin_value_right;
 			next = lexer->eat_token();
 			if(!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
 				return -1;
 			}
 			next = lexer->eat_token();
+			if (next->type == '-') {
+				negate_next = true;
+				next = lexer->eat_token();
+			}
 			if (next->type != TOKEN_INT_LITERAL) {
 				report_syntax_error(next, "margin declaration must have 1 or 4 pixel specifiers [left right top bottom].\n");
 				return -1;
 			}
 			r32 margin_value_top = str_to_r32(next->value);
+			if (negate_next) {
+				margin_value_top = -margin_value_top;
+				negate_next = false;
+			}
+			style->margin_size.z = margin_value_top;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
 				return -1;
 			}
 			next = lexer->eat_token();
+			if (next->type == '-') {
+				negate_next = true;
+				next = lexer->eat_token();
+			}
 			if (next->type != TOKEN_INT_LITERAL) {
 				report_syntax_error(next, "margin declaration must have 1 or 4 pixel specifiers [left right top bottom].\n");
 				return -1;
 			}
 			r32 margin_value_bottom = str_to_r32(next->value);
+			if (negate_next) {
+				margin_value_bottom = -margin_value_bottom;
+				negate_next = false;
+			}
+			style->margin_size.w = margin_value_bottom;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
 				return -1;
 			}
+			REQUIRE_AND_EAT_TOKEN(';');
 		} else if (next->type == ';') {
 			style->margin_size = { margin_value, margin_value, margin_value, margin_value };
 			return 0;
@@ -122,25 +163,33 @@ s32 Parser::parse_margin(gui::Div_Style* style) {
 		int error = 0;
 		REQUIRE_AND_EAT_TOKEN(':');
 		Token* value = lexer->eat_token();
+		if (value->type == '-') {
+			negate_next = true;
+			value = lexer->eat_token();
+		}
 		if (CHECK_STR_EQUAL(next->value, "left")) {
-			if (value->type == TOKEN_INT_LITERAL)
+			if (value->type == TOKEN_INT_LITERAL) {
 				style->margin_size.x = str_to_r32(value->value);
-			else
+				if (negate_next) style->margin_size.x = -style->margin_size.x;
+			} else
 				error = -1;
 		} else if (CHECK_STR_EQUAL(next->value, "right")) {
-			if (value->type == TOKEN_INT_LITERAL)
+			if (value->type == TOKEN_INT_LITERAL) {
 				style->margin_size.y = str_to_r32(value->value);
-			else
+				if (negate_next) style->margin_size.y = -style->margin_size.y;
+			} else
 				error = -1;
 		} else if (CHECK_STR_EQUAL(next->value, "top")) {
-			if (value->type == TOKEN_INT_LITERAL)
+			if (value->type == TOKEN_INT_LITERAL) {
 				style->margin_size.z = str_to_r32(value->value);
-			else
+				if (negate_next) style->margin_size.z = -style->margin_size.z;
+			} else
 				error = -1;
 		} else if (CHECK_STR_EQUAL(next->value, "bottom")) {
-			if (value->type == TOKEN_INT_LITERAL)
+			if (value->type == TOKEN_INT_LITERAL) {
 				style->margin_size.w = str_to_r32(value->value);
-			else
+				if (negate_next) style->margin_size.w = -style->margin_size.w;
+			} else
 				error = -1;
 		} else if (next->type == TOKEN_END_OF_STREAM) {
 			report_syntax_error(next, "unexpected end of stream in margin declaration.\n");
@@ -165,6 +214,7 @@ s32 Parser::parse_margin(gui::Div_Style* style) {
 		report_syntax_error(next, "invalid margin property, expected '-' followed by valid property or ':' and specification.\n");
 		return -1;
 	}
+	return 0;
 }
 
 s32 Parser::parse_padding(gui::Div_Style* style) {
@@ -174,6 +224,7 @@ s32 Parser::parse_padding(gui::Div_Style* style) {
 		next = lexer->eat_token();
 		if (next->type == TOKEN_INT_LITERAL) {
 			padding_value = str_to_r32(next->value);
+			style->padding_size.x = padding_value;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
@@ -186,6 +237,7 @@ s32 Parser::parse_padding(gui::Div_Style* style) {
 		next = lexer->eat_token();
 		if (next->type == TOKEN_INT_LITERAL) {
 			r32 padding_value_right = str_to_r32(next->value);
+			style->padding_size.y = padding_value_right;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
@@ -196,7 +248,8 @@ s32 Parser::parse_padding(gui::Div_Style* style) {
 				report_syntax_error(next, "padding declaration must have 1 or 4 pixel specifiers [left right top bottom].\n");
 				return -1;
 			}
-			r32 border_value_top = str_to_r32(next->value);
+			r32 padding_value_top = str_to_r32(next->value);
+			style->padding_size.z = padding_value_top;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
@@ -208,11 +261,13 @@ s32 Parser::parse_padding(gui::Div_Style* style) {
 				return -1;
 			}
 			r32 padding_value_bottom = str_to_r32(next->value);
+			style->padding_size.w = padding_value_bottom;
 			next = lexer->eat_token();
 			if (!CHECK_STR_EQUAL(next->value, "px")) {
 				report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
 				return -1;
 			}
+			REQUIRE_AND_EAT_TOKEN(';');
 		} else if (next->type == ';') {
 			style->padding_size = { padding_value, padding_value, padding_value, padding_value };
 			return 0;
@@ -270,11 +325,13 @@ s32 Parser::parse_padding(gui::Div_Style* style) {
 		report_syntax_error(next, "invalid padding property, expected '-' followed by valid property or ':' and specification.\n");
 		return -1;
 	}
+	return 0;
 }
 
 s32 Parser::parse_border(gui::Div_Style* style) {
 	if (!style->border) {
-		style->border = new engine::Border_2D();
+		void* border_mem = arena_alloc(lexer->arena, sizeof(engine::Border_2D));
+		style->border = new (border_mem) engine::Border_2D();
 		engine::border_create(style->border, hm::vec3(0, 0, 0), hm::vec4(0, 0, 0, 0), 0, 0);
 	}
 	engine::Border_2D* border = style->border;
@@ -469,7 +526,6 @@ s32 Parser::parse_background(gui::Div_Style* style) {
 	Token* next = lexer->eat_token();
 	REQUIRE_AND_EAT_TOKEN(':');
 
-	// @TODO background-image
 	if (CHECK_STR_EQUAL(next->value, "color")) {
 		Token* color = lexer->eat_token();
 		if (color->type == TOKEN_HEX_LITERAL) {
@@ -481,11 +537,69 @@ s32 Parser::parse_background(gui::Div_Style* style) {
 				report_syntax_error(color, "invalid color declaration, must be '#' followed by hexadecimal_literal.\n");
 			return -1;
 		}
+	} else if (CHECK_STR_EQUAL(next->value, "image")) {
+		string filepath = make_string("./res/images/");
+		Token* next = lexer->eat_token();
+		
+		string filename = concat(&filepath, &next->value, false);
+		style->texture_bg = new (arena_alloc(lexer->arena, sizeof(Texture))) Texture((const char*)filename.data);
+		free_string(&filepath);
+		free_string(&filename);
+
+		if (!style->texture_bg->valid) {
+			report_syntax_error(next, "file '%s' not found or is not a valid image.\n", next->value.data);
+			return -1;
+		}
+		style->flags |= gui::DIV_BACKGROUND_TEXTURE;
 	} else {
 		if(next->type == TOKEN_END_OF_STREAM)
 			report_syntax_error(next, "unexpected end of stream in background declaration.\n");
 		else
 			report_syntax_error(next, "invalid selector '%s' in background declaration.\n", next->value.data);
+		return -1;
+	}
+	REQUIRE_AND_EAT_TOKEN(';');
+	return 0;
+}
+
+s32 Parser::parse_font(gui::Div_Style* style) {
+	REQUIRE_AND_EAT_TOKEN(':');
+	string path = make_string("./res/fonts/");
+	// font:'LiberationMono-Regular.ttf' 16px;
+	Token* name = lexer->eat_token();
+	string filename = concat(&path, &name->value);
+	free_string(&path);
+
+	if (!ho_file_exist((const char*)filename.data)) {
+#if defined(_WIN64) || defined(_WIN32)
+		path = make_string("C:\\Windows\\Fonts\\");
+#elif defined(__linux__)
+#error NOT YET SUPPORTED
+		//path = make_string()
+#endif
+		free_string(&filename);
+		filename = concat(&path, &name->value);
+
+		if (!ho_file_exist((const char*)filename.data)) {
+			report_syntax_error(name, "font file '%s' does not exist.\n", name->value.data);
+			return -1;
+		}
+	}
+
+	Token* next = lexer->eat_token();
+	if (next->type == TOKEN_INT_LITERAL) {
+		u32 type_size = (u32)str_to_r32(next->value);
+		next = lexer->eat_token();
+		if (!CHECK_STR_EQUAL(next->value, "px")) {
+			report_syntax_error(next, "invalid value, missing 'px' specifier.\n");
+			return -1;
+		}
+		Font_ID id = load_font_not_repeat(filename, type_size);
+		style->font_family = id;
+		style->font_size = type_size;
+		free_string(&filename);
+	} else {
+		report_syntax_error(next, "expected integer, size of font.\n");
 		return -1;
 	}
 	REQUIRE_AND_EAT_TOKEN(';');
@@ -513,7 +627,7 @@ s32 Parser::parse_style(gui::Div_Style* style) {
 		} else if (CHECK_STR_EQUAL(param->value, "padding")) {
 			err = parse_padding(style);
 		} else if (CHECK_STR_EQUAL(param->value, "font")) {
-			// @todo
+			err = parse_font(style);
 		} else if (param->type == '"') {
 			break;
 		} else {
@@ -528,7 +642,7 @@ s32 Parser::parse_style(gui::Div_Style* style) {
 }
 
 s32 Parser::parse_div(size_t parent) {
-	gui::Div_Style* style = new gui::Div_Style();
+	gui::Div_Style* style = new (arena_alloc(lexer->arena, sizeof(gui::Div_Style))) gui::Div_Style();
 
 	// <div
 	// already parsed
@@ -548,12 +662,11 @@ s32 Parser::parse_div(size_t parent) {
 	Token* str = lexer->eat_token();
 	string div_string;
 	while (str->type != '<') {
-		
 		if (div_string.length != 0) {
 			div_string = concat(&div_string, " ");
-			div_string = concat(&div_string, &str->value, true);
+			div_string = concat(&div_string, &str->value, false);
 		} else {
-			div_string = make_string((s8*)str->value.data, str->value.length);
+			div_string = make_string(lexer->arena, (s8*)str->value.data, str->value.length);
 		}
 		str = lexer->eat_token();
 		if (str->type == '<' && lexer->peek_token_type() == TOKEN_KEYWORD_DIV) {
@@ -567,7 +680,6 @@ s32 Parser::parse_div(size_t parent) {
 	REQUIRE_AND_EAT_TOKEN(TOKEN_KEYWORD_DIV);
 	REQUIRE_AND_EAT_CLOSE_TAG;
 	gui::div_set_text(div, div_string);
-	//size_t div = gui::div_create(div_string, parent, style);
 	return 0;
 }
 
@@ -586,6 +698,7 @@ s32 Parser::parse_body() {
 			break;
 		}
 	} while (true);
+	return 0;
 }
 
 s32 Parser::parse_top_level() {
@@ -605,6 +718,7 @@ s32 Parser::parse_top_level() {
 		lexer->rewind();
 		return parse_body();
 	}
+	return 0;
 }
 
 s32 Parser::require_and_eat(Token_Type type) {
@@ -614,6 +728,7 @@ s32 Parser::require_and_eat(Token_Type type) {
 			return report_syntax_error(t, "unexpected end of stream.\n");
 		return report_syntax_error(t, "expected '%s' but got '%s'\n", lexer->get_token_string(type), t->value.data);
 	}
+	return 0;
 }
 
 s32 Parser::require_and_eat(s8 type) {
@@ -623,6 +738,7 @@ s32 Parser::require_and_eat(s8 type) {
 			return report_syntax_error(t, "unexpected end of stream.\n");
 		return report_syntax_error(t, "expected '%c' but got '%s'\n", type, t->value.data);
 	}
+	return 0;
 }
 
 s32 Parser::report_syntax_error(Token* loc_token, char* msg, ...) {

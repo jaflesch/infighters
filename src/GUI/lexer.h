@@ -1,4 +1,5 @@
 #pragma once
+#include <memory_arena.h>
 #include "../util.h"
 
 enum Token_Type
@@ -80,7 +81,9 @@ struct Lexer
 	s64 token_count = 0;
 	s64 line_count = 1;
 
-	s32 start(s8* filename);
+	Memory_Arena* arena;
+
+	s32 start(s8* filename, Memory_Arena* arena);
 	void rewind();
 	Token* peek_token();
 	Token* peek_token(s32 advance);
@@ -99,4 +102,6 @@ struct Lexer
 	s64 current_line = 0;
 	s64 current_col = 0;
 	Token* token_array = 0;
+
+	~Lexer();
 };

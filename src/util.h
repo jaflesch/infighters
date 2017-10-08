@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include <memory_arena.h>
 
 #ifdef __linux__
 #include <signal.h>
@@ -40,6 +41,9 @@ string make_string(s8* v);
 string make_string(s8* v, s64 length);
 void free_string(string* s);
 
+string make_string(Memory_Arena* arena, s8* v);
+string make_string(Memory_Arena* arena, s8* v, s64 length);
+
 string concat(string* left, string* right, bool _free = false);
 string concat(string* left, const s8* right, bool _free = false);
 string concat(s8* left, string* right, bool _free = false);
@@ -54,3 +58,4 @@ bool is_white_space(char str);
 bool str_equal(const char* str1, int str1_size, const char* str2, int str2_size);
 
 u8 hex_from_ascii(u8 c);
+s64 next_2_pow(s64 num);

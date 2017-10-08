@@ -4,6 +4,7 @@
 #include "../os.h"
 #include "lexer.h"
 #include "parser.h"
+#include <memory_arena.h>
 
 #if defined(_WIN64)
 #define DEFAULT_FONT "C:\\Windows\\fonts\\arial.ttf"
@@ -15,22 +16,37 @@ extern Window_Info window_info;
 
 namespace gui {
 
+	Memory_Arena arena;
+
 	Div* divs = 0;
 	int num_divs = 0;
 	Font_ID default_font_16 = -1;
 
 	void gui_init() {
 		divs = array_create(Div, 16);
-		default_font_16 = load_font(DEFAULT_FONT, 16);
+		if(default_font_16 == -1)
+			default_font_16 = load_font(DEFAULT_FONT, 16);
+
+		arena_create(&arena, 65536);
 
 		Lexer lexer;
-		lexer.start("./res/h.html");
+		lexer.start("./res/h.html", &arena);
 		Parser parser(&lexer);
-		parser.parse_top_level();
+		int err = parser.parse_top_level();
+		if (err) gui_release();
 	}
 
 	void gui_release() {
+		if (!divs) return;
+		size_t n = array_get_length(divs);
+		assert(n == num_divs)
+		for (size_t i = 0; i < num_divs; ++i) {
+			div_release(&divs[i]);
+		}
 		array_release(divs);
+		arena_release(&arena);
+		divs = 0;
+		num_divs = 0;
 	}
 
 	void div_set_text(size_t index, string s) {
@@ -106,11 +122,15 @@ namespace gui {
 		return index;
 	}
 
-	void div_release() {
-
+	void div_release(Div* div) {
+		engine::border_delete(div->style->border);
+		if (div->children)
+			array_release(div->children);
+		engine::quad_delete(&div->div_quad);
 	}
 
 	void div_render_all() {
+		if (!divs) return;
 		hm::vec2 base = {0.0f, 0.0f};
 		for (int i = 0; i < num_divs; ++i) {
 			if(divs[i].parent == 0)
@@ -210,7 +230,7 @@ namespace gui {
 		
 	}
 
-	Div_Style* get_div_style(size_t div) {
+	Div_Style* div_get_style(size_t div) {
 		return divs[div].style;
 	}
 

@@ -2,6 +2,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define HO_SYSTEM_IMPLEMENT
 #include "ho_system.h"
+#define HO_ARENA_IMPLEMENT
+#include <memory_arena.h>
 #include "util.h"
 #include <GL/glew.h>
 #include "os.h"
@@ -10,10 +12,6 @@
 #include "GUI/gui.h"
 
 Window_Info window_info;
-
-Texture DEBUG_texture;
-size_t div_index = -1;
-size_t div_index2 = -1;
 
 void application_state_init()
 {
@@ -28,8 +26,6 @@ void application_state_init()
 void application_state_update()
 {
 	gui::div_render_all();
-	//gui::div_render(div_index);
-	//gui::div_render(div_index2);
 }
 
 #ifdef _WIN64
@@ -75,6 +71,13 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			}
 			switch (msg.message) {
 			case WM_KEYDOWN: {
+				int key = msg.wParam;
+				if (key == 'R') {
+					gui::gui_release();
+				}
+				if (key == 'T') {
+					gui::gui_init();
+				}
 			} break;
 			case WM_KEYUP: {
 			} break;
@@ -151,8 +154,16 @@ int main(int argc, char** argv)
 		if(XCheckWindowEvent(window_info.display, window_info.win, ExposureMask | ButtonPressMask | KeyPressMask | FocusChangeMask | ResizeRedirectMask , &xev))
 		{
 			// /usr/include/X11/X.h line 181 has #define of all types of events
-			if(xev.type == KeyPress)
-				print("Key Press\n");
+			if(xev.type == KeyPress){
+				XKeyEvent* kev = (XKeyEvent*)&xev;
+				int key = XLookupKeysym(kev, 0);
+				print("Key Press %d\n", key);
+				if(key == 'r'){
+					gui::gui_release();
+				} else if(key == 't') {
+					gui::gui_init();
+				}
+			}
 			if(xev.type == FocusIn)
 				print("Focus In\n");
 			if(xev.type == FocusOut)

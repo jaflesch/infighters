@@ -79,9 +79,9 @@ namespace gui {
 	size_t div_create(string str, size_t parent, Div_Style* style);
 	size_t div_create(size_t parent, Div_Style* style);
 	void div_push_child(size_t parent, size_t child);
-	Div_Style* get_div_style(size_t div);
+	Div_Style* div_get_style(size_t div);
 	void div_set_text(size_t index, string s);
-	void div_release();
+	void div_release(Div* div);
 	void div_render(size_t index, hm::vec2& base);
 	void div_render_all();
 
