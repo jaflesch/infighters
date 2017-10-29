@@ -410,6 +410,7 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 	r32 max_height = position_out.y;
 	u8* text = text_in.data;
 
+
 	Font_Info* font = 0;
 	if (font_id >= 0) font = &fonts.list[font_id];
 	if (font->loaded) {

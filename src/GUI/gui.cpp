@@ -146,7 +146,8 @@ namespace gui {
 		r32 original_width = div->style->f_width, original_height = div->style->f_height;
 
 		vec2 pos_info(0.0f, 0.0f);
-		render_text_get_info(div->style->font_family, div->text, pos_info);
+		if (div->text.length > 0)
+			render_text_get_info(div->style->font_family, div->text, pos_info);
 
 		// adapt div dimensions to text if needed
 		r32 div_width = div->style->f_width, div_height = div->style->f_height;
@@ -219,7 +220,8 @@ namespace gui {
 
 			text_pos.x = floorf(text_pos.x);
 			text_pos.y = floorf(text_pos.y);
-			render_text(div->style->font_family, div->text, text_pos, div->style->text_color);
+			if(div->text.length > 0)
+				render_text(div->style->font_family, div->text, text_pos, div->style->text_color);
 			
 			if(div->children != 0){
 				hm::vec2 b = {0.0f, window_info.height - text_pos.y};

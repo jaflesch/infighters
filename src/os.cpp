@@ -1,18 +1,45 @@
 #include "render_engine.h"
 #include "os.h"
 #include "util.h"
+#include "input.h"
 
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
 
 extern Window_Info window_info;
+extern Keyboard_State keyboard_state;
+extern Mouse_State mouse_state;
 
 #ifdef _WIN64
+#include <windowsx.h>
 LRESULT CALLBACK window_proc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
 	case WM_DESTROY: PostQuitMessage(0); break;
+	case WM_MOUSEMOVE: {
+		int width = window_info.width;
+		int height = window_info.height;
+		int x = GET_X_LPARAM(lparam);
+		int y = GET_Y_LPARAM(lparam);
+
+		const float aspect = (float)width / height;
+		float screenX = ((float)x * 2 / width - 1.0f);
+		float screenY = -((float)y * 2 / height - 1.0f);
+
+		mouse_state.x = x;
+		mouse_state.y = y;
+	}break;
+	case WM_LBUTTONDOWN: {
+		int width = window_info.width;
+		int height = window_info.height;
+
+		const float aspect = (float)width / height;
+		float screenX = ((float)mouse_state.x * 2 / width - 1.0f);
+		float screenY = -((float)mouse_state.x * 2 / height - 1.0f);
+	}break;
+	case WM_LBUTTONUP: {
+	}break;
 	case WM_SIZE: {
 		print("sizing\n");
 		RECT rect;

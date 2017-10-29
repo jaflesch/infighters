@@ -60,6 +60,8 @@ namespace hm {
 		return result;
 	}
 
+	struct vec4;
+
 	struct vec3 {
 		union {
 			struct {
@@ -170,6 +172,7 @@ namespace hm {
 
 		vec4() {}
 		vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+		vec4(vec3 v, float f) : x(v.x), y(v.y), z(v.z), w(f) {}
 
 		static inline float dot(vec4 l, vec4 r) {
 			return l.x * r.x + l.y * r.y + l.z * r.z + l.w * r.w;
@@ -548,6 +551,14 @@ namespace hm {
 		q.z = axis.z * sang;
 
 		return q;
+	}
+
+	static vec3 to_vec3(hm::vec4 v) {
+		vec3 result;
+		result.x = v.x;
+		result.y = v.y;
+		result.z = v.z;
+		return result;
 	}
 
 } // namespace hm

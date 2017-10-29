@@ -35,6 +35,13 @@ namespace engine {
 		hm::vec4 color;
 	};
 
+	struct Grid_3D {
+		hm::vec3 position;
+		u32 width, height;
+		u32 count;
+		GLuint vao, vbo, ebo;
+	};
+
 	struct Quad_2D {
 		hm::vec3 position;
 		GLuint vao, vbo, ebo;
@@ -63,6 +70,11 @@ namespace engine {
 			position = { 0.0f, 0.0f, 0.0f };
 		}
 	};
+
+	// Grid3D
+	void grid_prepare_render();
+	void grid_create(Grid_3D* grid, u32 width, u32 height, r32 size_x, r32 size_y);
+	void grid_render(Grid_3D* grid);
 
 	// Quad2D
 	void quad_create(Quad_2D* quad, hm::vec3 pos, r32 width, r32 height);

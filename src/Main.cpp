@@ -1,34 +1,50 @@
-#include "common.h"
 #define STB_IMAGE_IMPLEMENTATION
 #define HO_SYSTEM_IMPLEMENT
-#include "ho_system.h"
 #define HO_ARENA_IMPLEMENT
+#include "common.h"
+
+#include <ho_system.h>
 #include <memory_arena.h>
-#include "util.h"
 #include <GL/glew.h>
+
+#include "util.h"
 #include "os.h"
 #include "font_rendering.h"
 #include "render_engine.h"
 #include "GUI/gui.h"
+#include "input.h"
 
 Window_Info window_info;
+engine::Grid_3D grid;
+
+Keyboard_State keyboard_state = { 0 };
+Mouse_State mouse_state = { 0 };
 
 void application_state_init()
 {
 	engine::render_engine_init();
 	font_rendering_init();
-	gui::gui_init();
+	//gui::gui_init();
 
-	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+	engine::grid_create(&grid, 100, 100, 20.0f, 20.0f);
+	grid.position = { -1000.0f, 0.0f, 0.0f };
+
+	glClearColor(0.03f, 0.05f, 0.08f, 1.0f);
 	glDisable(GL_CULL_FACE);
 }
 
 void application_state_update()
 {
-	gui::div_render_all();
+	static float speed = 0.01f;
+	engine::grid_prepare_render();
+	engine::grid_render(&grid);
+	grid.position.z += speed;
+
+	//gui::div_render_all();
 }
 
 #ifdef _WIN64
+#include <windowsx.h>
 
 s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, int cmd_show)
 {
@@ -70,25 +86,35 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 				continue;
 			}
 			switch (msg.message) {
-			case WM_KEYDOWN: {
-				int key = msg.wParam;
-				if (key == 'R') {
-					gui::gui_release();
-				}
-				if (key == 'T') {
-					gui::gui_init();
-				}
-			} break;
-			case WM_KEYUP: {
-			} break;
-			case WM_MOUSEMOVE: {
-			} break;
-			case WM_LBUTTONDOWN: {
-			} break;
-			case WM_LBUTTONUP: {
-			} break;
-			case WM_CHAR: {
-			} break;
+				case WM_KEYDOWN: {
+					u32 key = (u32)msg.wParam;
+					u32 mod = (u32)msg.lParam;
+					keyboard_state.key[key] = true;
+				} break;
+				case WM_KEYUP: {
+					int key = (u32)msg.wParam;
+					keyboard_state.key[key] = false;
+				} break;
+				case WM_MOUSEMOVE: {
+					mouse_state.x = (u32)GET_X_LPARAM(msg.lParam);
+					mouse_state.y = (u32)GET_Y_LPARAM(msg.lParam);
+				} break;
+				case WM_LBUTTONDOWN: {
+					int x = GET_X_LPARAM(msg.lParam);
+					int y = GET_Y_LPARAM(msg.lParam);
+					mouse_state.is_captured = true;
+					mouse_state.x_left = x;
+					mouse_state.y_left = y;
+					SetCapture(GetActiveWindow());
+				} break;
+				case WM_LBUTTONUP: {
+					mouse_state.is_captured = false;
+					ReleaseCapture();
+				} break;
+				case WM_CHAR: {
+					u32 key = (u32)msg.wParam;
+				} break;
+
 			}
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
