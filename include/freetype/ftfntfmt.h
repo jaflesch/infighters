@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Support functions for font formats.                                  */
 /*                                                                         */
-/*  Copyright 2002-2017 by                                                 */
+/*  Copyright 2002-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,8 +16,8 @@
 /***************************************************************************/
 
 
-#ifndef FTFNTFMT_H_
-#define FTFNTFMT_H_
+#ifndef __FTFNTFMT_H__
+#define __FTFNTFMT_H__
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -89,7 +89,4 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* FTFNTFMT_H_ */
-
-
-/* END */
+#endif /* __FTFNTFMT_H__ */

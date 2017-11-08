@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType trigonometric functions (specification).                    */
 /*                                                                         */
-/*  Copyright 2001-2017 by                                                 */
+/*  Copyright 2001-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,8 +16,8 @@
 /***************************************************************************/
 
 
-#ifndef FTTRIGON_H_
-#define FTTRIGON_H_
+#ifndef __FTTRIGON_H__
+#define __FTTRIGON_H__
 
 #include FT_FREETYPE_H
 
@@ -344,7 +344,7 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* FTTRIGON_H_ */
+#endif /* __FTTRIGON_H__ */
 
 
 /* END */

@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Debugging and logging component (specification).                     */
 /*                                                                         */
-/*  Copyright 1996-2017 by                                                 */
+/*  Copyright 1996-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -21,8 +21,8 @@
 /***************************************************************************/
 
 
-#ifndef FTDEBUG_H_
-#define FTDEBUG_H_
+#ifndef __FTDEBUG_H__
+#define __FTDEBUG_H__
 
 
 #include <ft2build.h>
@@ -249,7 +249,7 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* FTDEBUG_H_ */
+#endif /* __FTDEBUG_H__ */
 
 
 /* END */

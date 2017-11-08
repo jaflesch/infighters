@@ -5,7 +5,7 @@
 /*    Auxiliary functions and data structures related to PostScript fonts  */
 /*    (specification).                                                     */
 /*                                                                         */
-/*  Copyright 1996-2017 by                                                 */
+/*  Copyright 1996-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -17,14 +17,13 @@
 /***************************************************************************/
 
 
-#ifndef PSAUX_H_
-#define PSAUX_H_
+#ifndef __PSAUX_H__
+#define __PSAUX_H__
 
 
 #include <ft2build.h>
 #include FT_INTERNAL_OBJECTS_H
 #include FT_INTERNAL_TYPE1_TYPES_H
-#include FT_INTERNAL_HASH_H
 #include FT_SERVICE_POSTSCRIPT_CMAPS_H
 
 
@@ -679,7 +678,6 @@ FT_BEGIN_HEADER
     FT_Int               num_subrs;
     FT_Byte**            subrs;
     FT_UInt*             subrs_len;    /* array of subrs length (optional) */
-    FT_Hash              subrs_hash;   /* used if `num_subrs' was massaged */
 
     FT_Matrix            font_matrix;
     FT_Vector            font_offset;
@@ -817,7 +815,7 @@ FT_BEGIN_HEADER
 
   } PSAux_ServiceRec, *PSAux_Service;
 
-  /* backward compatible type definition */
+  /* backwards-compatible type definition */
   typedef PSAux_ServiceRec   PSAux_Interface;
 
 
@@ -873,7 +871,7 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* PSAUX_H_ */
+#endif /* __PSAUX_H__ */
 
 
 /* END */

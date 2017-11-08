@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType API for accessing Windows fnt-specific data.                */
 /*                                                                         */
-/*  Copyright 2003-2017 by                                                 */
+/*  Copyright 2003-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,8 +16,8 @@
 /***************************************************************************/
 
 
-#ifndef FTWINFNT_H_
-#define FTWINFNT_H_
+#ifndef __FTWINFNT_H__
+#define __FTWINFNT_H__
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -264,7 +264,7 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* FTWINFNT_H_ */
+#endif /* __FTWINFNT_H__ */
 
 
 /* END */

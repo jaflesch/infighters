@@ -1,4 +1,3 @@
-#pragma once
 #include "common.h"
 
 #define MAX_KEYS 1024

@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType Cache subsystem (specification).                            */
 /*                                                                         */
-/*  Copyright 1996-2017 by                                                 */
+/*  Copyright 1996-2015 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,8 +16,8 @@
 /***************************************************************************/
 
 
-#ifndef FTCACHE_H_
-#define FTCACHE_H_
+#ifndef __FTCACHE_H__
+#define __FTCACHE_H__
 
 
 #include <ft2build.h>
@@ -749,7 +749,7 @@ FT_BEGIN_HEADER
   /*    aglyph :: The corresponding @FT_Glyph object.  0~in case of        */
   /*              failure.                                                 */
   /*                                                                       */
-  /*    anode  :: Used to return the address of the corresponding cache    */
+  /*    anode  :: Used to return the address of of the corresponding cache */
   /*              node after incrementing its reference count (see note    */
   /*              below).                                                  */
   /*                                                                       */
@@ -802,7 +802,7 @@ FT_BEGIN_HEADER
   /*    aglyph     :: The corresponding @FT_Glyph object.  0~in case of    */
   /*                  failure.                                             */
   /*                                                                       */
-  /*    anode      :: Used to return the address of the corresponding      */
+  /*    anode      :: Used to return the address of of the corresponding   */
   /*                  cache node after incrementing its reference count    */
   /*                  (see note below).                                    */
   /*                                                                       */
@@ -957,7 +957,7 @@ FT_BEGIN_HEADER
   /* <Output>                                                              */
   /*    sbit   :: A handle to a small bitmap descriptor.                   */
   /*                                                                       */
-  /*    anode  :: Used to return the address of the corresponding cache    */
+  /*    anode  :: Used to return the address of of the corresponding cache */
   /*              node after incrementing its reference count (see note    */
   /*              below).                                                  */
   /*                                                                       */
@@ -1012,7 +1012,7 @@ FT_BEGIN_HEADER
   /* <Output>                                                              */
   /*    sbit       :: A handle to a small bitmap descriptor.               */
   /*                                                                       */
-  /*    anode      :: Used to return the address of the corresponding      */
+  /*    anode      :: Used to return the address of of the corresponding   */
   /*                  cache node after incrementing its reference count    */
   /*                  (see note below).                                    */
   /*                                                                       */
@@ -1051,7 +1051,7 @@ FT_BEGIN_HEADER
 
 FT_END_HEADER
 
-#endif /* FTCACHE_H_ */
+#endif /* __FTCACHE_H__ */
 
 
 /* END */
