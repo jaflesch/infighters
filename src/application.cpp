@@ -18,6 +18,37 @@ linked::Window* chat_window = 0;
 #define NUM_CHARS 12
 #define NUM_SKILLS 4
 
+char* char_names[NUM_CHARS] = {
+	"Zer0",
+	"On1",
+	"Serial K3YLL3R",
+	"R4y Tr4c3y",
+	"A-St4r",
+	"D3ADL0CK",
+	"N0rma",
+	"Haz4rd",
+	"Qwerty",
+	"=Big-O=",
+	"New()",
+	"Cl0ckb0y"
+};
+
+int char_names_length[NUM_CHARS] = {
+	sizeof "Zer0",
+	sizeof "On1",
+	sizeof "Serial K3YLL3R",
+	sizeof "R4y Tr4c3y",
+	sizeof "A-St4r",
+	sizeof "D3ADL0CK",
+	sizeof "N0rma",
+	sizeof "Haz4rd",
+	sizeof "Qwerty",
+	sizeof "=Big-O=",
+	sizeof "New()",
+	sizeof "Cl0ckb0y"
+};
+
+
 char* skill_names[32] = {
 	"FALSE RUSH",
 	"CONTRADICTION",
@@ -361,6 +392,14 @@ void init_char_selection_mode()
 	linked::WindowDiv* left_char_div = new linked::WindowDiv(*left_char_window, 400, 840, 0, 0, hm::vec2(0, 0), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
 	left_char_window->divs.push_back(left_char_div);
 	char_sel_state.last_hovered = CHAR_NONE;
+	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 100, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.97f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
+	
+	linked::Label* left_char_name_label = new linked::Label(*left_char_name_div, (u8*)"", sizeof "", hm::vec2(320.0f, 15.0f), hm::vec4(1, 1, 1, 1), 60.0f, 0, 0);
+	left_char_name_div->getLabels().push_back(left_char_name_label);
+	left_char_window->divs.push_back(left_char_name_div);
+
+	linked::WindowDiv* left_char_div_bar = new linked::WindowDiv(*left_char_window, 380, 3, 0, 0, hm::vec2(10, 220), hm::vec4(1, 0.2f, 1, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
+	left_char_window->divs.push_back(left_char_div_bar);
 
 	float char_window_width = 140.0f;
 	float char_window_height = 300.0f;
@@ -485,8 +524,20 @@ void init_char_information_mode()
 	hm::vec4 border_color = hm::vec4(1.0f, 0.71f, 0.29f, 1.0f);
 	char_info_window->setBorderColor(border_color);
 	gw.char_info_window = char_info_window;
+
 	linked::Window* char_info_window_bot = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
 	gw.char_info_window_bot = char_info_window_bot;
+
+	linked::WindowDiv* back_div = new linked::WindowDiv(*char_info_window_bot, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	Texture* esc_texture = new Texture("res/textures/esc.png");
+	back_div->setBackgroundTexture(esc_texture);
+	char_info_window_bot->divs.push_back(back_div);
+
+	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_info_window_bot, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_info_window_bot->divs.push_back(back_label_div);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	back_label_div->getLabels().push_back(back_label);
+	
 
 	linked::WindowDiv* skills_divs[NUM_SKILLS] = {};
 	float char_div_offset_x = 0.0f;
@@ -596,6 +647,9 @@ void update_game_mode()
 				if (gw.char_selection_window->divs[i * 3]->isButtonHovered()) {
 					Texture* char_tex = (Texture*)gw.char_selection_window->divs[i * 3]->getButtons()[0]->getNormalBGTexture();
 					gw.left_char_window->divs[0]->setBackgroundTexture(char_tex);
+					linked::Label* name_label = gw.left_char_window->divs[1]->getLabels()[0];
+					name_label->setText((u8*)char_names[i], char_names_length[i]);
+					name_label->setPosition(hm::vec2(380.0f - (char_names_length[i] - 1) * 18.0f, 15.0f));
 					char_sel_state.last_hovered = (Character_ID)i;
 				}
 			}
