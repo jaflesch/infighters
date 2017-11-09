@@ -18,6 +18,24 @@ Keyboard_State keyboard_state = { 0 };
 Mouse_State mouse_state = { 0 };
 extern Chat* g_chat;
 
+struct Timer
+{
+	double g_freq;
+	Timer()
+	{
+		LARGE_INTEGER li = {};
+		QueryPerformanceFrequency(&li);
+		g_freq = double(li.QuadPart);
+	}
+
+	double GetTime()
+	{
+		LARGE_INTEGER li;
+		QueryPerformanceCounter(&li);
+		return double(li.QuadPart) / this->g_freq;
+	}
+};
+
 LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
@@ -160,9 +178,26 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 
 	init_application();
 
+	Timer timer;
+
 	srand(time(0));
 
+	double laststart = timer.GetTime();
+	double totaltime = 0.0;
+
 	while (running) {
+		double endframe = timer.GetTime();
+
+		double frametime = (endframe - laststart);
+		totaltime += frametime;
+		laststart = timer.GetTime();
+
+		//printf("%f\n", totaltime);
+		if (totaltime >= 1.0) {
+			totaltime = 0.0;
+			printf("1 second\n");
+		}
+
 		TrackMouseEvent(&mouse_event);
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0) {
 			if (msg.message == WM_QUIT) {
@@ -214,7 +249,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			DispatchMessage(&msg);
 		}
 
-		update_and_render();
+		update_and_render(frametime);
 
 		linked::Window::updateWindows();
 		linked::Window::renderWindows();

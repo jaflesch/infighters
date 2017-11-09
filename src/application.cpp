@@ -17,6 +17,8 @@ linked::Window* chat_window = 0;
 
 #define NUM_CHARS 12
 #define NUM_SKILLS 4
+#define NUM_ALLIES 3
+#define NUM_ENEMIES 3
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",
@@ -47,7 +49,6 @@ int char_names_length[NUM_CHARS] = {
 	sizeof "New()",
 	sizeof "Cl0ckb0y"
 };
-
 
 char* skill_names[NUM_CHARS * NUM_SKILLS] = {
 	"FALSE RUSH",
@@ -357,19 +358,14 @@ struct GameState {
 
 static GameState ggs = {};
 
-#define PLAYING_CHARACTERS 3
 struct Char_Selection_State {
 	int num_selected;
-	int selections[PLAYING_CHARACTERS];
+	int selections[NUM_ALLIES];
 	linked::WindowDiv* play_button_div;
 	Character_ID last_hovered;
 };
 
 Char_Selection_State char_sel_state = {};
-
-struct Char_Info_State {
-
-};
 
 struct Game_Windows {
 	// background window
@@ -383,177 +379,20 @@ struct Game_Windows {
 	// character info
 	linked::Window* char_info_window;
 	linked::Window* char_info_window_bot;
+
+	// combat
+	linked::Window* allies[NUM_ALLIES];
+	linked::Window* allies_info[NUM_ALLIES];
+	linked::Window* enemies[NUM_ENEMIES];
+	linked::Window* enemies_info[NUM_ENEMIES];
+	linked::Window* allies_skills[NUM_ALLIES * NUM_SKILLS];
+	linked::Window* combat_bottom_info;
+	linked::Window* timer_window;
 };
 
 Game_Windows gw = {};
 
-void load_model(char* filename, IndexedModel3D* model) {
-	load_objfile(filename, model);
-	hm::mat4::identity(model->model_matrix);
-	model->position = hm::vec3(0.0f, 0.0f, 0.0f);
-	model->rotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-	model->is_colliding = false;
-}
-
-void init_object(IndexedModel3D* m) {
-	
-	glGenVertexArrays(1, &m->vao);
-	glBindVertexArray(m->vao);
-
-	glGenBuffers(1, &m->ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->num_indices * sizeof(u16), m->indices, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &m->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m->vbo);
-	glBufferData(GL_ARRAY_BUFFER, m->num_vertices * sizeof(Vertex3D), m->vertices, GL_STATIC_DRAW);
-
-	GLuint pos_attrib_loc = glGetAttribLocation(ggs.shader, "pos_coord");
-	GLuint tex_coord_attrib_loc = glGetAttribLocation(ggs.shader, "tex_coord");
-	GLuint normal_attrib_loc = glGetAttribLocation(ggs.shader, "normal_coord");
-	glEnableVertexAttribArray(pos_attrib_loc);
-	glEnableVertexAttribArray(normal_attrib_loc);
-	glEnableVertexAttribArray(tex_coord_attrib_loc);
-
-	glVertexAttribPointer(pos_attrib_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)0);
-	glVertexAttribPointer(normal_attrib_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)&((Vertex3D*)0)->normal);
-	glVertexAttribPointer(tex_coord_attrib_loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)&((Vertex3D*)0)->tex);
-}
-
-void render_line(hm::vec3 start, hm::vec3 end)
-{
-	mat4 ident;
-	mat4::identity(ident);
-	hm::vec4 magenta(1, 0, 1, 1);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
-	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&magenta);
-	glLineWidth(4.0f);
-	glBegin(GL_LINES);
-	glVertex3f(start.x, start.y, start.z);
-	glVertex3f(end.x, end.y, end.z);
-	glEnd();
-	glLineWidth(1.0f);
-}
-
-void render_vector(hm::vec3 vec, hm::vec3 position)
-{
-	mat4 ident;
-	mat4::identity(ident);
-	hm::vec4 black(0, 0, 0, 1);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
-	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&black);
-	glBegin(GL_LINES);
-	glVertex3f(position.x, position.y, position.z);
-	glVertex3f(vec.x + position.x, vec.y + position.y, vec.z + position.z);
-	glEnd();
-}
-
-void render_face(hm::vec3 p1, hm::vec3 p2, hm::vec3 p3, hm::vec3 c) {
-	mat4 ident;
-	mat4::identity(ident);
-	hm::vec4 color(c.r, c.g, c.b, 1);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
-	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&color);
-	glDisable(GL_CULL_FACE);
-	glBegin(GL_TRIANGLES);
-	glVertex3f(p1.x, p1.y, p1.z);
-	glVertex3f(p3.x, p3.y, p3.z);
-	glVertex3f(p2.x, p2.y, p2.z);
-	glEnd();
-
-	glLineWidth(4.0f);
-	glBegin(GL_LINES);
-	glVertex3f(p1.x, p1.y, p1.z);
-	glVertex3f(p3.x, p3.y, p3.z);
-	glVertex3f(p2.x, p2.y, p2.z);
-	glVertex3f(p1.x, p1.y, p1.z);
-	glEnd();
-	glLineWidth(1.0f);
-	glEnable(GL_CULL_FACE);
-
-	if (p1 == p2 && p2 == p3) {
-		glPointSize(5.0f);
-		glBegin(GL_POINTS);
-		glVertex3f(p1.x, p1.y, p1.z);
-		glEnd();
-	}
-}
-
-void render_object_default(hm::vec3 position, float scale);
-
-void render_object(IndexedModel3D* model) {
-	if (model->texture) {
-		glBindTexture(GL_TEXTURE_2D, model->texture->textureID);
-	}
-	glActiveTexture(GL_TEXTURE0);
-
-	glBindVertexArray(model->vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->ebo);
-	glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
-
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "persp_matrix"), 1, GL_FALSE, (GLfloat*)ggs.camera.projection_matrix.data);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "view_matrix"), 1, GL_FALSE, (GLfloat*)ggs.camera.view_matrix.data);
-	mat4 ident;
-	mat4::identity(ident);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (GLfloat*)model->model_matrix.m);
-	glUniform1i(glGetUniformLocation(ggs.shader, "is_colliding"), model->is_colliding);
-
-	hm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
-	hm::vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
-	if (model->is_colliding) {
-		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&red);
-	}
-	else {
-		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&green);
-	}
-	u32 render_form = GL_TRIANGLES;
-	glDrawElements(render_form, model->num_indices, GL_UNSIGNED_SHORT, 0);
-}
-
-void render_object_default(hm::vec3 position, float scale) {
-	IndexedModel3D* model = &ggs.models[2];
-	if (model->texture) {
-		glBindTexture(GL_TEXTURE_2D, model->texture->textureID);
-	}
-	glBindVertexArray(model->vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->ebo);
-	glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
-
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "persp_matrix"), 1, GL_FALSE, (GLfloat*)ggs.camera.projection_matrix.data);
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "view_matrix"), 1, GL_FALSE, (GLfloat*)ggs.camera.view_matrix.data);
-	mat4 pos = mat4::translate(position);
-	mat4 scale_mat = mat4::scale(scale);
-	mat4 model_mat = pos * scale_mat;
-
-	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (GLfloat*)model_mat.m);
-
-	hm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
-	hm::vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
-	if (model->is_colliding) {
-		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&red);
-	}
-	else {
-		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&green);
-	}
-	u32 render_form = GL_TRIANGLES;
-	glDrawElements(render_form, model->num_indices, GL_UNSIGNED_SHORT, 0);
-}
-
-void create_object(char* filename)
-{
-	int index = ggs.num_models;
-	if (index == 256) return;
-	memset(&ggs.models[index], 0, sizeof(IndexedModel3D));
-	load_model(filename, &ggs.models[index]);
-	init_object(&ggs.models[index]);
-	ggs.models[index].position = hm::vec3(0.0f, 45.0f, 0.0f);
-	ggs.models[index].scale = 0.3f;
-	ggs.models[index].simulating = true;
-	ggs.models[index].static_object = false;
-	ggs.models[index].texture = 0;
-
-	ggs.num_models++;
-}
+#include "rendering.cpp"
 
 hm::vec4 char_window_held_color(0.5f, 1.0f, 1.0f, 0.65f);
 hm::vec4 char_window_hover_color(0.35f, 0.6f, 0.6f, 0.65f);
@@ -587,7 +426,7 @@ void select_character_button(void* arg) {
 	if (selected) {
 		char_sel_state.num_selected -= 1;
 		if (char_sel_state.num_selected > 1) {
-			for (int i = 0; i < PLAYING_CHARACTERS; ++i) {
+			for (int i = 0; i < NUM_ALLIES; ++i) {
 				if (char_sel_state.selections[i] == id)
 					char_sel_state.selections[i] = char_sel_state.selections[char_sel_state.num_selected];
 			}
@@ -598,8 +437,8 @@ void select_character_button(void* arg) {
 		char_sel_state.num_selected += 1;
 	} else {
 		// replace the last selected
-		gui_toggle_char_selection(char_sel_state.selections[PLAYING_CHARACTERS - 1], divs);
-		char_sel_state.selections[PLAYING_CHARACTERS - 1] = id;
+		gui_toggle_char_selection(char_sel_state.selections[NUM_ALLIES - 1], divs);
+		char_sel_state.selections[NUM_ALLIES - 1] = id;
 	}
 
 	gui_toggle_char_selection(id, divs);
@@ -623,6 +462,20 @@ void hide_all_windows() {
 	// character info
 	gw.char_info_window->setActive(false);
 	gw.char_info_window_bot->setActive(false);
+
+	// combat
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		gw.allies[i]->setActive(false);
+		gw.allies_info[i]->setActive(false);
+		for (int k = 0; k < NUM_SKILLS; ++k) {
+			gw.allies_skills[i * NUM_SKILLS + k]->setActive(false);
+		}
+	}
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		gw.enemies[i]->setActive(false);
+		gw.enemies_info[i]->setActive(false);
+	}
+	gw.combat_bottom_info->setActive(false);
 }
 
 void init_char_selection_mode()
@@ -811,9 +664,134 @@ void init_char_information_mode()
 	skill_desc_div->getLabels().push_back(skill_desc_label);
 }
 
-void init_combar_mode()
+void init_combat_mode()
 {
+	hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
+	hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
+	hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
+	hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
+	hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 
+	{
+		// Players Names
+		linked::Window* player_name = new linked::Window(win_state.win_width, 80, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.6f), 0, 0, linked::W_UNFOCUSABLE);
+		linked::WindowDiv* player_name_div = new linked::WindowDiv(*player_name, 300, 80, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* enemy_name_div = new linked::WindowDiv(*player_name, 300, 80, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_RIGHT | linked::DIV_ANCHOR_TOP);
+		player_name->divs.push_back(player_name_div);
+		player_name->divs.push_back(enemy_name_div);
+
+		linked::Label* player_label = new linked::Label(*player_name_div, (u8*)"Player Name", sizeof "Player Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), 50.0f, 0, 0);
+		player_name_div->getLabels().push_back(player_label);
+		player_label->setMargin(20.0f);
+
+		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy Name", sizeof "Enemy Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), 50.0f, 0, 0);
+		enemy_name_div->getLabels().push_back(enemy_label);
+		enemy_label->setMargin(20.0f);
+
+		// end turn button
+		linked::WindowDiv* end_turn = new linked::WindowDiv(*player_name, 200, 45, 0, 0, hm::vec2(0, 20.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP |linked::DIV_CENTER_X);
+		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), 40.0f, 0, 0);
+		linked::Button* end_turn_button = new linked::Button(*end_turn, end_turn_label, hm::vec2(0, 0), 200, 45, greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f), 0);
+		player_name->divs.push_back(end_turn);
+		end_turn->getButtons().push_back(end_turn_button);
+		end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
+		end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
+	}
+	{
+		// Timer window
+		linked::Window* timer_window = new linked::Window(win_state.win_width, 5, hm::vec2(0, 80), greener_cyan, 0, 0, linked::W_UNFOCUSABLE);
+		gw.timer_window = timer_window;
+	}
+
+
+	hm::vec2 start_pos(60, 120);
+	float size_img = 160.0f;
+	float size_info = 350.0f;
+	float x_spacing = 10.0f;
+	float y_spacing = 20.0f;
+	float hp_bar_height = 25.0f;
+	float size_enemy_bars = 80.0f;
+
+	float skill_img_size = 75.0f;
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		gw.allies[i] = new linked::Window(size_img, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.allies[i]->setBorderSizeX(1.0f);
+		gw.allies[i]->setBorderSizeY(1.0f);
+		gw.allies[i]->setBorderColor(hm::vec4(0, 1, 1, 1));
+
+		start_pos.x += size_img + x_spacing;
+		gw.allies_info[i] = new linked::Window(size_info, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.allies_info[i]->setBorderSizeX(1.0f);
+		gw.allies_info[i]->setBorderSizeY(1.0f);
+		gw.allies_info[i]->setBorderColor(hm::vec4(0, 1, 1, 1));
+
+		float x_off = 0.0f;
+		for (int k = 0; k < NUM_SKILLS; ++k) {
+			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 1), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], skill_img_size, skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
+			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
+			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
+			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(hm::vec4(ally_hp_bar_full_color));
+			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 0, 1, 1), k);
+			skill_div->getButtons().push_back(skill_button);
+			skill_button->setHoveredBGColor(hm::vec4(0, 0.2f, 1, 1));
+			x_off += skill_img_size + x_spacing;
+		}
+
+		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), ally_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.allies_info[i]->divs.push_back(hpempty);
+
+		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), ally_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.allies_info[i]->divs.push_back(hpfilled);
+		hpfilled->setWidth(100);
+
+		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.allies_info[i]->divs.push_back(dummy);
+		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), 28.0f, 0, 0);
+		dummy->getLabels().push_back(hplabel);
+
+		start_pos.x = 60;
+		start_pos.y += size_img + y_spacing;
+	}
+
+	start_pos.x = 1400.0f;
+	start_pos.y = 120.0f;
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		gw.enemies[i] = new linked::Window(size_img, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.enemies[i]->setBorderSizeX(1.0f);
+		gw.enemies[i]->setBorderSizeY(1.0f);
+		gw.enemies[i]->setBorderColor(enem_hp_bar_full_color);
+
+		start_pos.x -= (x_spacing + size_info);
+		gw.enemies_info[i] = new linked::Window(size_info, size_enemy_bars, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.enemies_info[i]->setBorderSizeX(1.0f);
+		gw.enemies_info[i]->setBorderSizeY(1.0f);
+		gw.enemies_info[i]->setBorderColor(enem_hp_bar_full_color);
+		
+		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), enem_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.enemies_info[i]->divs.push_back(hpempty);
+		
+		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.enemies_info[i]->divs.push_back(hpfilled);
+		hpfilled->setWidth(100);
+		
+		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.enemies_info[i]->divs.push_back(dummy);
+		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), enem_hp_bar_full_color, 28.0f, 0, 0);
+		dummy->getLabels().push_back(hplabel);
+
+		start_pos.x = 1400.0f;
+		start_pos.y += size_img + y_spacing;
+	}
+
+	hm::vec4 combat_info_bar_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 0.8f);
+	linked::Window* combat_bottom_info = new linked::Window(win_state.win_width, 200, hm::vec2(0, 660), combat_info_bar_color, 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+	combat_bottom_info->setBorderSizeY(4.0f);
+	combat_bottom_info->setBorderColor(greener_cyan);
+	gw.combat_bottom_info = combat_bottom_info;
 }
 
 void init_application()
@@ -853,6 +831,7 @@ void init_application()
 
 	init_char_selection_mode();
 	init_char_information_mode();
+	init_combat_mode();
 
 	// init console chat
 	chat_window = chat.init_chat();
@@ -861,7 +840,7 @@ void init_application()
 	g_chat = &chat;
 
 	hide_all_windows();
-	change_game_mode(MODE_CHAR_SELECT);
+	change_game_mode(MODE_COMBAT);
 
 	// opengl
 	glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
@@ -883,7 +862,7 @@ void update_model(IndexedModel3D* im)
 	im->model_matrix = final_matrix;
 }
 
-void update_game_mode()
+void update_game_mode(double frametime)
 {
 	switch (ggs.mode) {
 		case MODE_CHAR_SELECT: {
@@ -914,6 +893,16 @@ void update_game_mode()
 				}
 			}
 		}break;
+		case MODE_COMBAT: {
+			static double min = 60.0; //
+			//frametime = 0.016
+			min -= frametime;
+			if (min <= 0.0) {
+				min = 60.0;
+			}
+			double new_w = (int)((double)win_state.win_width * min / 60.0);
+			gw.timer_window->setWidth(new_w);
+		}break;
 	}
 }
 
@@ -935,6 +924,20 @@ void change_game_mode(Game_Mode mode)
 			skill_label->setText(0, 0);
 			skill_desc_label->setText(0, 0);
 		}break;
+		case MODE_COMBAT: {
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				gw.allies[i]->setActive(false);
+				gw.allies_info[i]->setActive(false);
+				for (int k = 0; k < NUM_SKILLS; ++k) {
+					gw.allies_skills[i * NUM_SKILLS + k]->setActive(false);
+				}
+			}
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				gw.enemies[i]->setActive(false);
+				gw.enemies_info[i]->setActive(false);
+			}
+			gw.combat_bottom_info->setActive(false);
+		}break;
 	}
 
 	ggs.last_mode = ggs.mode;
@@ -951,19 +954,33 @@ void change_game_mode(Game_Mode mode)
 			gw.char_info_window->setActive(true);
 			gw.char_info_window_bot->setActive(true);
 		}break;
+		case MODE_COMBAT: {
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				gw.allies[i]->setActive(true);
+				gw.allies_info[i]->setActive(true);
+				for (int k = 0; k < NUM_SKILLS; ++k) {
+					gw.allies_skills[i * NUM_SKILLS + k]->setActive(true);
+				}
+			}
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				gw.enemies[i]->setActive(true);
+				gw.enemies_info[i]->setActive(true);
+			}
+			gw.combat_bottom_info->setActive(true);
+		}break;
 	}
 }
 
 void input();
 
-void update_and_render()
+void update_and_render(double frametime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (chat.m_active)
 		chat.update();
 
-	update_game_mode();
+	update_game_mode(frametime);
 
 	input();
 #if 0

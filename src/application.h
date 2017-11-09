@@ -43,6 +43,6 @@ struct IndexedModel3D {
 
 void init_application();
 
-void update_and_render();
+void update_and_render(double frametime);
 void render_object_default(hm::vec3 position, float scale);
 void create_object(char* filename);
