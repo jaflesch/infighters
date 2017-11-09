@@ -22,6 +22,7 @@ public:
 	float getTextureIndex();
 	float getTextureNumRows();
 	hm::vec2& getTextureOffset();
+	void updateQuad(int width, int height);
 
 	void setIndex(int i);
 	float getIndex();
@@ -29,6 +30,7 @@ private:
 	float index;
 	float numRows;
 	hm::vec2 offset;
+	hm::vec3 m_center;
 
 	void calcAtlas();
 

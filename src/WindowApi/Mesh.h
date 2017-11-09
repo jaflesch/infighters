@@ -30,6 +30,7 @@ public:
 	int& getReferenceCount();
 	void setReferenceCount(int refCount);
 	void setIndexedModel(IndexedModel* im);
+	void updateQuad();
 private:
 	Quad* quad;
 	IndexedModel* indexedModel;

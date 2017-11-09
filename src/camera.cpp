@@ -2,9 +2,9 @@ struct Camera {
 	mat4 view_matrix;
 	mat4 projection_matrix;
 
-	vec3 cam_position;
-	vec3 cam_orientation;
-	vec3 cam_up;
+	hm::vec3 cam_position;
+	hm::vec3 cam_orientation;
+	hm::vec3 cam_up;
 
 	bool locked;
 
@@ -15,11 +15,11 @@ struct Camera {
 	float far_plane;
 	float near_plane;
 
-	void set_cam_position(vec3 newpos) {
+	void set_cam_position(hm::vec3 newpos) {
 		cam_position = newpos;
 		view_matrix = mat4::look_at(newpos, cam_orientation, cam_up);
 	}
-	void set_cam_orientation(vec3 newori) {
+	void set_cam_orientation(hm::vec3 newori) {
 		cam_orientation = newori;
 		view_matrix = mat4::look_at(cam_position, cam_position + newori, cam_up);
 	}
@@ -29,33 +29,33 @@ struct Camera {
 		set_cam_orientation(cam_orientation);
 	}
 	void move_sideways(float amt) {
-		vec3 left = vec3::normalize(vec3::cross(cam_up, cam_orientation));
+		hm::vec3 left = hm::vec3::normalize(hm::vec3::cross(cam_up, cam_orientation));
 		set_cam_position(cam_position + (left * amt));
 		set_cam_orientation(cam_orientation);
 	}
 
 	void rotate_x(float amt) {
 		mat4 rot = mat4::rotate(cam_up, amt);
-		vec3 normalized_ori = vec3::normalize(cam_orientation);
+		hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
 		normalized_ori = rot * normalized_ori;
 		set_cam_orientation(normalized_ori);
 	}
 
 	void rotate_y(float amt) {
-		mat4 rot = mat4::rotate(vec3::cross(cam_orientation, cam_up), amt);
-		vec3 normalized_ori = vec3::normalize(cam_orientation);
+		mat4 rot = mat4::rotate(hm::vec3::cross(cam_orientation, cam_up), amt);
+		hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
 		normalized_ori = rot * normalized_ori;
 		set_cam_orientation(normalized_ori);
 	}
 };
 
 void init_camera(Camera* camera, float aspect, float fov, float znear, float zfar) {
-	vec3 campos(0, 0, 0);
-	vec3 camori(0, 0, -1);
-	vec3 up(0, 1, 0);
+	hm::vec3 campos(0, 0, 0);
+	hm::vec3 camori(0, 0, -1);
+	hm::vec3 up(0, 1, 0);
 
-	camera->view_matrix = mat4::look_at(campos, camori, up);
-	camera->projection_matrix = mat4::perspective(fov, aspect, znear, zfar);
+	camera->view_matrix = hm::mat4::look_at(campos, camori, up);
+	camera->projection_matrix = hm::mat4::perspective(fov, aspect, znear, zfar);
 	camera->fov = fov;
 	camera->far_plane = zfar;
 	camera->near_plane = znear;

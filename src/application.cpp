@@ -1,14 +1,73 @@
 #include "application.h"
 #include "input.h"
 #include "quaternion.h"
-#include "ResourceLoad\Texture.h"
+#include "ResourceLoad/Texture.h"
 #include "debug_table.h"
+#include "WindowApi/Window.h"
+#include "chat.h"
 
 extern Window_State win_state;
 extern DebugTable debug_table;
+Chat* g_chat = 0;
+Chat chat;
+linked::Window* chat_window = 0;
 
 #include "camera.cpp"
 #include "load_model.cpp"
+
+#define NUM_CHARS 12
+#define NUM_SKILLS 4
+
+char* skill_names[32] = {
+	"FALSE RUSH",
+	"CONTRADICTION",
+	"REQUIEM ZERO",
+	"VOID BARRIER"
+};
+
+int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
+	sizeof("FALSE RUSH"),
+	sizeof("CONTRADICTION"),
+	sizeof("REQUIEM ZERO"),
+	sizeof("VOID BARRIER")
+};
+
+char* skill_desc[32] = {
+	"Ataca um oponente e realiza 20 de dano.",
+	"Marca um adversário e, se no próximo turno ele realizar um ataque em\nZer0, seu golpe é negado, sofre 20 de dano e recebe status Paralyze\npor 1 turno.",
+	"Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
+	"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno."
+};
+
+int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
+	sizeof "Ataca um oponente e realiza 20 de dano.",
+	sizeof "Marca um adversário e, se no próximo turno ele realizar um ataque em\nZer0, seu golpe é negado, sofre 20 de dano e recebe status Paralyze\npor 1 turno.",
+	sizeof "Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
+	sizeof "Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno."
+};
+
+enum Character_ID {
+	CHAR_NONE = -1,
+	CHAR_ZERO = 0,
+	CHAR_ONE,
+	CHAR_SERIAL_KEYLLER,
+	CHAR_RAY_TRACEY,
+	CHAR_A_STAR,
+	CHAR_DEADLOCK,
+	CHAR_NORMA,
+	CHAR_HAZARD,
+	CHAR_QWERTY,
+	CHAR_BIG_O,
+	CHAR_NEW,
+	CHAR_CLOCKBOY,
+};
+
+enum Game_Mode {
+	MODE_INTRO,
+	MODE_CHAR_SELECT,
+	MODE_CHAR_INFO,
+	MODE_COMBAT,
+};
 
 struct GameState {
 	Camera camera;
@@ -17,19 +76,46 @@ struct GameState {
 	IndexedModel3D* models;
 	int num_models;
 
-	bool start_simulation = false;
-	bool move_objects = false;
-	bool wireframe = false;
-
-	hm::vec3 gravity;
+	Game_Mode mode;
+	Game_Mode last_mode;
 };
 
 static GameState ggs = {};
 
+#define PLAYING_CHARACTERS 3
+struct Char_Selection_State {
+	int num_selected;
+	int selections[PLAYING_CHARACTERS];
+	linked::WindowDiv* play_button_div;
+	Character_ID last_hovered;
+};
+
+Char_Selection_State char_sel_state = {};
+
+struct Char_Info_State {
+
+};
+
+struct Game_Windows {
+	// background window
+	linked::Window* bgwindow;
+
+	// character selection
+	linked::Window* left_char_window;
+	linked::Window* char_selected_window;
+	linked::Window* char_selection_window;
+
+	// character info
+	linked::Window* char_info_window;
+	linked::Window* char_info_window_bot;
+};
+
+Game_Windows gw = {};
+
 void load_model(char* filename, IndexedModel3D* model) {
 	load_objfile(filename, model);
-	mat4::identity(model->model_matrix);
-	model->position = vec3(0.0f, 0.0f, 0.0f);
+	hm::mat4::identity(model->model_matrix);
+	model->position = hm::vec3(0.0f, 0.0f, 0.0f);
 	model->rotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
 	model->is_colliding = false;
 }
@@ -59,11 +145,11 @@ void init_object(IndexedModel3D* m) {
 	glVertexAttribPointer(tex_coord_attrib_loc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)&((Vertex3D*)0)->tex);
 }
 
-void render_line(vec3 start, vec3 end) 
+void render_line(hm::vec3 start, hm::vec3 end)
 {
 	mat4 ident;
 	mat4::identity(ident);
-	vec4 magenta(1, 0, 1, 1);
+	hm::vec4 magenta(1, 0, 1, 1);
 	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
 	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&magenta);
 	glLineWidth(4.0f);
@@ -74,11 +160,11 @@ void render_line(vec3 start, vec3 end)
 	glLineWidth(1.0f);
 }
 
-void render_vector(vec3 vec, vec3 position)
+void render_vector(hm::vec3 vec, hm::vec3 position)
 {
 	mat4 ident;
 	mat4::identity(ident);
-	vec4 black(0, 0, 0, 1);
+	hm::vec4 black(0, 0, 0, 1);
 	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
 	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&black);
 	glBegin(GL_LINES);
@@ -87,10 +173,10 @@ void render_vector(vec3 vec, vec3 position)
 	glEnd();
 }
 
-void render_face(vec3 p1, vec3 p2, vec3 p3, vec3 c) {
+void render_face(hm::vec3 p1, hm::vec3 p2, hm::vec3 p3, hm::vec3 c) {
 	mat4 ident;
 	mat4::identity(ident);
-	vec4 color(c.r, c.g, c.b, 1);
+	hm::vec4 color(c.r, c.g, c.b, 1);
 	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (float*)ident.data);
 	glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&color);
 	glDisable(GL_CULL_FACE);
@@ -120,118 +206,6 @@ void render_face(vec3 p1, vec3 p2, vec3 p3, vec3 c) {
 
 void render_object_default(hm::vec3 position, float scale);
 
-void create_object(char* filename)
-{
-	int index = ggs.num_models;
-	if (index == 256) return;
-	memset(&ggs.models[index], 0, sizeof(IndexedModel3D));
-	load_model(filename, &ggs.models[index]);
-	init_object(&ggs.models[index]);
-	ggs.models[index].position = vec3(0.0f, 45.0f, 0.0f);
-	ggs.models[index].scale = 0.3f;
-	ggs.models[index].simulating = true;
-	ggs.models[index].static_object = false;
-	ggs.models[index].texture = 0;
-
-	ggs.num_models++;
-}
-
-int model_input_index = 0;
-int move_up_model = 'R';
-int move_down_model = 'F';
-int turn_left_model = VK_LEFT;
-int turn_right_model = VK_RIGHT;
-int move_forward_model = VK_UP;
-int move_backward_model = VK_DOWN;
-int rotate_x_model = 'X';
-int rotate_y_model = 'Y';
-int rotate_z_model = 'Z';
-int start_simulation_key = 'H';
-int move_objects = 'M';
-int toggle_simulate_key = 'L';
-
-void init_debug_entries()
-{
-	debug_table.create_entry("model_input", &model_input_index, TYPE_S32);
-	debug_table.create_entry("position_x", &ggs.models[model_input_index].position.x, TYPE_R32);
-	debug_table.create_entry("position_y", &ggs.models[model_input_index].position.y, TYPE_R32);
-	debug_table.create_entry("position_z", &ggs.models[model_input_index].position.z, TYPE_R32);
-	debug_table.create_entry("scale", &ggs.models[model_input_index].scale, TYPE_R32);
-	debug_table.create_entry("move_up", &move_up_model, TYPE_S32);
-	debug_table.create_entry("move_down", &move_down_model, TYPE_S32);
-	debug_table.create_entry("turn_left", &turn_left_model, TYPE_S32);
-	debug_table.create_entry("turn_right", &turn_right_model, TYPE_S32);
-	debug_table.create_entry("move_forward_model", &move_forward_model, TYPE_S32);
-	debug_table.create_entry("move_backward_model", &move_backward_model, TYPE_S32);
-	debug_table.create_entry("rotate_x", &rotate_x_model, TYPE_S32);
-	debug_table.create_entry("rotate_y", &rotate_y_model, TYPE_S32);
-	debug_table.create_entry("rotate_z", &rotate_z_model, TYPE_S32);
-	debug_table.create_entry("start_simulation", &start_simulation_key, TYPE_S32);
-	debug_table.create_entry("move_objects", &move_objects, TYPE_S32);
-	debug_table.create_entry("gravity_x", &ggs.gravity.x, TYPE_R32);
-	debug_table.create_entry("gravity_y", &ggs.gravity.y, TYPE_R32);
-	debug_table.create_entry("gravity_z", &ggs.gravity.z, TYPE_R32);
-	debug_table.create_entry("toggle_simulate", &toggle_simulate_key, TYPE_S32);
-}
-
-void init_application()
-{
-	Texture* texture = new Texture(std::string("res/textures/wood.png"));
-
-	init_camera(&ggs.camera, (float)win_state.win_width / win_state.win_height, 45.0f, 0.2f, 1000.0f);
-	ggs.camera.set_cam_position(vec3(5.0f, 30.0f, 60.0f));
-	ggs.shader = load_shader(vert_shader, frag_shader, sizeof(vert_shader) - 1, sizeof(frag_shader) - 1);
-
-	// Models
-	ggs.models = (IndexedModel3D*)malloc(sizeof(IndexedModel3D) * 256);
-	ggs.gravity = vec3(0, -10, 0);
-
-	load_model("res/cube.obj", &ggs.models[0]);
-	init_object(&ggs.models[0]);
-	ggs.models[0].position = vec3(0.0f, 45.0f, 0.0f);
-	ggs.models[0].scale = 0.3f;
-	ggs.models[0].simulating = true;
-	ggs.models[0].static_object = false;
-	ggs.models[0].texture = texture;
-	ggs.models[0].last_pos = ggs.models[0].position;
-
-	load_model("res/cube.obj", &ggs.models[1]);
-	init_object(&ggs.models[1]);
-	ggs.models[1].scale = 1.0f;
-	ggs.models[1].simulating = false;
-	ggs.models[1].static_object = true;
-	ggs.models[1].texture = texture;
-	ggs.models[1].last_pos = ggs.models[1].position;
-
-	load_model("res/esfera_10.obj", &ggs.models[2]);
-	init_object(&ggs.models[2]);
-	ggs.models[2].position = vec3(-15.0f, 45.0f, 0.0f);
-	ggs.models[2].scale = 0.3f;
-	ggs.models[2].simulating = true;
-	ggs.models[2].static_object = false;
-	ggs.models[2].texture = texture;
-	ggs.models[2].last_pos = ggs.models[2].position;
-
-	load_model("res/cube.obj", &ggs.models[3]);
-	init_object(&ggs.models[3]);
-	ggs.models[3].position = vec3(-15.0f, 75.0f, 0.0f);
-	ggs.models[3].scale = 0.3f;
-	ggs.models[3].simulating = true;
-	ggs.models[3].static_object = false;
-	ggs.models[3].texture = texture;
-	ggs.models[3].last_pos = ggs.models[3].position;
-
-	ggs.num_models = 4;
-
-	init_debug_entries();
-
-	// opengl
-	glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-}
-
 void render_object(IndexedModel3D* model) {
 	if (model->texture) {
 		glBindTexture(GL_TEXTURE_2D, model->texture->textureID);
@@ -249,8 +223,8 @@ void render_object(IndexedModel3D* model) {
 	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (GLfloat*)model->model_matrix.m);
 	glUniform1i(glGetUniformLocation(ggs.shader, "is_colliding"), model->is_colliding);
 
-	vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
-	vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
+	hm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
+	hm::vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
 	if (model->is_colliding) {
 		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&red);
 	}
@@ -258,7 +232,6 @@ void render_object(IndexedModel3D* model) {
 		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&green);
 	}
 	u32 render_form = GL_TRIANGLES;
-	if (ggs.wireframe) render_form = GL_LINES;
 	glDrawElements(render_form, model->num_indices, GL_UNSIGNED_SHORT, 0);
 }
 
@@ -279,8 +252,8 @@ void render_object_default(hm::vec3 position, float scale) {
 
 	glUniformMatrix4fv(glGetUniformLocation(ggs.shader, "model_matrix"), 1, GL_TRUE, (GLfloat*)model_mat.m);
 
-	vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
-	vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
+	hm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
+	hm::vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
 	if (model->is_colliding) {
 		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&red);
 	}
@@ -288,100 +261,321 @@ void render_object_default(hm::vec3 position, float scale) {
 		glUniform4fv(glGetUniformLocation(ggs.shader, "vertex_color"), 1, (float*)&green);
 	}
 	u32 render_form = GL_TRIANGLES;
-	if (ggs.wireframe) render_form = GL_LINES;
 	glDrawElements(render_form, model->num_indices, GL_UNSIGNED_SHORT, 0);
 }
 
-void input()
+void create_object(char* filename)
 {
-	if (!win_state.do_input) return;
+	int index = ggs.num_models;
+	if (index == 256) return;
+	memset(&ggs.models[index], 0, sizeof(IndexedModel3D));
+	load_model(filename, &ggs.models[index]);
+	init_object(&ggs.models[index]);
+	ggs.models[index].position = hm::vec3(0.0f, 45.0f, 0.0f);
+	ggs.models[index].scale = 0.3f;
+	ggs.models[index].simulating = true;
+	ggs.models[index].static_object = false;
+	ggs.models[index].texture = 0;
 
-	float velocity = 0.5f;
-	float rot_velocity = 3.0f;
+	ggs.num_models++;
+}
 
-	if (keyboard_state.key[VK_SHIFT]) {
-		velocity = 0.005f;
-		rot_velocity = -3.0f;
-	}
-	if (keyboard_state.key[turn_left_model]) {
-		Quaternion local2 = QuatFromAxisAngle(vec3(0, 1, 0), rot_velocity);
-		ggs.models[model_input_index].rotation = local2 * ggs.models[model_input_index].rotation;
-	}
-	if (keyboard_state.key[turn_right_model]) {
-		Quaternion local2 = QuatFromAxisAngle(vec3(0, -1, 0), rot_velocity);
-		ggs.models[model_input_index].rotation = local2 * ggs.models[model_input_index].rotation;
-	}
-	if (keyboard_state.key[move_forward_model]) {
-		vec3 res = RotFromQuat(ggs.models[model_input_index].rotation) * vec3(0, 0, -1);
-		ggs.models[model_input_index].position = ggs.models[model_input_index].position + res;
-	}
-	if (keyboard_state.key[move_backward_model]) {
-		vec3 res = RotFromQuat(ggs.models[model_input_index].rotation) * vec3(0, 0, -1);
-		ggs.models[model_input_index].position = ggs.models[model_input_index].position - res;
-	}
+hm::vec4 char_window_held_color(0.5f, 1.0f, 1.0f, 0.65f);
+hm::vec4 char_window_hover_color(0.35f, 0.6f, 0.6f, 0.65f);
+hm::vec4 char_window_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 1.0f);
+hm::vec4 char_selected_bg_color(0.4f, 0.7f, 0.7f, 1.0f);
 
-	if (keyboard_state.key[move_up_model]) {
-		ggs.models[model_input_index].last_pos.y = ggs.models[model_input_index].position.y;
-		ggs.models[model_input_index].position.y += velocity;
-	}
-	if (keyboard_state.key[move_down_model]) {
-		ggs.models[model_input_index].last_pos.y = ggs.models[model_input_index].position.y;
-		ggs.models[model_input_index].position.y -= velocity;
-	}
-	
-	if (keyboard_state.key[rotate_x_model]) {
-		Quaternion local2 = QuatFromAxisAngle(vec3(1, 0, 0), rot_velocity);
-		ggs.models[model_input_index].rotation = local2 * ggs.models[model_input_index].rotation;
+void gui_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs)
+{
+	// update the selection screen
+	bool notselected = (*divs)[id * 3 + 1]->m_render = !(*divs)[id * 3 + 1]->m_render;
+	(*divs)[id * 3 + 2]->m_render = !(*divs)[id * 3 + 2]->m_render;
+	hm::vec4 selected_color;
+	hm::vec4 selected_bg_color;
+	if (notselected) {
+		selected_bg_color = char_selected_bg_color;
+		selected_color = char_window_hover_color;
+	} else {
+		selected_bg_color = char_window_color;
+		selected_color = hm::vec4(0, 0, 0, 1);
 	}
 
-	if (keyboard_state.key[rotate_y_model]) {
-		Quaternion local2 = QuatFromAxisAngle(vec3(0, 1, 0), rot_velocity);
-		ggs.models[model_input_index].rotation = local2 * ggs.models[model_input_index].rotation;
+	(*divs)[id * 3]->getButtons()[0]->setNormalBGColor(selected_color);
+	(*divs)[id * 3]->setBackgroundColor(selected_bg_color);
+}
+
+void select_character_button(void* arg) {
+	auto divs = (std::vector<linked::WindowDiv*>*)((linked::Button_Info*)arg)->data;
+	int id = ((linked::Button_Info*)arg)->id;
+	bool selected = (*divs)[id * 3 + 1]->m_render;
+	// update game state
+	if (selected) {
+		char_sel_state.num_selected -= 1;
+		if (char_sel_state.num_selected > 1) {
+			for (int i = 0; i < PLAYING_CHARACTERS; ++i) {
+				if (char_sel_state.selections[i] == id)
+					char_sel_state.selections[i] = char_sel_state.selections[char_sel_state.num_selected];
+			}
+		}
+	} else if(char_sel_state.num_selected < 3) {
+		// select one more character
+		char_sel_state.selections[char_sel_state.num_selected] = id;
+		char_sel_state.num_selected += 1;
+	} else {
+		// replace the last selected
+		gui_toggle_char_selection(char_sel_state.selections[PLAYING_CHARACTERS - 1], divs);
+		char_sel_state.selections[PLAYING_CHARACTERS - 1] = id;
 	}
 
-	if (keyboard_state.key[rotate_z_model]) {
-		Quaternion local2 = QuatFromAxisAngle(vec3(0, 0, 1), rot_velocity);
-		ggs.models[model_input_index].rotation = local2 * ggs.models[model_input_index].rotation;
-	}
+	gui_toggle_char_selection(id, divs);
+}
 
-	if (keyboard_state.key_event[start_simulation_key]) {
-		ggs.start_simulation = !ggs.start_simulation;
-		keyboard_state.key_event[start_simulation_key] = false;
-	}
-	if (keyboard_state.key_event[move_objects]) {
-		ggs.move_objects = !ggs.move_objects;
-		keyboard_state.key_event[move_objects] = false;
-	}
-	if (keyboard_state.key_event[toggle_simulate_key]) {
-		ggs.models[model_input_index].simulating = !ggs.models[model_input_index].simulating;
-		ggs.models[model_input_index].static_object = !ggs.models[model_input_index].static_object;
-		keyboard_state.key_event[toggle_simulate_key] = false;
-	}
+void change_game_mode(Game_Mode mode);
 
-	if (keyboard_state.key_event['I']) {
-		ggs.wireframe = !ggs.wireframe;
-		keyboard_state.key_event['I'] = false;
+void combat_start_mode(void* arg)
+{
+	change_game_mode(MODE_COMBAT);
+}
+
+void hide_all_windows() {
+	//gw.bgwindow->setActive(false);
+
+	// character selection
+	gw.left_char_window->setActive(false);
+	gw.char_selected_window->setActive(false);
+	gw.char_selection_window->setActive(false);
+
+	// character info
+	gw.char_info_window->setActive(false);
+	gw.char_info_window_bot->setActive(false);
+}
+
+void init_char_selection_mode()
+{
+	// left character window
+	linked::Window* left_char_window = new linked::Window(400, 840, hm::vec2(100, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), 0, 0, linked::W_BORDER);
+	left_char_window->setBorderSizeX(10.0f);
+	left_char_window->setBorderSizeY(0.0f);
+	left_char_window->setBorderColor(hm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
+	gw.left_char_window = left_char_window;
+	linked::WindowDiv* left_char_div = new linked::WindowDiv(*left_char_window, 400, 840, 0, 0, hm::vec2(0, 0), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
+	left_char_window->divs.push_back(left_char_div);
+	char_sel_state.last_hovered = CHAR_NONE;
+
+	float char_window_width = 140.0f;
+	float char_window_height = 300.0f;
+
+	// Character selected lower window (bottom)
+	linked::Window* char_selected_window = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	gw.char_selected_window = char_selected_window;
+
+	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_selected_window->divs.push_back(s_div1);
+	char_selected_window->divs.push_back(s_div2);
+	char_selected_window->divs.push_back(s_div3);
+
+	linked::WindowDiv* info_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(600.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	Texture* space_texture = new Texture("res/textures/spacebar.png");
+	info_div->setBackgroundTexture(space_texture);
+	char_selected_window->divs.push_back(info_div);
+
+	linked::WindowDiv* info_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(624.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_selected_window->divs.push_back(info_label_div);
+	linked::Label* info_label = new linked::Label(*info_label_div, (u8*)"Information", sizeof("Information"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	info_label_div->getLabels().push_back(info_label);
+
+	linked::WindowDiv* confirm_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(740.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	Texture* enter_texture = new Texture("res/textures/enter.png");
+	confirm_div->setBackgroundTexture(enter_texture);
+	char_selected_window->divs.push_back(confirm_div);
+
+	linked::WindowDiv* confirm_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(764.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_selected_window->divs.push_back(confirm_label_div);
+	linked::Label* confirm_label = new linked::Label(*confirm_label_div, (u8*)"Confirm", sizeof("Confirm"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	confirm_label_div->getLabels().push_back(confirm_label);
+
+	linked::WindowDiv* back_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	Texture* esc_texture = new Texture("res/textures/esc.png");
+	back_div->setBackgroundTexture(esc_texture);
+	char_selected_window->divs.push_back(back_div);
+
+	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_selected_window->divs.push_back(back_label_div);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	back_label_div->getLabels().push_back(back_label);
+
+	linked::WindowDiv* play_div = new linked::WindowDiv(*char_selected_window, 148, 48, 0, 0, hm::vec2(740.0f, 50.0f), hm::vec4(0.34f, 0.9f, 0.72f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_selected_window->divs.push_back(play_div);
+	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"), hm::vec2(42.0f, 14.0f), hm::vec4(1, 1, 1, 1), 40.0f, 0, 0);
+	linked::Button* play_button = new linked::Button(*play_div, play_label, hm::vec2(0, 0), 148, 48, char_window_color, 0);
+	play_button->setHoveredBGColor(char_window_hover_color);
+	play_button->setHeldBGColor(char_window_held_color);
+	play_button->setClickedCallback(combat_start_mode);
+	play_div->getButtons().push_back(play_button);
+	play_div->m_render = false;
+	char_sel_state.play_button_div = play_div;
+
+	// Character selection window (top)
+	linked::Window* char_selection_window = new linked::Window(6 * char_window_width + 100.0f, 630, hm::vec2(520, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	gw.char_selection_window = char_selection_window;
+
+	Texture* chars_texture[NUM_CHARS] = {};
+	chars_texture[0] = new Texture("res/textures/zero.png");
+	chars_texture[1] = new Texture("res/textures/one.png");
+	chars_texture[2] = new Texture("res/textures/serial.png");
+	chars_texture[3] = new Texture("res/textures/ray.png");
+	chars_texture[4] = new Texture("res/textures/astar.png");
+	chars_texture[5] = new Texture("res/textures/deadlock.png");
+	chars_texture[6] = new Texture("res/textures/norma.png");
+	chars_texture[7] = new Texture("res/textures/hazard.png");
+	chars_texture[8] = new Texture("res/textures/qwerty.png");
+	chars_texture[9] = new Texture("res/textures/bigo.png");
+	chars_texture[10] = new Texture("res/textures/new.png");
+	chars_texture[11] = new Texture("res/textures/clockboy.png");
+
+	linked::WindowDiv* char_divs[NUM_CHARS] = {};
+	float char_div_offset_x = 0.0f;
+	float char_div_offset_y = 0.0f;
+	for (int i = 0; i < NUM_CHARS; ++i) {
+		char_divs[i] = new linked::WindowDiv(*char_selection_window, char_window_width, char_window_height, 0.0f, 0.0f,
+			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
+			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		char_selection_window->divs.push_back(char_divs[i]);
+
+		linked::WindowDiv* select_div_l = new linked::WindowDiv(*char_selection_window, 5.0f, char_window_height, 0.0f, 0.0f,
+			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
+			hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		char_selection_window->divs.push_back(select_div_l);
+		select_div_l->m_render = false;
+
+		linked::WindowDiv* select_div_r = new linked::WindowDiv(*char_selection_window, 5.0f, char_window_height, 0.0f, 0.0f,
+			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x + char_window_width - 5.0f, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
+			hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		char_selection_window->divs.push_back(select_div_r);
+		select_div_r->m_render = false;
+
+		char_div_offset_x += 1.0f;
+		if (i + 1 == NUM_CHARS / 2) {
+			char_div_offset_x = 0.0f;
+			char_div_offset_y += 1.0f;
+		}
+		linked::Button* button = new linked::Button(*char_divs[i], 0, hm::vec2(0, 0), char_window_width, char_window_height, char_window_color, i);
+		button->setHoveredBGColor(char_window_hover_color);
+		button->setHeldBGColor(char_window_held_color);
+		Texture* char_texture = chars_texture[i];
+		button->setNormalBGTexture(char_texture);
+		button->setHoveredBGTexture(char_texture);
+		button->setHeldBGTexture(char_texture);
+		char_divs[i]->getButtons().push_back(button);
+		button->button_info.data = &char_selection_window->divs;
+		button->setClickedCallback(select_character_button);
 	}
 }
 
-void update(IndexedModel3D* im) {
-	if (ggs.move_objects) return;
-	vec3 acceleration = ggs.gravity;
+void init_char_information_mode()
+{
+	float char_window_width = 140.0f;
+	float char_window_height = 140.0f;
 
-	const float time_step = 1.0f / 250.0f;
-	im->time += time_step;
-	im->velocity = acceleration * im->time + im->velocity;
-	im->position = im->velocity * im->time + im->position;
+	linked::Window* char_info_window = new linked::Window(6 * char_window_width + 100.0f - 20.0f, 630, hm::vec2(530, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.9f), 0, 0, linked::W_BORDER);
+	char_info_window->setBorderSizeX(10.0f);
+	char_info_window->setBorderSizeY(0.0f);
+	hm::vec4 border_color = hm::vec4(1.0f, 0.71f, 0.29f, 1.0f);
+	char_info_window->setBorderColor(border_color);
+	gw.char_info_window = char_info_window;
+	linked::Window* char_info_window_bot = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	gw.char_info_window_bot = char_info_window_bot;
+
+	linked::WindowDiv* skills_divs[NUM_SKILLS] = {};
+	float char_div_offset_x = 0.0f;
+	float char_div_offset_y = 0.0f;
+	for (int i = 0; i < NUM_SKILLS; ++i) {
+		skills_divs[i] = new linked::WindowDiv(*char_info_window, char_window_width, char_window_height, 0.0f, 0.0f,
+			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
+			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		char_info_window->divs.push_back(skills_divs[i]);
+
+		linked::Button* button = new linked::Button(*skills_divs[i], 0, hm::vec2(0, 0), char_window_width, char_window_height, char_window_color, i);
+		button->setHoveredBGColor(char_window_hover_color);
+		button->setHeldBGColor(char_window_held_color);
+		skills_divs[i]->getButtons().push_back(button);
+		button->button_info.data = &char_info_window->divs;
+		char_div_offset_x += 1.0f;
+	}
+
+	linked::WindowDiv* skill_title_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 35.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_info_window->divs.push_back(skill_title_div);
+	linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1,1,1,1), 38.0f, 0, 0);
+	skill_title_div->getLabels().push_back(skill_title_label);
+
+	linked::WindowDiv* skill_desc_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 65.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	char_info_window->divs.push_back(skill_desc_div);
+	linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 34.0f, 0, 0);
+	skill_desc_div->getLabels().push_back(skill_desc_label);
+}
+
+void init_application()
+{
+	using namespace linked;
+
+#if 0
+	// init camera and 3d shader
+	init_camera(&ggs.camera, (float)win_state.win_width / win_state.win_height, 45.0f, 0.2f, 1000.0f);
+	ggs.camera.set_cam_position(hm::vec3(5.0f, 30.0f, 60.0f));
+	ggs.shader = load_shader(vert_shader, frag_shader, sizeof(vert_shader) - 1, sizeof(frag_shader) - 1);
+
+	ggs.models = (IndexedModel3D*)malloc(sizeof(IndexedModel3D) * 256);
+
+	load_model("res/cube.obj", &ggs.models[0]);
+	init_object(&ggs.models[0]);
+	ggs.models[0].position = hm::vec3(0.0f, 45.0f, 0.0f);
+	ggs.models[0].scale = 0.3f;
+	ggs.models[0].simulating = true;
+	ggs.models[0].static_object = false;
+	ggs.models[0].texture = 0;
+	ggs.models[0].last_pos = ggs.models[0].position;
+
+	ggs.num_models = 1;
+#endif
+
+	ggs.mode = MODE_INTRO;
+	ggs.last_mode = MODE_INTRO;
+
+	// background @temporary
+	linked::Window* bgwindow = new linked::Window(win_state.win_width, win_state.win_height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
+	linked::WindowDiv* bgdiv = new linked::WindowDiv(*bgwindow, win_state.win_width, win_state.win_height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), DIV_ANCHOR_LEFT | DIV_ANCHOR_TOP);
+	bgwindow->divs.push_back(bgdiv);
+	Texture* bgtexture = new Texture("res/textures/bg2.jpg");
+	bgdiv->setBackgroundTexture(bgtexture);
+	gw.bgwindow = bgwindow;
+
+	init_char_selection_mode();
+	init_char_information_mode();
+
+	// init console chat
+	chat_window = chat.init_chat();
+	chat_window->setActive(false);
+	chat.m_active = false;
+	g_chat = &chat;
+
+	hide_all_windows();
+	change_game_mode(MODE_CHAR_SELECT);
+
+	// opengl
+	glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void update_model(IndexedModel3D* im) 
 {
-	bool colliding = false;
-
-	vec3 last_pos = im->position;
+	hm::vec3 last_pos = im->position;
 	mat4 rot = RotFromQuat(im->rotation);
 
-	vec3 pos = im->position;
+	hm::vec3 pos = im->position;
 	mat4 rotation_matrix = rot;
 	mat4 scale_matrix = mat4::scale(im->scale);
 	mat4 final_matrix = mat4::translate(pos) * rotation_matrix * scale_matrix;
@@ -389,20 +583,117 @@ void update_model(IndexedModel3D* im)
 	im->model_matrix = final_matrix;
 }
 
+void update_game_mode()
+{
+	switch (ggs.mode) {
+		case MODE_CHAR_SELECT: {
+			if (char_sel_state.num_selected == 3)
+				char_sel_state.play_button_div->m_render = true;
+			else
+				char_sel_state.play_button_div->m_render = false;
+
+			for (int i = 0; i < NUM_CHARS; ++i) {
+				if (gw.char_selection_window->divs[i * 3]->isButtonHovered()) {
+					Texture* char_tex = (Texture*)gw.char_selection_window->divs[i * 3]->getButtons()[0]->getNormalBGTexture();
+					gw.left_char_window->divs[0]->setBackgroundTexture(char_tex);
+					char_sel_state.last_hovered = (Character_ID)i;
+				}
+			}
+		}break;
+		case MODE_CHAR_INFO: {
+			linked::Label* skill_label = gw.char_info_window->divs[NUM_SKILLS]->getLabels()[0];
+			linked::Label* skill_desc_label = gw.char_info_window->divs[NUM_SKILLS + 1]->getLabels()[0];
+			for (int i = 0; i < NUM_SKILLS; ++i) {
+				if (gw.char_info_window->divs[i]->isButtonHovered()) {
+					skill_label->setText((u8*)skill_names[i], skill_names_length[i]);
+					skill_desc_label->setText((u8*)skill_desc[i], skill_desc_length[i]);
+				}
+			}
+		}break;
+	}
+}
+
+void change_game_mode(Game_Mode mode)
+{
+	if (ggs.mode == mode) return;
+	switch (ggs.mode) {
+		case MODE_CHAR_SELECT: {
+			gw.char_selected_window->setActive(false);
+			gw.left_char_window->setActive(false);
+			gw.char_selection_window->setActive(false);
+		}break;
+		case MODE_CHAR_INFO: {
+			gw.left_char_window->setActive(false);
+			gw.char_info_window->setActive(false);
+			gw.char_info_window_bot->setActive(false);
+		}break;
+	}
+
+	ggs.last_mode = ggs.mode;
+	ggs.mode = mode;
+
+	switch (mode) {
+		case MODE_CHAR_SELECT: {
+			gw.char_selected_window->setActive(true);
+			gw.left_char_window->setActive(true);
+			gw.char_selection_window->setActive(true);
+		}break;
+		case MODE_CHAR_INFO: {
+			gw.left_char_window->setActive(true);
+			gw.char_info_window->setActive(true);
+			gw.char_info_window_bot->setActive(true);
+		}break;
+	}
+}
+
+void input();
+
 void update_and_render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(ggs.shader);
-	
-	input_camera(&ggs.camera);
-	input();
+	if (chat.m_active)
+		chat.update();
 
+	update_game_mode();
+
+	input();
 #if 0
+	glUseProgram(ggs.shader);
+	input_camera(&ggs.camera);
+
 	for (int i = 0; i < ggs.num_models; ++i) {
 		update_model(ggs.models + i);
 		render_object(ggs.models + i);
 	}
-#endif
 	//glUseProgram(0);
+#endif
+}
+
+void input()
+{
+	win_state.move_camera = !chat_window->isAttached();
+	win_state.do_input = !chat.m_enabled;
+
+	if (keyboard_state.key_event[VK_F1]) {
+		keyboard_state.key_event[VK_F1] = false;
+		chat_window->setActive(!chat_window->getActive());
+		g_chat->m_active = !g_chat->m_active;
+	}
+	if (keyboard_state.key_event[VK_ESCAPE]) {
+		keyboard_state.key_event[VK_ESCAPE] = false;
+		change_game_mode(ggs.last_mode);
+	}
+
+	if (keyboard_state.key_event[VK_SPACE]) {
+		keyboard_state.key_event[VK_SPACE] = false;
+		
+		if (ggs.mode == MODE_CHAR_SELECT && char_sel_state.last_hovered != CHAR_NONE) {
+			printf("last hovered %d\n", char_sel_state.last_hovered);
+			change_game_mode(MODE_CHAR_INFO);
+		}
+	}
+
+	if (!chat_window->isFocused())
+		chat_window->setFocus();
 }

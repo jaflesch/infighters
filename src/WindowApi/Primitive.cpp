@@ -20,6 +20,7 @@ Quad::Quad(vec3 center, float sizeX, float sizeY, int textureNumRows, int textur
 
 	this->index = (float)textureIndex;
 	this->numRows = (float)textureNumRows;
+	this->m_center = center;
 
 	calcAtlas();
 
@@ -87,6 +88,20 @@ Quad::Quad(vec3& topLeftCorner, vec3& bottomRightCorner)
 	model->indices.push_back(3);
 }
 
+void Quad::updateQuad(int width, int height)
+{
+	vec3 topL = vec3(m_center.x - width, m_center.y + height, 0);	// 0
+	vec3 topR = vec3(m_center.x + width, m_center.y + height, 0);	// 1
+	vec3 botL = vec3(m_center.x - width, m_center.y - height, 0);	// 2
+	vec3 botR = vec3(m_center.x + width, m_center.y - height, 0);	// 3
+
+	model->positions.clear();
+
+	model->getPositions()->push_back(topL);
+	model->getPositions()->push_back(topR);
+	model->getPositions()->push_back(botL);
+	model->getPositions()->push_back(botR);
+}
 
 void Quad::calcAtlas()
 {

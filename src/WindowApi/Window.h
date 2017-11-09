@@ -6,7 +6,7 @@
 #include "WindowDiv.h"
 #include "Label.h"
 #include "Mesh.h"
-#include "..\ho_gl.h"
+#include "../ho_gl.h"
 
 #include <vector>
 #include <hmath.h>
@@ -108,19 +108,18 @@ private:
 	FontRenderer* m_fontRenderer;
 public:
 	std::vector<WindowDiv*> divs;
-
+	bool isFocused();
 private: 
 	// Methods
 	void attachMouse();
 	void detachMouse();
-	void resize(const int width, const int height);
-	void createWindowMesh();
 	bool isHovered();
-	bool isFocused();
+	
 	void handleWindowHints(unsigned int hints);		// hints related
 	void setupBorder();
 
 public: // Getters and Setters
+	void setFocus();
 	inline bool getActive() const { return this->m_active; }
 	inline void setActive(bool value) { this->m_active = value; }
 	inline hm::vec2 getPosition() const { return this->m_position; }
@@ -129,6 +128,14 @@ public: // Getters and Setters
 
 	inline int getWidth()const{ return this->m_width; }
 	inline int getHeight()const{ return this->m_height; }
+	inline void setWidth(int value) { this->m_width = value; m_windowMesh->getQuad()->updateQuad(value, m_height); m_windowMesh->updateQuad(); }
+	inline void setHeight(int value) { this->m_height = value; m_windowMesh->getQuad()->updateQuad(m_width, value); m_windowMesh->updateQuad(); }
+	inline void setWidthHeight(int width, int height) { 
+		this->m_width = width; 
+		this->m_height = height; 
+		m_windowMesh->getQuad()->updateQuad(width, height); 
+		m_windowMesh->updateQuad(); 
+	}
 
 	inline hm::vec4 getBackGroundColor() const { return this->m_backgroundColor; }
 	inline void setBackGroundColor(const hm::vec4& newBackGroundColor) { this->m_backgroundColor = newBackGroundColor; }

@@ -5,7 +5,6 @@
 #include "util.h"
 #include <hmath.h>
 #include "application.h"
-#include "WindowApi\Window.h"
 #include "chat.h"
 #include <stdlib.h>
 #include <time.h>
@@ -17,7 +16,7 @@ Window_State win_state;
 
 Keyboard_State keyboard_state = { 0 };
 Mouse_State mouse_state = { 0 };
-Chat* g_chat = 0;
+extern Chat* g_chat;
 
 LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -91,6 +90,7 @@ LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 	return 0;
 }
 
+
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, int cmd_show)
 {
 	WNDCLASSEX window_class;
@@ -110,7 +110,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	if (!RegisterClassEx(&window_class)) error_fatal("Error creating window class.\n", 0);
 
 	// alloc console
-#if DEBUG
+#if _DEBUG
 	AllocConsole();
 	FILE* pCout;
 	freopen_s(&pCout, "CONOUT$", "w", stdout);
@@ -144,8 +144,6 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 
 	init_opengl(win_state.window_handle, &win_state.device_context, &win_state.rendering_context, 3, 1);
 
-	init_application();
-
 	wglSwapIntervalEXT_(1);		// Enable Vsync
 
 	bool running = true;
@@ -158,124 +156,9 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	mouse_event.dwHoverTime = HOVER_DEFAULT;
 	mouse_event.hwndTrack = win_state.window_handle;
 
-	using namespace linked;
-
 	linked::Window::linkedWindowInit();
 
-	linked::Window* bgwindow = new linked::Window(win_state.win_width, win_state.win_height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), (u8*)"", 0, W_UNFOCUSABLE);
-	linked::WindowDiv* bgdiv = new linked::WindowDiv(*bgwindow, win_state.win_width, win_state.win_height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 1, 0, 0.5f), DIV_ANCHOR_LEFT | DIV_ANCHOR_TOP);
-	bgwindow->divs.push_back(bgdiv);
-	Texture* bgtexture = new Texture("res/textures/bg2.jpg");
-	bgdiv->setBackgroundTexture(bgtexture);
-
-	linked::Window* window = new linked::Window(400, 840, hm::vec2(200, 30), hm::vec4(12.0f/255.0f, 16.0f/255.0f, 40.0f/255.0f, 1.0f), (u8*)"Hello", sizeof("Hello"), linked::W_BORDER);
-	window->setBorderSizeX(10.0f);
-	window->setBorderSizeY(0.0f);
-	window->setBorderColor(hm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
-
-	linked::Window* window2 = new linked::Window(760, 630, hm::vec2(620, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.4f), (u8*)"Hello", sizeof("Hello"), 0);
-
-	linked::Window* window3 = new linked::Window(760, 200, hm::vec2(620, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.4f), (u8*)"Hello", sizeof("Hello"), 0);
-
-	linked::WindowDiv* s_div1 = new linked::WindowDiv(*window3, 110, 110, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + 110.0f * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div2 = new linked::WindowDiv(*window3, 110, 110, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + 110.0f * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div3 = new linked::WindowDiv(*window3, 110, 110, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + 110.0f * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	window3->divs.push_back(s_div1);
-	window3->divs.push_back(s_div2);
-	window3->divs.push_back(s_div3);
-
-	linked::WindowDiv* info_confirm = new linked::WindowDiv(*window3, 24, 24, 0, 0, hm::vec2(400.0f, 20.0f + 110.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* confirm_texture = new Texture("res/textures/enter.png");
-	info_confirm->setBackgroundTexture(confirm_texture);
-
-	linked::WindowDiv* info_confirm_labels = new linked::WindowDiv(*window3, 256, 24, 0, 0, hm::vec2(400.0f, 20.0f + 110.0f), hm::vec4(1,0,0,0.1f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	window3->divs.push_back(info_confirm_labels);
-	linked::Label* confirm_label = new linked::Label(*info_confirm_labels, (u8*)"Hello", sizeof("Hello"), hm::vec2(0.0f, 0.0f), 24.0f);
-	info_confirm_labels->getLabels().push_back(confirm_label);
-
-	
-	linked::WindowDiv* div1 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + 110.0f * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div2 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + 110.0f * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div3 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + 110.0f * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div4 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 3.0f + 110.0f * 3.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div5 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 4.0f + 110.0f * 4.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div6 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 5.0f + 110.0f * 5.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	window2->divs.push_back(div1);
-	window2->divs.push_back(div2);
-	window2->divs.push_back(div3);
-	window2->divs.push_back(div4);
-	window2->divs.push_back(div5);
-	window2->divs.push_back(div6);
-
-	linked::WindowDiv* div7  = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + 110.0f * 0.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div8  = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + 110.0f * 1.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div9  = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + 110.0f * 2.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div10 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 3.0f + 110.0f * 3.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div11 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 4.0f + 110.0f * 4.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* div12 = new linked::WindowDiv(*window2, 110, 300, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 5.0f + 110.0f * 5.0f, 10.0f * 2.0f + 300.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	window2->divs.push_back(div7);
-	window2->divs.push_back(div8);
-	window2->divs.push_back(div9);
-	window2->divs.push_back(div10);
-	window2->divs.push_back(div11);
-	window2->divs.push_back(div12);
-
-	linked::Button* but1 = new Button(*div1, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but1->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but1->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but2 = new Button(*div2, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but2->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but2->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but3 = new Button(*div3, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but3->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but3->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but4 = new Button(*div4, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but4->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but4->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but5 = new Button(*div5, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but5->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but5->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but6 = new Button(*div6, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but6->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but6->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but7 = new Button(*div7, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but7->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but7->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but8 = new Button(*div8, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but8->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but8->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but9 = new Button(*div9, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but9->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but9->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but10 = new Button(*div10, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but10->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but10->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but11 = new Button(*div11, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but11->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but11->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	linked::Button* but12 = new Button(*div12, 0, hm::vec2(0, 0), 110, 300, hm::vec4(0, 1, 0, 1));
-	but12->setHoveredBGColor(hm::vec4(1, 1, 1, 1));
-	but12->setNormalBGColor(hm::vec4(0, 0, 0, 1));
-	div1->getButtons().push_back(but1);
-	div2->getButtons().push_back(but2);
-	div3->getButtons().push_back(but3);
-	div4->getButtons().push_back(but4);
-	div5->getButtons().push_back(but5);
-	div6->getButtons().push_back(but6);
-	div7->getButtons().push_back(but7);
-	div8->getButtons().push_back(but8);
-	div9->getButtons().push_back(but9);
-	div10->getButtons().push_back(but10);
-	div11->getButtons().push_back(but11);
-	div12->getButtons().push_back(but12);
-
-
-
-	Chat chat;
-	linked::Window* chat_window = chat.init_chat();
-	chat_window->setActive(false);
-	chat.m_active = false;
-	g_chat = &chat;
+	init_application();
 
 	srand(time(0));
 
@@ -294,6 +177,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			} break;
 			case WM_KEYUP: {
 				size_t key = msg.wParam;
+				printf("%d\n", key);
 				keyboard_state.key[key] = false;
 				keyboard_state.key_event[key] = true;
 				if (keyboard_state.key_event[VK_UP] && g_chat->m_enabled) {
@@ -330,19 +214,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			DispatchMessage(&msg);
 		}
 
-		if (keyboard_state.key_event[VK_F1]) {
-			keyboard_state.key_event[VK_F1] = false;
-			chat_window->setActive(!chat_window->getActive());
-			g_chat->m_active = !g_chat->m_active;
-		}
-
-		win_state.move_camera = !chat_window->isAttached();
-		win_state.do_input = !chat.m_enabled;
-
 		update_and_render();
-
-		if(chat.m_active)
-			chat.update();
 
 		linked::Window::updateWindows();
 		linked::Window::renderWindows();

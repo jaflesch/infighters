@@ -3,8 +3,6 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "Parser\lexer.h"
-#include "Parser\parser.h"
 
 struct Chat {
 	std::string chatString;
@@ -31,6 +29,5 @@ struct Chat {
 
 	std::vector<std::string> messages;
 
-	Lexer lexer;
 	//Parser parser;
 };

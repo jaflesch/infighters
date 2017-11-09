@@ -12,10 +12,15 @@ namespace linked
 class WindowDiv;
 class Label;
 
+struct Button_Info {
+	int id;
+	void* data;
+};
+
 class Button
 {
 public:
-	Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor);
+	Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor, int id);
 	Button(const WindowDiv& div, int width, int height);
 	~Button();
 	void render();
@@ -24,6 +29,7 @@ public:
 
 	static void flush();
 	static void mouseCallback(int button, int action, int mods);
+	Button_Info button_info;
 private:
 	const WindowDiv& m_div;
 	int m_width, m_height;
@@ -49,7 +55,7 @@ private:
 	static bool clicked;
 	static int mouseStatus;
 	
-	void(*clickedCallback)();
+	void(*clickedCallback)(void* arg);
 public:
 	Mesh& getButtonMesh()const{ return *(m_buttonMesh); }
 	int getWidth()const{ return this->m_width; }
@@ -59,7 +65,7 @@ public:
 	hm::vec2 getScreenPosition() const;
 	static int getMouseStatus() { return mouseStatus; }
 	static bool getClicked() { return clicked; }
-	void setClickedCallback(void(*callback)());
+	void setClickedCallback(void(*callback)(void*));
 	inline const hm::vec2 getPosition() const { return this->m_position; }
 
 	// setters for bg

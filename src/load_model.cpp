@@ -1,6 +1,6 @@
 //#include "util.h"
 
-struct Token {
+struct Token_Model {
 	u8* value;
 	int size;
 	union {

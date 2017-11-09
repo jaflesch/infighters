@@ -10,7 +10,7 @@ namespace linked
 	int Button::mouseStatus;
 	bool Button::clicked;
 
-	Button::Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor)
+	Button::Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor, int id)
 		:
 		m_div(div),
 		m_label(label),
@@ -18,6 +18,7 @@ namespace linked
 		m_width(width), m_height(height),
 		clickedCallback(nullptr)
 	{
+		button_info.id = id;
 		if(label)
 			label->setPosition(m_position + label->getPosition());
 		m_buttonMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), (float)m_width, (float)m_height), true);
@@ -40,7 +41,7 @@ namespace linked
 	}
 
 	Button::Button(const WindowDiv& div, int width, int height)
-		: Button(div, nullptr, hm::vec2(0, 0), width, height, hm::vec4(0, 0, 0, 1)){}
+		: Button(div, nullptr, hm::vec2(0, 0), width, height, hm::vec4(0, 0, 0, 1), 0){}
 
 	Button::~Button()
 	{
@@ -63,7 +64,7 @@ namespace linked
 			if(isHovered())
 			{
 				if (clickedCallback)
-					clickedCallback();
+					clickedCallback(&button_info);
 				Button::clicked = false;
 			}
 		}
@@ -147,7 +148,7 @@ namespace linked
 		}
 	}
 
-	void Button::setClickedCallback(void(*callback)())
+	void Button::setClickedCallback(void(*callback)(void*))
 	{
 		this->clickedCallback = callback;
 	}

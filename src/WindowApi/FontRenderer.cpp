@@ -62,6 +62,14 @@ TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, floa
 	for (int i = 0; i < text.size(); i++)
 	{
 		unsigned char c = text[i];
+		if (c == '\n') {
+			yPos -= font->ascender - font->descender;	// highest glyph height - lowest glyph height
+			yPos = roundf(yPos);
+			yAdvance++;
+			x = xPos / scaleX;
+			continue;
+		}
+
 		ftgl::texture_glyph_t* glyph = ftgl::texture_font_get_glyph(font, c);
 		if (glyph != NULL)
 		{
@@ -76,12 +84,12 @@ TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, floa
 			{
 				if (text[i - 1] == ' ' && text[i] != ' ')
 				{
-					if (!fit(i, firstPos, x * scaleX, glyph) && c != ' ')
-					{
-						x = xPos / scaleX;
-						yPos -= font->ascender - font->descender;	// highest glyph height - lowest glyph height
-						yAdvance++;
-					}
+					//if (!fit(i, firstPos, x * scaleX, glyph) && c != ' ')
+					//{
+					//	x = xPos / scaleX;
+					//	yPos -= font->ascender - font->descender;	// highest glyph height - lowest glyph height
+					//	yAdvance++;
+					//}
 				}
 			}
 

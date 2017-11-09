@@ -35,8 +35,11 @@ public:
 	void setAbsolutePosition(hm::vec2& absolutePos);
 	float getAlphaValue() const { return this->m_backGroundColor.a; }
 	hm::vec2 getDivBasePosition(float xoffset, float yoffset) const;
-	int getWidth() const{ return this->m_width; }
-	int getHeight() const { return this->m_height; }
+	inline int getWidth() const{ return this->m_width; }
+	inline int getHeight() const { return this->m_height; }
+	inline void setWidth(int value) { this->m_width = value; divMesh->getQuad()->updateQuad(value, m_height); divMesh->updateQuad(); }
+	inline void setHeight(int value) { this->m_height = value; divMesh->getQuad()->updateQuad(m_width, value); divMesh->updateQuad(); }
+	inline void setWidthHeight(int width, int height) { this->m_width = width; this->m_height = height; divMesh->getQuad()->updateQuad(width, height); divMesh->updateQuad(); }
 	bool m_render;
 	const Window& getWindow()const{ return this->m_window; }
 	hm::vec2 getScreenPosition() const;

@@ -22,8 +22,9 @@ void main(){
 	if(useTexture == 1)
 	{
 		vec4 textureColor = texture(textureSampler, uvCoords);
-		float finalAlpha = textureColor.a - 1 + backgroundColor.a;
-		out_Color = vec4(textureColor.xyz, finalAlpha);
+		//float finalAlpha = textureColor.a - 1 + backgroundColor.a;
+		vec3 finalColor = mix(backgroundColor.rgb, textureColor.rgb, vec3(backgroundColor.a));
+		out_Color = vec4(finalColor, textureColor.a);
 	}
 	else
 		out_Color = backgroundColor;

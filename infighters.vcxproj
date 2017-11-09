@@ -129,8 +129,6 @@
     <ClCompile Include="src\freetypegl\texture-font.c" />
     <ClCompile Include="src\freetypegl\vector.c" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Parser\lexer.cpp" />
-    <ClCompile Include="src\Parser\parser.cpp" />
     <ClCompile Include="src\ResourceLoad\ImageLoader.cpp" />
     <ClCompile Include="src\ResourceLoad\Texture.cpp" />
     <ClCompile Include="src\util.cpp" />
@@ -161,9 +159,6 @@
     <ClInclude Include="src\freetypegl\vector.h" />
     <ClInclude Include="src\ho_gl.h" />
     <ClInclude Include="src\input.h" />
-    <ClInclude Include="src\Parser\interp.h" />
-    <ClInclude Include="src\Parser\lexer.h" />
-    <ClInclude Include="src\Parser\parser.h" />
     <ClInclude Include="src\ResourceLoad\ImageLoader.h" />
     <ClInclude Include="src\ResourceLoad\Texture.h" />
     <ClInclude Include="src\shader.h" />

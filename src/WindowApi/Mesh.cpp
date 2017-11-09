@@ -48,6 +48,14 @@ Mesh::~Mesh()
 	}
 }
 
+void Mesh::updateQuad() 
+{
+	glBindVertexArray(VertexArrayID);
+	glBindBuffer(GL_ARRAY_BUFFER, VertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER, quad->getIndexedModel()->positions.size() * sizeof(float) * 3, &quad->getIndexedModel()->positions[0], openglDrawHint);
+	glDisableVertexAttribArray(0);
+}
+
 void Mesh::genVAO()
 {
 	glGenVertexArrays(1, &VertexArrayID);
@@ -63,7 +71,6 @@ void Mesh::genVBOS(IndexedModel* iModel)
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glDisableVertexAttribArray(0);
-
 
 	// Normals Data
 	glGenBuffers(1, &NormalsBufferID);

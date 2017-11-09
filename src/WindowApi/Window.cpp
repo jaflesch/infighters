@@ -211,6 +211,22 @@ void Window::mouseCallback(int button, int action, int mods)
 	else
 		detachMouse();
 }
+
+void Window::setFocus()
+{
+	int thisIndex = 0;
+	for (unsigned int i = 0; i < openedWindows.size(); i++) {
+		openedWindows[i]->focused = false;
+		if (openedWindows[i] == this)
+			thisIndex = i;
+	}
+
+	openedWindows.erase(openedWindows.begin() + thisIndex);
+	openedWindows.push_back(this);
+
+	focused = true;
+}
+
 void Window::attachMouse()
 {
 	if (!h_focusable) {

@@ -2,7 +2,6 @@
 #include "input.h"
 #include "debug_table.h"
 #include "util.h"
-#include "Parser\interp.h"
 
 extern Window_State win_state;
 extern Keyboard_State keyboard_state;
@@ -75,32 +74,6 @@ void Chat::handle_keystroke(int key, int params)
 		if (m_enabled)
 		{	
 			msg = ss.str();
-			if (msg[0] == '/') {
-				lexer.start(msg.c_str() + 1);
-				Parser parser(&lexer);
-				Ast* exp = parser.parse();
-				if (exp) {
-					Evaluated evald = interpret(exp);
-					if (evald.data) {
-						ss.str(std::string());
-						switch (evald.t) {
-						case TYPE_S64:	ss << *(s64*)evald.data; break;
-						case TYPE_S32:	ss << *(s32*)evald.data; break;
-						case TYPE_S16:	ss << *(s16*)evald.data; break;
-						case TYPE_S8:	ss << *(s8*)evald.data; break;
-						case TYPE_U64:	ss << *(u64*)evald.data; break;
-						case TYPE_U32:	ss << *(u32*)evald.data; break;
-						case TYPE_U16:	ss << *(u16*)evald.data; break;
-						case TYPE_U8:	ss << *(u8*)evald.data; break;
-						case TYPE_R32:	ss << *(float*)evald.data; break;
-						case TYPE_R64:	ss << *(double*)evald.data; break;
-						}
-						msg = ss.str();
-						if(evald.data) free(evald.data);
-					}
-				}
-				lexer.reset();
-			}
 			ss.str("");
 		}
 		m_enabled = !m_enabled;

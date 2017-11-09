@@ -27,6 +27,7 @@ namespace linked
 
 	void WindowDiv::render()
 	{
+		if (!m_render) return;
 		WindowShader* ws = m_window.getWindowShader();
 
 		ws->useShader();
@@ -47,8 +48,8 @@ namespace linked
 				ws->bindTextures(m_backgroundTexture->textureID);
 		
 			hm::vec2 rp = getRelativePosition();
-			float ww_ = win_state.win_width / 2.0f;
-			float wh_ = win_state.win_height / 2.0f;
+			float ww_ = roundf(win_state.win_width / 2.0f);
+			float wh_ = roundf(win_state.win_height / 2.0f);
 			rp.x /= ww_;
 			rp.y /= wh_;
 
@@ -121,6 +122,7 @@ namespace linked
 
 	void WindowDiv::update()
 	{
+		if (!m_render) return;
 		setAbsolutePosition(m_position);
 		for (Button* b : buttons)
 			b->update();
