@@ -57,6 +57,7 @@ private:
 	
 	void(*clickedCallback)(void* arg);
 public:
+	Label* getLabel() { return m_label; }
 	Mesh& getButtonMesh()const{ return *(m_buttonMesh); }
 	int getWidth()const{ return this->m_width; }
 	int getHeight()const{ return this->m_height; }
