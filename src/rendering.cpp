@@ -6,6 +6,19 @@ void load_model(char* filename, IndexedModel3D* model) {
 	model->is_colliding = false;
 }
 
+void update_model(IndexedModel3D* im)
+{
+	hm::vec3 last_pos = im->position;
+	mat4 rot = RotFromQuat(im->rotation);
+
+	hm::vec3 pos = im->position;
+	mat4 rotation_matrix = rot;
+	mat4 scale_matrix = mat4::scale(im->scale);
+	mat4 final_matrix = mat4::translate(pos) * rotation_matrix * scale_matrix;
+
+	im->model_matrix = final_matrix;
+}
+
 void init_object(IndexedModel3D* m) {
 
 	glGenVertexArrays(1, &m->vao);

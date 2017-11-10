@@ -152,7 +152,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 		window_class.lpszClassName,
 		"HoEngine",
 		window_style_flags,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		50, 50,
 		win_state.win_width, win_state.win_height, NULL, NULL, instance, NULL
 	);
 	if (!win_state.window_handle) error_fatal("Error criating window context.\n", 0);
