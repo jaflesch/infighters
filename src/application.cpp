@@ -677,6 +677,7 @@ struct Combat_State {
 	linked::WindowDiv* skill_info_image_border;
 	linked::WindowDiv* skill_info_title;
 	linked::WindowDiv* skill_info_desc;
+	linked::WindowDiv* skill_info_group;
 	linked::WindowDiv* skill_costs[ORB_NUMBER];
 
 	linked::Label* orb_labels[ORB_NUMBER];
@@ -724,6 +725,7 @@ void change_game_mode(Game_Mode mode);
 static void layout_enemy_die(u32 enemy_index);
 static void layout_ally_die(u32 ally_index);
 static void layout_set_skill_group_from_skill(int skill_index, linked::Label* label);
+static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label);
 
 #include "rendering.cpp"
 
@@ -1049,6 +1051,9 @@ void init_char_information_mode()
 	char_info_window->divs.push_back(skill_group_div);
 	linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)/*"VIRTUAL, RANGED, INV, STATIC"*/"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
 	skill_group_div->getLabels().push_back(skill_group_label);
+
+	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"COOLDOWN -", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+	skill_group_div->getLabels().push_back(skill_cooldown_label);
 }
 
 void init_combat_mode()
@@ -1311,6 +1316,14 @@ void init_combat_mode()
 		skill_desc_div->getLabels().push_back(skill_desc_label);
 		skill_desc_div->m_render = false;
 
+		linked::WindowDiv* skill_group_div = new linked::WindowDiv(*combat_bottom_info, 600, 48, 0, 0, hm::vec2(780.0f, skill_desc_height + 126 - 26), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		combat_bottom_info->divs.push_back(skill_group_div);
+		linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+		skill_group_div->getLabels().push_back(skill_group_label);
+		linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(540, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+		skill_group_div->getLabels().push_back(skill_cooldown_label);
+		skill_desc_div->m_render = false;
+
 		float orb_size = 32.0f;
 		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_1);
@@ -1339,6 +1352,7 @@ void init_combat_mode()
 		combat_state.skill_info_image_border = skill_image_div_border;
 		combat_state.skill_info_title = skill_title_div;
 		combat_state.skill_info_desc = skill_desc_div;
+		combat_state.skill_info_group = skill_group_div;
 	}
 }
 
@@ -1462,7 +1476,6 @@ void update_game_mode(double frametime)
 			for (int i = 0; i < NUM_CHARS; ++i) {
 				if (gw.char_selection_window->divs[i * 3]->isButtonHovered()) {
 					Texture* char_tex = (Texture*)gw.char_selection_window->divs[i * 3]->getButtons()[0]->getNormalBGTexture();
-					//gw.left_char_window->divs[0]->setBackgroundTexture(char_tex);
 					gw.left_char_window->divs[0]->setBackgroundTexture(chars_texture_big[i]);
 					linked::Label* name_label = gw.left_char_window->divs[1]->getLabels()[0];
 					name_label->setText((u8*)char_names[i], char_names_length[i]);
@@ -1493,6 +1506,7 @@ void update_game_mode(double frametime)
 
 					// set skill group desc
 					layout_set_skill_group_from_skill(index, gw.skill_group_div->getLabels()[0]);
+					layout_set_cooldown_from_skill(index, gw.skill_group_div->getLabels()[1]);
 
 					for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
 						gw.char_info_skill_cost->divs[n]->m_render = false;
@@ -1531,6 +1545,8 @@ void update_game_mode(double frametime)
 						combat_state.skill_info_image->setBackgroundTexture(skill_textures[skill_index]);
 						combat_state.skill_info_title->getLabels()[0]->setText((u8*)skill_names[skill_index], skill_names_length[skill_index]);
 						combat_state.skill_info_desc->getLabels()[0]->setText((u8*)skill_desc[skill_index], skill_desc_length[skill_index]);
+						layout_set_skill_group_from_skill(skill_index, combat_state.skill_info_group->getLabels()[0]);
+						layout_set_cooldown_from_skill(skill_index, combat_state.skill_info_group->getLabels()[1]);
 						combat_state.last_hovered = (Skill_ID)(skill_index);
 						for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
 							combat_state.skill_costs[n]->m_render = false;
@@ -1556,6 +1572,7 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_image->m_render = is_hovering_skill;
 			combat_state.skill_info_title->m_render = is_hovering_skill;
 			combat_state.skill_info_desc->m_render = is_hovering_skill;
+			combat_state.skill_info_group->m_render = is_hovering_skill;
 		}break;
 	}
 }
@@ -1784,6 +1801,19 @@ static void layout_set_skill_group_from_skill(int skill_index, linked::Label* la
 	case SKILL_UNIQUE: if (insert_space) put_space(&length, buffer); PUT_STR("UNIQUE", buffer, length); break;
 	default: break;
 	}
+
+	label->setText((u8*)buffer, length);
+}
+
+static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label) {
+	static char buffer[] = "COOLDOWN -\0\0\0\0\0";
+	int length = sizeof("COOLDOWN -");
+
+	int count =	s32_to_str_base10(skill_cooldowns[skill_index], buffer + length - 2);
+	length += count - 1;
+
+	if (skill_cooldowns[skill_index] == 0)
+		buffer[9] = '-';
 
 	label->setText((u8*)buffer, length);
 }
