@@ -6,7 +6,7 @@
 #define FOR(N) for(int i = 0; i < N; ++i)
 #define MAX(L, R) ((L > R) ? L : R)
 #define MIN(L, R) ((L < R) ? L : R)
-#define assert(EXP) if(!EXP) { printf("Assertion failed at %s (%d)", __FILE__, __LINE__); DebugBreak(); }
+#define assert(EXP) if(!(EXP)) { printf("Assertion failed at %s (%d)", __FILE__, __LINE__); DebugBreak(); }
 
 #define E_32 2.7182818284f
 #define MINS32 -2147483648

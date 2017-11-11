@@ -3,7 +3,7 @@
 #include "Label.h"
 #include "Mesh.h"
 #include "Primitive.h"
-#include "..\ResourceLoad\Texture.h"
+#include "../ResourceLoad/Texture.h"
 
 #include <hmath.h>
 

@@ -257,7 +257,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 		SwapBuffers(win_state.device_context);
 	}
 	linked::Window::linkedWindowDestroy();
-#ifdef DEBUG
+#ifdef _DEBUG
 	FreeConsole();
 #endif
 	return 0;

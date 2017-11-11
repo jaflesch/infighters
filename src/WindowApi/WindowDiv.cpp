@@ -161,8 +161,8 @@ namespace linked
 	{
 		if (divMesh)
 			delete divMesh;
-		if (m_backgroundTexture)
-			delete m_backgroundTexture;
+		//if (m_backgroundTexture)
+		//	delete m_backgroundTexture;
 
 		for (Label* l : labels)
 		{
