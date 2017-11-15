@@ -1,53 +1,35 @@
-struct Camera {
-	mat4 view_matrix;
-	mat4 projection_matrix;
+void Camera::set_cam_position(hm::vec3 newpos) {
+	cam_position = newpos;
+	view_matrix = mat4::look_at(newpos, cam_orientation, cam_up);
+}
+void Camera::set_cam_orientation(hm::vec3 newori) {
+	cam_orientation = newori;
+	view_matrix = mat4::look_at(cam_position, cam_position + newori, cam_up);
+}
 
-	hm::vec3 cam_position;
-	hm::vec3 cam_orientation;
-	hm::vec3 cam_up;
+void Camera::move_forward_and_back(float amt) {
+	set_cam_position(cam_position + (cam_orientation * amt));
+	set_cam_orientation(cam_orientation);
+}
+void Camera::move_sideways(float amt) {
+	hm::vec3 left = hm::vec3::normalize(hm::vec3::cross(cam_up, cam_orientation));
+	set_cam_position(cam_position + (left * amt));
+	set_cam_orientation(cam_orientation);
+}
 
-	bool locked;
+void Camera::rotate_x(float amt) {
+	mat4 rot = mat4::rotate(cam_up, amt);
+	hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
+	normalized_ori = rot * normalized_ori;
+	set_cam_orientation(normalized_ori);
+}
 
-	float current_speed;
-	float current_turn_speed;
-
-	float fov;
-	float far_plane;
-	float near_plane;
-
-	void set_cam_position(hm::vec3 newpos) {
-		cam_position = newpos;
-		view_matrix = mat4::look_at(newpos, cam_orientation, cam_up);
-	}
-	void set_cam_orientation(hm::vec3 newori) {
-		cam_orientation = newori;
-		view_matrix = mat4::look_at(cam_position, cam_position + newori, cam_up);
-	}
-
-	void move_forward_and_back(float amt) {
-		set_cam_position(cam_position + (cam_orientation * amt));
-		set_cam_orientation(cam_orientation);
-	}
-	void move_sideways(float amt) {
-		hm::vec3 left = hm::vec3::normalize(hm::vec3::cross(cam_up, cam_orientation));
-		set_cam_position(cam_position + (left * amt));
-		set_cam_orientation(cam_orientation);
-	}
-
-	void rotate_x(float amt) {
-		mat4 rot = mat4::rotate(cam_up, amt);
-		hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
-		normalized_ori = rot * normalized_ori;
-		set_cam_orientation(normalized_ori);
-	}
-
-	void rotate_y(float amt) {
-		mat4 rot = mat4::rotate(hm::vec3::cross(cam_orientation, cam_up), amt);
-		hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
-		normalized_ori = rot * normalized_ori;
-		set_cam_orientation(normalized_ori);
-	}
-};
+void Camera::rotate_y(float amt) {
+	mat4 rot = mat4::rotate(hm::vec3::cross(cam_orientation, cam_up), amt);
+	hm::vec3 normalized_ori = hm::vec3::normalize(cam_orientation);
+	normalized_ori = rot * normalized_ori;
+	set_cam_orientation(normalized_ori);
+}
 
 void init_camera(Camera* camera, float aspect, float fov, float znear, float zfar) {
 	hm::vec3 campos(0, 0, 0);

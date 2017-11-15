@@ -77,6 +77,11 @@ public:
 	inline void setNormalBGTexture(Texture* texture){ this->m_backgroundNormalTexture = texture; }
 	inline void setHeldBGTexture(Texture* texture){ this->m_backgroundHeldTexture = texture; }
 	inline void setHoveredBGTexture(Texture* texture){ this->m_backgroundHoveredTexture = texture; }
+	inline void setAllBGTexture(Texture* texture) {
+		this->m_backgroundNormalTexture = texture;
+		this->m_backgroundHeldTexture = texture;
+		this->m_backgroundHoveredTexture = texture;
+	}
 
 	inline void setNormalTextColor(hm::vec4& color){ this->m_labelNormalTextColor = color; }
 	inline void setHeldText(hm::vec4& color){ this->m_labelHeldTextColor = color; }

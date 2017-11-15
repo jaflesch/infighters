@@ -1,5 +1,6 @@
 #pragma once
 #include "util.h"
+#include <GL/glew.h>
 
 static const char vert_shader[] =
 "#version 330\n"

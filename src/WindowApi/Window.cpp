@@ -148,6 +148,10 @@ void Window::render()
 
 void Window::update()
 {
+	if (h_movable && m_attached) {
+		int x = 0;
+		focused = true;
+	}
 	if (!m_active)
 		return;
 	// if the mouse is attached to the window, move it accordingly
@@ -229,6 +233,9 @@ void Window::setFocus()
 
 void Window::attachMouse()
 {
+	if (h_movable) {
+		int x = 0;
+	}
 	if (!h_focusable) {
 		return;
 	}

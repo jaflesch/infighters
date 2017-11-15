@@ -100,7 +100,7 @@ LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 		POINT mouse_loc;
 		DragQueryPoint(hDrop, &mouse_loc);
 		DragFinish(hDrop);
-		create_object(buffer);
+		//create_object(buffer);
 	}break;
 	default:
 		return DefWindowProc(window, msg, wparam, lparam);

@@ -1,9 +1,9 @@
 #include "application.h"
 #include "input.h"
-#include "quaternion.h"
-#include "ResourceLoad/Texture.h"
-#include "WindowApi/Window.h"
 #include "chat.h"
+
+#define ARROW_UP 1
+#define ARROW_DOWN 0
 
 extern Window_State win_state;
 Chat* g_chat = 0;
@@ -12,12 +12,6 @@ linked::Window* chat_window = 0;
 
 #include "camera.cpp"
 #include "load_model.cpp"
-
-#define NUM_CHARS 12
-#define NUM_SKILLS 4
-#define NUM_ALLIES 3
-#define NUM_ENEMIES 3
-#define TURN_DURATION 60.0
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",
@@ -321,14 +315,34 @@ int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
 	sizeof "Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y\nfaz um pulo condicional que o torna invulnerável por 1 turno."
 };
 
-enum Orb_ID {
-	ORB_NONE = -1,
-	ORB_HARD = 0,
-	ORB_SOFT = 1,
-	ORB_VR   = 2,
-	ORB_BIOS = 3,
-	ORB_NULL = 4,
-	ORB_NUMBER,
+char* char_descriptions[NUM_CHARS] = {
+	"O vilão que nunca tem suas condições atendidas!",
+	"O super herói mais otimista possível!",
+	"Possui um papagaio chamado Cracken.",
+	"Fotogênica, ama câmeras e sempre anda pelas sombras.",
+	"Em sua busca sistemática para achar o caminho do estrelato.",
+	"Graduado em direito, mestre em processos.",
+	"Uma máquina na arte da luta: simples e eficaz.",
+	"Codinome catástrofe.",
+	"I/OLO",
+	"Temperamental, complexo de se relacionar.",
+	"Elegante, cheia de classe.",
+	"Nunca se atrasou para o ENEM."
+};
+
+int char_descriptions_length[NUM_CHARS] = {
+	sizeof "O vilão que nunca tem suas condições atendidas!",
+	sizeof "O super herói mais otimista possível!",
+	sizeof "Possui um papagaio chamado Cracken.",
+	sizeof "Fotogênica, ama câmeras e sempre anda pelas sombras.",
+	sizeof "Em sua busca sistemática para achar o caminho do estrelato.",
+	sizeof "Graduado em direito, mestre em processos.",
+	sizeof "Uma máquina na arte da luta: simples e eficaz.",
+	sizeof "Codinome catástrofe.",
+	sizeof "I/OLO",
+	sizeof "Temperamental, complexo de se relacionar.",
+	sizeof "Elegante, cheia de classe.",
+	sizeof "Nunca se atrasou para o ENEM."
 };
 
 int skill_costs[NUM_SKILLS * NUM_CHARS][ORB_NUMBER] = {
@@ -406,66 +420,6 @@ int skill_cooldowns[NUM_SKILLS * NUM_CHARS] = {
 	0, 1, 3, 4, // bigo
 	0, 1, 0, 4, // new
 	1, 3, 4, 4  // clockboy
-};
-
-enum Skill_Type {
-	SKILL_TYPE_NONE,
-	SKILL_TYPE_PHYSICAL,
-	SKILL_TYPE_VIRTUAL,
-	SKILL_TYPE_MENTAL,
-};
-enum Skill_Mode {
-	SKILL_MODE_NONE,
-	SKILL_MODE_MELEE,
-	SKILL_MODE_RANGED,
-};
-enum Skill_Category {
-	SKILL_CATEGORY_NORMAL,
-	SKILL_CATEGORY_COUNTER,
-	SKILL_CATEGORY_STATUS,
-};
-enum Skill_Condition {
-	SKILL_CONDITION_NONE,
-	SKILL_CONDITION_NORMAL,
-	SKILL_CONDITION_BURN,
-	SKILL_CONDITION_FREEZE,
-	SKILL_CONDITION_POISON,
-	SKILL_CONDITION_PARALYZE,
-	SKILL_CONDITION_SLEEP,
-};
-enum Skill_Damage {
-	SKILL_DMG_NONE,
-	SKILL_DMG_NORMAL,
-	SKILL_DMG_PIERCING,
-	SKILL_DMG_CRUSHING,
-};
-enum Skill_Defense {
-	SKILL_DEF_NONE,
-	SKILL_DEF_REDUCTION,
-	SKILL_DEF_ABSORPTION,
-	SKILL_DEF_RELECTION,
-	SKILL_DEF_INVULNERABILITY,
-};
-enum Skill_Duration {
-	SKILL_DURATION_NONE,
-	SKILL_DURATION_STATIC,
-	SKILL_DURATION_CONTROL,
-	SKILL_DURATION_CONSTANT,
-};
-enum Skill_Unique {
-	SKILL_NOT_UNIQUE,
-	SKILL_UNIQUE,
-};
-
-struct Skill_Group {
-	Skill_Type       type;
-	Skill_Mode       mode;
-	Skill_Category   category;
-	Skill_Condition  condition;
-	Skill_Damage     damage;
-	Skill_Defense    defense;
-	Skill_Duration   duration;
-	Skill_Unique     unique;
 };
 
 Skill_Group skill_groups[NUM_SKILLS * NUM_CHARS] = {
@@ -556,204 +510,21 @@ Texture* orb_dead_ally = 0;
 Texture* orb_alive_enemy = 0;
 Texture* orb_dead_enemy = 0;
 
-enum Character_ID {
-	CHAR_NONE = -1,
-	CHAR_ZERO = 0,
-	CHAR_ONE,
-	CHAR_SERIAL_KEYLLER,
-	CHAR_RAY_TRACEY,
-	CHAR_A_STAR,
-	CHAR_DEADLOCK,
-	CHAR_NORMA,
-	CHAR_HAZARD,
-	CHAR_QWERTY,
-	CHAR_BIG_O,
-	CHAR_NEW,
-	CHAR_CLOCKBOY,
-};
-
-enum Skill_ID {
-	SKILL_NONE = -1,
-	SKILL_FALSE_RUSH = 0,
-	SKILL_CONTRADICTION,
-	SKILL_REQUIEM_ZERO,
-	SKILL_VOID_BARRIER,
-
-	SKILL_TRUTH_SLASH,
-	SKILL_TAUTOLOGY,
-	SKILL_AXIOM_ONE,
-	SKILL_TRUE_ENDURANCE,
-
-	SKILL_BRUTE_FORCE,
-	SKILL_BUFFER_OVERFLOW,
-	SKILL_DDOS_ATTACK,
-	SKILL_ENCRYPTION,
-
-	SKILL_PARTICLE_RENDERING,
-	SKILL_DIFFUSE_REFLECTION,
-	SKILL_DYNAMIC_FRUSTUM_ATTACK,
-	SKILL_RASTERIZATION,
-
-	SKILL_Q_PUNCH,
-	SKILL_PERCEPTRON,
-	SKILL_NEURAL_NETWORK,
-	SKILL_HILL_CLIMBING,
-
-	SKILL_PREEMPTION,
-	SKILL_MUTEX,
-	SKILL_THREAD_SCHEDULING,
-	SKILL_FORK,
-
-	SKILL_PUMPING_UP,
-	SKILL_AUTOMATA_SUMMON,
-	SKILL_TURING_MACHINE,
-	SKILL_NON_DETERMINISM,
-
-	SKILL_TMR,
-	SKILL_REDUNDANCY,
-	SKILL_ROLLBACK,
-	SKILL_ROLLFORWARD,
-
-	SKILL_ALT,
-	SKILL_CRTL,
-	SKILL_DELETE,
-	SKILL_ESC,
-
-	SKILL_BEST_BOUND_FIRST,
-	SKILL_DUAL_SIMPLEX,
-	SKILL_GRAPH_COLORING,
-	SKILL_KNAPSACK_HIDEOUT,
-
-	SKILL_SPRINT_BURST,
-	SKILL_INHERITANCE,
-	SKILL_OVERRIDE,
-	SKILL_POLIMORPHISM,
-
-	SKILL_CLOCK_PULSE,
-	SKILL_PIPELINE,
-	SKILL_OVERCLOCK,
-	SKILL_BRANCH_DAMAGE
-};
-
-enum Game_Mode {
-	MODE_INTRO,
-	MODE_CHAR_SELECT,
-	MODE_CHAR_INFO,
-	MODE_COMBAT,
-};
-
-struct GameState {
-	Camera camera;
-	GLuint shader;
-
-	IndexedModel3D* models;
-	int num_models;
-
-	Game_Mode mode;
-	Game_Mode last_mode;
-};
-
 static GameState ggs = {};
+static Char_Selection_State char_sel_state = {};
+static Combat_State combat_state = {};
+static Game_Windows gw = {};
 
-struct Char_Selection_State {
-	int num_selected;
-	int selections[NUM_ALLIES];
-	linked::WindowDiv* play_button_div;
-	Character_ID last_hovered;
-};
-
-Char_Selection_State char_sel_state = {};
-
-struct Combat_State {
-	// Gameplay
-	bool player_turn;
-	int orbs_amount[ORB_NUMBER];
-	int total_orbs;
-
-	// Visual
-	Skill_ID last_hovered;
-
-	linked::WindowDiv* skill_info_image;
-	linked::WindowDiv* skill_info_image_border;
-	linked::WindowDiv* skill_info_title;
-	linked::WindowDiv* skill_info_desc;
-	linked::WindowDiv* skill_info_group;
-	linked::WindowDiv* skill_costs[ORB_NUMBER];
-
-	linked::Label* orb_labels[ORB_NUMBER];
-	linked::Label* all_orbs_label;
-
-	linked::Button* end_turn_button;
-};
-
-Combat_State combat_state = {};
-
-struct Game_Windows {
-	// background window
-	linked::Window* bgwindow;
-
-	// character selection
-	linked::Window* left_char_window;
-	linked::Window* char_selected_window;
-	linked::Window* char_selection_window;
-
-	// character info
-	linked::Window* char_info_window;
-	linked::Window* char_info_window_bot;
-	linked::Window* char_info_skill_cost;
-	linked::WindowDiv* skill_group_div;
-
-	// combat
-	linked::Window* allies[NUM_ALLIES];
-	linked::Window* allies_info[NUM_ALLIES];
-	linked::Window* enemies[NUM_ENEMIES];
-	linked::Window* enemies_info[NUM_ENEMIES];
-	linked::Window* allies_skills[NUM_ALLIES * NUM_SKILLS];
-	linked::Window* combat_bottom_info;
-	linked::Window* timer_window;
-	linked::Window* player_name_window;
-
-	linked::WindowDiv* allies_indicator[NUM_ALLIES];
-	linked::WindowDiv* enemies_indicator[NUM_ENEMIES];
-};
-
-Game_Windows gw = {};
-
-void change_game_mode(Game_Mode mode);
-
-// Gameplay functions
-static void layout_enemy_die(u32 enemy_index);
-static void layout_ally_die(u32 ally_index);
-static void layout_set_skill_group_from_skill(int skill_index, linked::Label* label);
-static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label);
-
-#include "rendering.cpp"
+static double turn_time = TURN_DURATION;
 
 hm::vec4 char_window_held_color(0.5f, 1.0f, 1.0f, 0.65f);
 hm::vec4 char_window_hover_color(0.35f, 0.6f, 0.6f, 0.65f);
 hm::vec4 char_window_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 1.0f);
 hm::vec4 char_selected_bg_color(0.4f, 0.7f, 0.7f, 1.0f);
+hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 
-void gui_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs)
-{
-	// update the selection screen
-	bool notselected = (*divs)[id * 3 + 1]->m_render = !(*divs)[id * 3 + 1]->m_render;
-	(*divs)[id * 3 + 2]->m_render = !(*divs)[id * 3 + 2]->m_render;
-	hm::vec4 selected_color;
-	hm::vec4 selected_bg_color;
-	if (notselected) {
-		selected_bg_color = char_selected_bg_color;
-		selected_color = char_window_hover_color;
-	} else {
-		selected_bg_color = char_window_color;
-		selected_color = hm::vec4(0, 0, 0, 1);
-	}
-
-	(*divs)[id * 3]->getButtons()[0]->setNormalBGColor(selected_color);
-	(*divs)[id * 3]->setBackgroundColor(selected_bg_color);
-}
-
-void select_character_button(void* arg) {
+// Button Callbacks
+static void button_select_character(void* arg) {
 	auto divs = (std::vector<linked::WindowDiv*>*)((linked::Button_Info*)arg)->data;
 	int id = ((linked::Button_Info*)arg)->id;
 	bool selected = (*divs)[id * 3 + 1]->m_render;
@@ -779,27 +550,140 @@ void select_character_button(void* arg) {
 		char_sel_state.selections[2] = id;
 #else
 		// replace the last selected
-		gui_toggle_char_selection(char_sel_state.selections[NUM_ALLIES - 1], divs);
+		layout_toggle_char_selection(char_sel_state.selections[NUM_ALLIES - 1], divs);
 		char_sel_state.selections[NUM_ALLIES - 1] = id;
 #endif
 	}
 
-	gui_toggle_char_selection(id, divs);
+	layout_toggle_char_selection(id, divs);
 }
 
-void end_turn();
-static double turn_time = TURN_DURATION;
-void end_turn_button_callback(void* arg) {
+static void button_end_turn(void* arg) {
 	if (!combat_state.player_turn) return;
 	turn_time = TURN_DURATION;
 	end_turn();
 }
 
-void combat_start_mode(void* arg)
+static void button_combat_start_mode(void* arg)
 {
 	change_game_mode(MODE_COMBAT);
 }
 
+static void button_exchange_orb(void* arg) {
+	for (int i = 0; i < ORB_NUMBER; ++i) {
+		printf("Number of orbs %d\n", combat_state.orbs_amount[i]);
+	}
+	// Setup view and state
+	layout_change_exchange_orb_amount(ORB_ALL, 0);
+	combat_state.exchange_orbs_state.accumulated = 0;
+	for (int i = 0; i < ORB_NUMBER; ++i) {
+		layout_change_exchange_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
+		combat_state.exchange_orbs_state.orbs_start_amount[i] = combat_state.orbs_amount[i];
+		combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i] = 0;
+	}
+
+	// reset confirm button color
+	linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
+	confirm_button->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+	confirm_button->setHoveredBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+	confirm_button->setHoveredTextColor(hm::vec4(0, 0, 0.2f, 1.0f));
+
+	// Gray out all upper arrows
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+		if(combat_state.exchange_orbs_state.orbs_start_amount[i] <= 0)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+		else
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	combat_state.exchange_orbs_state.active = true;
+	gw.exchange_orbs->setActive(true);
+}
+
+static void button_exchange_orbs_close(void* arg) {
+	combat_state.exchange_orbs_state.active = false;
+	gw.exchange_orbs->setActive(false);
+}
+
+static void button_exchange_orbs_confirm(void* arg) {
+	assert(combat_state.exchange_orbs_state.active == true);
+	if (combat_state.exchange_orbs_state.state_changed) {
+		// reset state
+		combat_state.exchange_orbs_state.state_changed = false;
+
+		for (int i = 0; i < ORB_NUMBER; ++i) {
+			if (i == ORB_NULL) continue;
+			combat_state.orbs_amount[i] += combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i];
+			layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
+			memset(&combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i], 0, sizeof(combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i]));
+		}
+		combat_state.total_orbs -= combat_state.exchange_orbs_state.num_lost;
+		combat_state.total_orbs += combat_state.exchange_orbs_state.num_gain;
+
+		combat_state.exchange_orbs_state.num_lost = 0;
+		combat_state.exchange_orbs_state.num_gain = 0;
+
+		// close
+		combat_state.exchange_orbs_state.active = false;
+		gw.exchange_orbs->setActive(false);
+	}
+}
+
+static void button_exchange_orb_arrow(void* arg) {
+	linked::Button_Info* eba = (linked::Button_Info*)arg;
+	int curr_orbs = combat_state.exchange_orbs_state.orbs_start_amount[eba->id] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id];
+	bool state_changed = false;
+	if (eba->data == (void*)ARROW_UP) {
+		// Arrow up
+		if (combat_state.exchange_orbs_state.accumulated >= 3) {
+			state_changed = true;
+			combat_state.exchange_orbs_state.state_changed = true;
+			combat_state.exchange_orbs_state.accumulated -= 3;
+			combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id] += 1;
+			combat_state.exchange_orbs_state.num_gain += 1;
+		}
+	} else {
+		// Arrow down
+		if (curr_orbs > 0) {
+			state_changed = true;
+			combat_state.exchange_orbs_state.state_changed = true;
+			combat_state.exchange_orbs_state.accumulated += 1;
+			combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id] -= 1;
+			combat_state.exchange_orbs_state.num_lost += 1;
+		}
+	}
+	if (state_changed) {
+		layout_change_exchange_orb_amount((Orb_ID)eba->id, combat_state.exchange_orbs_state.orbs_start_amount[eba->id] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id]);
+		layout_change_exchange_orb_amount(ORB_ALL, combat_state.exchange_orbs_state.accumulated);
+
+		// update confirm button
+		if (combat_state.exchange_orbs_state.accumulated == 0) {
+			linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
+			confirm_button->setNormalBGColor(greener_cyan);
+			confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+			confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		}
+	}
+
+	hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
+	if (combat_state.exchange_orbs_state.accumulated >= 3) {
+		for(int i = 0; i < ORB_NUMBER - 1; ++i)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	} else {
+		for (int i = 0; i < ORB_NUMBER - 1; ++i)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+	}
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		int curr_amt = combat_state.exchange_orbs_state.orbs_start_amount[i] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i];
+		if (curr_amt <= 0)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+		else
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+}
+
+// Layout initialization functions
 void hide_all_windows() {
 	//gw.bgwindow->setActive(false);
 
@@ -828,6 +712,7 @@ void hide_all_windows() {
 	gw.combat_bottom_info->setActive(false);
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
+	gw.exchange_orbs->setActive(false);
 }
 
 void init_char_selection_mode()
@@ -900,7 +785,7 @@ void init_char_selection_mode()
 	linked::Button* play_button = new linked::Button(*play_div, play_label, hm::vec2(0, 0), 148, 48, hm::vec4(0.34f, 0.73f, 0.62f, 1), 0);
 	play_button->setHoveredBGColor(hm::vec4(0.24f, 0.63f, 0.52f, 1));
 	play_button->setHeldBGColor(char_window_held_color);
-	play_button->setClickedCallback(combat_start_mode);
+	play_button->setClickedCallback(button_combat_start_mode);
 	play_div->getButtons().push_back(play_button);
 	play_div->m_render = false;
 	char_sel_state.play_button_div = play_div;
@@ -911,19 +796,33 @@ void init_char_selection_mode()
 
 	Texture* chars_texture[NUM_CHARS] = {};
 	
-	chars_texture[0] = new Texture("res/textures/zero.png");
-	chars_texture[1] = new Texture("res/textures/one.png");
-	chars_texture[2] = new Texture("res/textures/serial.png");
-	chars_texture[3] = new Texture("res/textures/ray.png");
-	chars_texture[4] = new Texture("res/textures/astar.png");
-	chars_texture[5] = new Texture("res/textures/deadlock.png");
-	chars_texture[6] = new Texture("res/textures/norma.png");
-	chars_texture[7] = new Texture("res/textures/hazard.png");
-	chars_texture[8] = new Texture("res/textures/qwerty.png");
-	chars_texture[9] = new Texture("res/textures/bigo.png");
+	chars_texture[0] =  new Texture("res/textures/zero.png");
+	chars_texture[1] =  new Texture("res/textures/one.png");
+	chars_texture[2] =  new Texture("res/textures/serial.png");
+	chars_texture[3] =  new Texture("res/textures/ray.png");
+	chars_texture[4] =  new Texture("res/textures/astar.png");
+	chars_texture[5] =  new Texture("res/textures/deadlock.png");
+	chars_texture[6] =  new Texture("res/textures/norma.png");
+	chars_texture[7] =  new Texture("res/textures/hazard.png");
+	chars_texture[8] =  new Texture("res/textures/qwerty.png");
+	chars_texture[9] =  new Texture("res/textures/bigo.png");
 	chars_texture[10] = new Texture("res/textures/new.png");
 	chars_texture[11] = new Texture("res/textures/clockboy.png");
 	
+#if FAST
+	chars_texture_big[0] = chars_texture[0];
+	chars_texture_big[1] = chars_texture[1];
+	chars_texture_big[2] = chars_texture[2];
+	chars_texture_big[3] = chars_texture[3];
+	chars_texture_big[4] = chars_texture[4];
+	chars_texture_big[5] = chars_texture[5];
+	chars_texture_big[6] = chars_texture[6];
+	chars_texture_big[7] = chars_texture[7];
+	chars_texture_big[8] = chars_texture[8];
+	chars_texture_big[9] = chars_texture[9];
+	chars_texture_big[10] = chars_texture[10];
+	chars_texture_big[11] = chars_texture[11];
+#else
 	chars_texture_big[0] = new Texture("res/char_big/zero.png");
 	chars_texture_big[1] = new Texture("res/char_big/one.png");
 	chars_texture_big[2] = new Texture("res/char_big/serial-keiller.png");
@@ -936,6 +835,7 @@ void init_char_selection_mode()
 	chars_texture_big[9] = new Texture("res/char_big/big-o.png");
 	chars_texture_big[10] = new Texture("res/char_big/new.png");
 	chars_texture_big[11] = new Texture("res/char_big/clockboy.png");
+#endif
 
 	linked::WindowDiv* char_divs[NUM_CHARS] = {};
 	float char_div_offset_x = 0.0f;
@@ -972,7 +872,7 @@ void init_char_selection_mode()
 		button->setHeldBGTexture(char_texture);
 		char_divs[i]->getButtons().push_back(button);
 		button->button_info.data = &char_selection_window->divs;
-		button->setClickedCallback(select_character_button);
+		button->setClickedCallback(button_select_character);
 	}
 }
 
@@ -1052,7 +952,7 @@ void init_char_information_mode()
 	linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)/*"VIRTUAL, RANGED, INV, STATIC"*/"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
 	skill_group_div->getLabels().push_back(skill_group_label);
 
-	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"COOLDOWN -", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
 	skill_group_div->getLabels().push_back(skill_cooldown_label);
 }
 
@@ -1103,7 +1003,7 @@ void init_combat_mode()
 	hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
 	hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
 	hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
-	hm::vec4 greener_cyan(0, 1, 0.7f, 1);
+	
 
 	{
 		// Players Names
@@ -1147,7 +1047,7 @@ void init_combat_mode()
 		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), 40.0f, 0, 0);
 		linked::Button* end_turn_button = new linked::Button(*end_turn, end_turn_label, hm::vec2(0, 0), 200, 45, greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f), 0);
 		combat_state.end_turn_button = end_turn_button;
-		end_turn_button->setClickedCallback(end_turn_button_callback);
+		end_turn_button->setClickedCallback(button_end_turn);
 		player_name->divs.push_back(end_turn);
 		end_turn->getButtons().push_back(end_turn_button);
 		end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
@@ -1177,6 +1077,8 @@ void init_combat_mode()
 		gw.allies[i]->setBorderColor(hm::vec4(0, 1, 1, 1));
 		linked::WindowDiv* allies_div = new linked::WindowDiv(*gw.allies[i], size_img, size_img, 0, 0, hm::vec2(0, 0), char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies[i]->divs.push_back(allies_div);
+		linked::Button* dummy_ally_button = new linked::Button(*allies_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		allies_div->getButtons().push_back(dummy_ally_button);
 
 		start_pos.x += size_img + x_spacing;
 		gw.allies_info[i] = new linked::Window(size_info, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
@@ -1225,6 +1127,8 @@ void init_combat_mode()
 		linked::WindowDiv* enemy_image_div = new linked::WindowDiv(*gw.enemies[i], size_img, size_img, 0, 0, hm::vec2(0,0), hm::vec4(0,0,0,1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		enemy_image_div->setBackgroundTexture(char_textures[i]);
 		gw.enemies[i]->divs.push_back(enemy_image_div);
+		linked::Button* dummy_enemy_button = new linked::Button(*enemy_image_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		enemy_image_div->getButtons().push_back(dummy_enemy_button);
 
 		start_pos.x -= (x_spacing + size_info);
 		gw.enemies_info[i] = new linked::Window(size_info, size_enemy_bars, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
@@ -1256,24 +1160,33 @@ void init_combat_mode()
 		combat_bottom_info->divs.push_back(orbs_div);
 
 		linked::Button* multiple_orb_button = new linked::Button(*orbs_div, 0, hm::vec2(0, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		multiple_orb_button->setNormalBGTexture(new Texture("res/orbs/all_orbs.png"));
+		Texture* multiple_orbs_texture = new Texture("res/orbs/all_orbs.png");
+		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		orbs_div->getButtons().push_back(multiple_orb_button);
 
 		linked::Button* hard_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		hard_orb_button->setNormalBGTexture(orb_textures[0]);
+		hard_orb_button->setAllBGTexture(orb_textures[0]);
 		orbs_div->getButtons().push_back(hard_orb_button);
 
 		linked::Button* soft_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		soft_orb_button->setNormalBGTexture(orb_textures[1]);
+		soft_orb_button->setAllBGTexture(orb_textures[1]);
 		orbs_div->getButtons().push_back(soft_orb_button);
 
-		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		vr_orb_button->setNormalBGTexture(orb_textures[2]);
+		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		vr_orb_button->setAllBGTexture(orb_textures[2]);
 		orbs_div->getButtons().push_back(vr_orb_button);
 
-		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		bios_orb_button->setNormalBGTexture(orb_textures[3]);
+		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		bios_orb_button->setAllBGTexture(orb_textures[3]);
 		orbs_div->getButtons().push_back(bios_orb_button);
+
+		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		Texture* xchg_orb_texture = new Texture("res/orbs/exchange_orb.png");
+		exchange_orb_button->setAllBGTexture(xchg_orb_texture);
+		exchange_orb_button->setHoveredBGColor(hm::vec4(0, 1, 1, 0.7f));
+		exchange_orb_button->setHeldBGColor(hm::vec4(0, 0.38f, 0.32f, 0.7f));
+		orbs_div->getButtons().push_back(exchange_orb_button);
+		exchange_orb_button->setClickedCallback(button_exchange_orb);
 
 		linked::Label* multiple_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
 		orbs_div->getLabels().push_back(multiple_orb_label);
@@ -1284,13 +1197,13 @@ void init_combat_mode()
 		combat_state.orb_labels[ORB_HARD] = hard_orb_label;
 		linked::Label* soft_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 2, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
 		orbs_div->getLabels().push_back(soft_orb_label);
-		combat_state.orb_labels[ORB_SOFT] = soft_orb_label;
-		linked::Label* bios_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 3, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
-		orbs_div->getLabels().push_back(bios_orb_label);
-		combat_state.orb_labels[ORB_BIOS] = bios_orb_label;
-		linked::Label* vr_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 4, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		combat_state.orb_labels[ORB_SOFT] = soft_orb_label;		
+		linked::Label* vr_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 3, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
 		orbs_div->getLabels().push_back(vr_orb_label);
 		combat_state.orb_labels[ORB_VR] = vr_orb_label;
+		linked::Label* bios_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 4, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		orbs_div->getLabels().push_back(bios_orb_label);
+		combat_state.orb_labels[ORB_BIOS] = bios_orb_label;
 
 		combat_bottom_info->setBorderSizeY(4.0f);
 		combat_bottom_info->setBorderColor(greener_cyan);
@@ -1354,32 +1267,145 @@ void init_combat_mode()
 		combat_state.skill_info_desc = skill_desc_div;
 		combat_state.skill_info_group = skill_group_div;
 	}
+	
+	{
+		// Multiple Orb Modal
+		linked::Window* exchange_orbs = new linked::Window(360, 200, hm::vec2(win_state.win_width / 2 - 360 / 2, win_state.win_height / 2 - 200 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
+		exchange_orbs->setBorderColor(greener_cyan);
+		exchange_orbs->setTitleColor(char_window_color);
+		exchange_orbs->setTitleCentered(true);
+		gw.exchange_orbs = exchange_orbs;
+		exchange_orbs->setActive(false);
+
+		// Close Multiple Orb Modal
+		linked::WindowDiv* close_div = new linked::WindowDiv(*exchange_orbs, 360, 40, 0, 0, hm::vec2(0, -20), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_BOTTOM | linked::DIV_CENTER_X);
+		exchange_orbs->divs.push_back(close_div);
+		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CLOSE", sizeof("CLOSE"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
+		linked::Button* close_button = new linked::Button(*close_div, close_label, hm::vec2(200, 0), 100, 40, greener_cyan, 0);
+		close_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+		close_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		close_button->setClickedCallback(button_exchange_orbs_close);
+		close_div->getButtons().push_back(close_button);
+
+		linked::Label* confirm_label = new linked::Label(*close_div, (u8*)"CONFIRM", sizeof("CONFIRM"), hm::vec2(10, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
+		linked::Button* confirm_button = new linked::Button(*close_div, confirm_label, hm::vec2(60, 0), 100, 40, hm::vec4(0.6f, 0.6f, 0.6f, 1.0f), 0);
+		//confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+		//confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		confirm_button->setClickedCallback(button_exchange_orbs_confirm);
+		close_div->getButtons().push_back(confirm_button);
+
+		// Multiple Orb Modal Orbs
+		linked::WindowDiv* info_div = new linked::WindowDiv(*exchange_orbs, 220, 120, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP|linked::DIV_CENTER_X);
+		exchange_orbs->divs.push_back(info_div);
+		combat_state.exchange_orbs_state.info_div = info_div;
+
+		float orbs_size = 32.0f;
+		float orbs_height = 36.0f;
+
+		linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		Texture* multiple_orbs_texture = new Texture("res/orbs/all_orbs.png");
+		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
+		info_div->getButtons().push_back(multiple_orb_button);
+
+		linked::Button* hard_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		hard_orb_button->setAllBGTexture(orb_textures[0]);
+		info_div->getButtons().push_back(hard_orb_button);
+
+		linked::Button* soft_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		soft_orb_button->setAllBGTexture(orb_textures[1]);
+		info_div->getButtons().push_back(soft_orb_button);
+
+		linked::Button* vr_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		vr_orb_button->setAllBGTexture(orb_textures[2]);
+		info_div->getButtons().push_back(vr_orb_button);
+
+		linked::Button* bios_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		bios_orb_button->setAllBGTexture(orb_textures[3]);
+		info_div->getButtons().push_back(bios_orb_button);
+		
+		float spacing = 18 + 16 - 5;
+		linked::Label* multiple_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing - 18, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		info_div->getLabels().push_back(multiple_orb_label);
+		linked::Label* hard_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10), 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		info_div->getLabels().push_back(hard_orb_label);
+		linked::Label* soft_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 2, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		info_div->getLabels().push_back(soft_orb_label);
+		linked::Label* vr_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 3, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		info_div->getLabels().push_back(vr_orb_label);
+		linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 4, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		info_div->getLabels().push_back(bios_orb_label);		
+
+		Texture* arrow_up = new Texture("res/orbs/arrow_up.png");
+		Texture* arrow_down = new Texture("res/orbs/arrow_down.png");
+		float arrow_up_size = 24.0f;
+		hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
+		// up
+		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_HARD);
+		hard_orb_arrow_up->setAllBGTexture(arrow_up);
+		hard_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		hard_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+		hard_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+		info_div->getButtons().push_back(hard_orb_arrow_up);
+
+		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_SOFT);
+		soft_orb_arrow_up->setAllBGTexture(arrow_up);
+		soft_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		soft_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+		soft_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+		info_div->getButtons().push_back(soft_orb_arrow_up);
+
+		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_VR);
+		vr_orb_arrow_up->setAllBGTexture(arrow_up);
+		vr_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		vr_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+		vr_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+		info_div->getButtons().push_back(vr_orb_arrow_up);
+
+		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_BIOS);
+		bios_orb_arrow_up->setAllBGTexture(arrow_up);
+		bios_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		bios_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+		bios_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+		info_div->getButtons().push_back(bios_orb_arrow_up);
+
+		// down
+		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_HARD);
+		hard_orb_arrow_down->setAllBGTexture(arrow_down);
+		hard_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		hard_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+		hard_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+		info_div->getButtons().push_back(hard_orb_arrow_down);
+
+		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_SOFT);
+		soft_orb_arrow_down->setAllBGTexture(arrow_down);
+		soft_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		soft_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+		soft_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+		info_div->getButtons().push_back(soft_orb_arrow_down);
+
+		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_VR);
+		vr_orb_arrow_down->setAllBGTexture(arrow_down);
+		vr_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		vr_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+		vr_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+		info_div->getButtons().push_back(vr_orb_arrow_down);
+
+		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_BIOS);
+		bios_orb_arrow_down->setAllBGTexture(arrow_down);
+		bios_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		bios_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+		bios_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+		info_div->getButtons().push_back(bios_orb_arrow_down);		
+	}
 }
 
+#define TEST 1
 void init_application()
 {
 	using namespace linked;
 
-#if 0
-	// init camera and 3d shader
-	init_camera(&ggs.camera, (float)win_state.win_width / win_state.win_height, 45.0f, 0.2f, 1000.0f);
-	ggs.camera.set_cam_position(hm::vec3(5.0f, 30.0f, 60.0f));
-	ggs.shader = load_shader(vert_shader, frag_shader, sizeof(vert_shader) - 1, sizeof(frag_shader) - 1);
-
-	ggs.models = (IndexedModel3D*)malloc(sizeof(IndexedModel3D) * 256);
-
-	load_model("res/cube.obj", &ggs.models[0]);
-	init_object(&ggs.models[0]);
-	ggs.models[0].position = hm::vec3(0.0f, 45.0f, 0.0f);
-	ggs.models[0].scale = 0.3f;
-	ggs.models[0].simulating = true;
-	ggs.models[0].static_object = false;
-	ggs.models[0].texture = 0;
-	ggs.models[0].last_pos = ggs.models[0].position;
-
-	ggs.num_models = 1;
-#endif
-
+	// Initialize game mode
 	ggs.mode = MODE_INTRO;
 	ggs.last_mode = MODE_INTRO;
 
@@ -1395,6 +1421,20 @@ void init_application()
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
+
+
+#if TEST
+	combat_state.orbs_amount[ORB_HARD] = 2;
+	combat_state.orbs_amount[ORB_SOFT] = 3;
+	combat_state.orbs_amount[ORB_VR]   = 4;
+	combat_state.orbs_amount[ORB_BIOS] = 5;
+	combat_state.total_orbs = 5 + 2 + 3 + 4;
+	layout_change_orb_amount(ORB_HARD, 2);
+	layout_change_orb_amount(ORB_SOFT, 3);
+	layout_change_orb_amount(ORB_VR, 4);
+	layout_change_orb_amount(ORB_BIOS, 5);
+	layout_change_orb_amount(ORB_ALL, 5 + 2 + 3 + 4);
+#endif
 
 	// init console chat
 	chat_window = chat.init_chat();
@@ -1412,44 +1452,16 @@ void init_application()
 	glEnable(GL_DEPTH_TEST);
 }
 
+// Gameplay functions
 void end_turn() {
-
-	static char all_orbs_buffer[16] = { 0 };
-	static char hard_orb_buffer[16] = { 0 };
-	static char soft_orb_buffer[16] = { 0 };
-	static char vr_orb_buffer[16] = { 0 };
-	static char bios_orb_buffer[16] = { 0 };
-
 	if (!combat_state.player_turn) {
 		int orb_generated = rand() % (ORB_NUMBER - 1);
 		printf("generated orb %d\n", orb_generated);
-		combat_state.total_orbs += 1;
-
-		int count = s32_to_str_base10(combat_state.total_orbs, all_orbs_buffer);
-		combat_state.all_orbs_label->setText((u8*)all_orbs_buffer, count + 1);
 		combat_state.orbs_amount[orb_generated] += 1;
-		switch (orb_generated) {
-		case ORB_HARD: {
-			memset(hard_orb_buffer, 0, sizeof(hard_orb_buffer));
-			int count = s32_to_str_base10(combat_state.orbs_amount[ORB_HARD], hard_orb_buffer);
-			combat_state.orb_labels[ORB_HARD]->setText((u8*)hard_orb_buffer, count + 1);
-		}break;
-		case ORB_SOFT: {
-			memset(soft_orb_buffer, 0, sizeof(soft_orb_buffer));
-			int count = s32_to_str_base10(combat_state.orbs_amount[ORB_SOFT], soft_orb_buffer);
-			combat_state.orb_labels[ORB_SOFT]->setText((u8*)soft_orb_buffer, count + 1);
-		}break;
-		case ORB_VR: {
-			memset(vr_orb_buffer, 0, sizeof(vr_orb_buffer));
-			int count = s32_to_str_base10(combat_state.orbs_amount[ORB_VR], vr_orb_buffer);
-			combat_state.orb_labels[ORB_VR]->setText((u8*)vr_orb_buffer, count + 1);
-		}break;
-		case ORB_BIOS: {
-			memset(bios_orb_buffer, 0, sizeof(bios_orb_buffer));
-			int count = s32_to_str_base10(combat_state.orbs_amount[ORB_BIOS], bios_orb_buffer);
-			combat_state.orb_labels[ORB_BIOS]->setText((u8*)bios_orb_buffer, count + 1);
-		}break;
-		}
+
+		combat_state.total_orbs += 1;
+		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+		layout_change_orb_amount((Orb_ID)orb_generated, combat_state.orbs_amount[orb_generated]);
 	}
 	
 	combat_state.player_turn = !combat_state.player_turn;
@@ -1500,6 +1512,7 @@ void update_game_mode(double frametime)
 				// first 4(NUM_SKILLS) are buttons
 				gw.char_info_window->divs[i]->getButtons()[0]->setNormalBGTexture(skill_textures[index]);
 				if (gw.char_info_window->divs[i]->isButtonHovered()) {
+					gw.skill_group_div->m_render = true;
 					gw.char_info_skill_cost->setActive(true);
 					skill_label->setText((u8*)skill_names[index], skill_names_length[index]);
 					skill_desc_label->setText((u8*)skill_desc[index], skill_desc_length[index]);
@@ -1523,7 +1536,6 @@ void update_game_mode(double frametime)
 					break;
 				}
 			}
-
 		}break;
 		case MODE_COMBAT: {
 			//frametime = 0.016 aprox
@@ -1537,31 +1549,54 @@ void update_game_mode(double frametime)
 			gw.timer_window->setWidth(new_w);
 
 			bool is_hovering_skill = false;
+			bool is_hovering_char = false;
 			for (int i = 0; i < NUM_ALLIES; ++i) {
-				for (int k = 0; k < NUM_SKILLS; ++k) {
-					if (gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0]->isHovered()) {
-						//printf("skill %d of ally %d hovered\n", k, i);
-						int skill_index = char_sel_state.selections[i] * NUM_SKILLS + k;
-						combat_state.skill_info_image->setBackgroundTexture(skill_textures[skill_index]);
-						combat_state.skill_info_title->getLabels()[0]->setText((u8*)skill_names[skill_index], skill_names_length[skill_index]);
-						combat_state.skill_info_desc->getLabels()[0]->setText((u8*)skill_desc[skill_index], skill_desc_length[skill_index]);
-						layout_set_skill_group_from_skill(skill_index, combat_state.skill_info_group->getLabels()[0]);
-						layout_set_cooldown_from_skill(skill_index, combat_state.skill_info_group->getLabels()[1]);
-						combat_state.last_hovered = (Skill_ID)(skill_index);
-						for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
-							combat_state.skill_costs[n]->m_render = false;
-						}
-						for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
-							int cost = skill_costs[skill_index][n];
-							while (cost > 0) {
-								combat_state.skill_costs[orb_index]->m_render = true;
-								combat_state.skill_costs[orb_index++]->setBackgroundTexture(orb_textures[n]);
-								cost--;
+				if (gw.allies[i]->divs[0]->getButtons()[0]->isHovered()) {
+					//printf("Ally %d hovered!\n", i);
+					int char_index = char_sel_state.selections[i];
+					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
+					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
+					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
+					is_hovering_char = true;
+					break;
+				} else {
+					for (int k = 0; k < NUM_SKILLS; ++k) {
+						if (gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0]->isHovered()) {
+							//printf("skill %d of ally %d hovered\n", k, i);
+							int skill_index = char_sel_state.selections[i] * NUM_SKILLS + k;
+							combat_state.skill_info_image->setBackgroundTexture(skill_textures[skill_index]);
+							combat_state.skill_info_title->getLabels()[0]->setText((u8*)skill_names[skill_index], skill_names_length[skill_index]);
+							combat_state.skill_info_desc->getLabels()[0]->setText((u8*)skill_desc[skill_index], skill_desc_length[skill_index]);
+							layout_set_skill_group_from_skill(skill_index, combat_state.skill_info_group->getLabels()[0]);
+							layout_set_cooldown_from_skill(skill_index, combat_state.skill_info_group->getLabels()[1]);
+							combat_state.last_hovered = (Skill_ID)(skill_index);
+							for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
+								combat_state.skill_costs[n]->m_render = false;
 							}
+							for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
+								int cost = skill_costs[skill_index][n];
+								while (cost > 0) {
+									combat_state.skill_costs[orb_index]->m_render = true;
+									combat_state.skill_costs[orb_index++]->setBackgroundTexture(orb_textures[n]);
+									cost--;
+								}
+							}
+							is_hovering_skill = true;
+							break;
 						}
-						is_hovering_skill = true;
-						break;
 					}
+				}
+			}
+
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				if (gw.enemies[i]->divs[0]->getButtons()[0]->isHovered()) {
+					//printf("Enemy %d hovered!\n", i);
+					int char_index = i; // @TODO this must be the 3 enemies selected
+					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
+					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
+					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
+					is_hovering_char = true;
+					break;
 				}
 			}
 			if (!is_hovering_skill) {
@@ -1569,9 +1604,9 @@ void update_game_mode(double frametime)
 					combat_state.skill_costs[i]->m_render = false;
 			}
 			combat_state.skill_info_image_border->m_render = is_hovering_skill;
-			combat_state.skill_info_image->m_render = is_hovering_skill;
-			combat_state.skill_info_title->m_render = is_hovering_skill;
-			combat_state.skill_info_desc->m_render = is_hovering_skill;
+			combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
+			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
+			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_group->m_render = is_hovering_skill;
 		}break;
 	}
@@ -1580,6 +1615,8 @@ void update_game_mode(double frametime)
 void change_game_mode(Game_Mode mode)
 {
 	if (ggs.mode == mode) return;
+	hide_all_windows();
+	/*
 	switch (ggs.mode) {
 		// cleanup the mode you are in
 		case MODE_CHAR_SELECT: {
@@ -1596,6 +1633,7 @@ void change_game_mode(Game_Mode mode)
 			linked::Label* skill_desc_label = gw.char_info_window->divs[NUM_SKILLS + 1]->getLabels()[0];
 			skill_label->setText(0, 0);
 			skill_desc_label->setText(0, 0);
+			gw.skill_group_div->m_render = false;
 		}break;
 		case MODE_COMBAT: {
 			for (int i = 0; i < NUM_ALLIES; ++i) {
@@ -1614,6 +1652,7 @@ void change_game_mode(Game_Mode mode)
 			gw.player_name_window->setActive(false);
 		}break;
 	}
+	*/
 
 	ggs.last_mode = ggs.mode;
 	ggs.mode = mode;
@@ -1656,8 +1695,6 @@ void change_game_mode(Game_Mode mode)
 	}
 }
 
-void input();
-
 void update_and_render(double frametime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1668,16 +1705,6 @@ void update_and_render(double frametime)
 	update_game_mode(frametime);
 
 	input();
-#if 0
-	glUseProgram(ggs.shader);
-	input_camera(&ggs.camera);
-
-	for (int i = 0; i < ggs.num_models; ++i) {
-		update_model(ggs.models + i);
-		render_object(ggs.models + i);
-	}
-	//glUseProgram(0);
-#endif
 }
 
 void input()
@@ -1713,8 +1740,34 @@ void input()
 		layout_ally_die(2);
 	}
 
+	if (keyboard_state.key_event['Q']) {
+		keyboard_state.key_event['Q'] = false;
+		gw.exchange_orbs->setFocus();
+	}
+
 	if (!chat_window->isFocused())
 		chat_window->setFocus();
+}
+
+// Layout functions
+static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs)
+{
+	// update the selection screen
+	bool notselected = (*divs)[id * 3 + 1]->m_render = !(*divs)[id * 3 + 1]->m_render;
+	(*divs)[id * 3 + 2]->m_render = !(*divs)[id * 3 + 2]->m_render;
+	hm::vec4 selected_color;
+	hm::vec4 selected_bg_color;
+	if (notselected) {
+		selected_bg_color = char_selected_bg_color;
+		selected_color = char_window_hover_color;
+	}
+	else {
+		selected_bg_color = char_window_color;
+		selected_color = hm::vec4(0, 0, 0, 1);
+	}
+
+	(*divs)[id * 3]->getButtons()[0]->setNormalBGColor(selected_color);
+	(*divs)[id * 3]->setBackgroundColor(selected_bg_color);
 }
 
 static void layout_enemy_die(u32 enemy_index) {
@@ -1816,4 +1869,55 @@ static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label
 		buffer[9] = '-';
 
 	label->setText((u8*)buffer, length);
+}
+
+static void layout_change_orb_amount(Orb_ID id, int amt) {
+	static char all_orbs_buffer[16] = { 0 };
+	static char hard_orb_buffer[16] = { 0 };
+	static char soft_orb_buffer[16] = { 0 };
+	static char vr_orb_buffer[16] = { 0 };
+	static char bios_orb_buffer[16] = { 0 };
+
+	char* selected = 0;
+	linked::Label* label = 0;
+
+	switch (id) {
+	case ORB_HARD: selected = (char*)&hard_orb_buffer; label = combat_state.orb_labels[ORB_HARD]; break;
+	case ORB_SOFT: selected = (char*)&soft_orb_buffer; label = combat_state.orb_labels[ORB_SOFT]; break;
+	case ORB_VR:   selected = (char*)&vr_orb_buffer;   label = combat_state.orb_labels[ORB_VR]; break;
+	case ORB_BIOS: selected = (char*)&bios_orb_buffer; label = combat_state.orb_labels[ORB_BIOS]; break;
+	case ORB_ALL:  selected = (char*)&all_orbs_buffer; label = combat_state.all_orbs_label; break;
+	}
+
+	memset(selected, 0, sizeof(all_orbs_buffer));
+	int count = s32_to_str_base10(amt, selected);
+
+	label->setText((u8*)selected, count + 1);
+}
+
+static void layout_change_exchange_orb_amount(Orb_ID id, int amt) {
+	static char all_orbs_buffer[16] = { 0 };
+	static char hard_orb_buffer[16] = { 0 };
+	static char soft_orb_buffer[16] = { 0 };
+	static char vr_orb_buffer[16] = { 0 };
+	static char bios_orb_buffer[16] = { 0 };
+
+	char* selected = 0;
+	linked::Label* label = 0;
+	linked::WindowDiv* info_div = combat_state.exchange_orbs_state.info_div;
+	
+
+	switch (id) {
+	case ORB_HARD: selected = (char*)&hard_orb_buffer; label = info_div->getLabels()[ORB_HARD + 1]; break;
+	case ORB_SOFT: selected = (char*)&soft_orb_buffer; label = info_div->getLabels()[ORB_SOFT + 1]; break;
+	case ORB_VR:   selected = (char*)&vr_orb_buffer;   label = info_div->getLabels()[ORB_VR + 1]; break;
+	case ORB_BIOS: selected = (char*)&bios_orb_buffer; label = info_div->getLabels()[ORB_BIOS + 1]; break;
+	case ORB_ALL:  selected = (char*)&all_orbs_buffer; label = info_div->getLabels()[0]; break;
+	case ORB_NULL: return;
+	}
+
+	memset(selected, 0, sizeof(all_orbs_buffer));
+	int count = s32_to_str_base10(amt, selected);
+
+	label->setText((u8*)selected, count + 1);
 }

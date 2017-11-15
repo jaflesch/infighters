@@ -1,3 +1,13 @@
+void load_model(char* filename, IndexedModel3D* model);
+void update_model(IndexedModel3D* im);
+void init_object(IndexedModel3D* m);
+void render_line(hm::vec3 start, hm::vec3 end);
+void render_vector(hm::vec3 vec, hm::vec3 position);
+void render_face(hm::vec3 p1, hm::vec3 p2, hm::vec3 p3, hm::vec3 c);
+void render_object_default(hm::vec3 position, float scale);
+void render_object(IndexedModel3D* model);
+void create_object(char* filename);
+
 void load_model(char* filename, IndexedModel3D* model) {
 	load_objfile(filename, model);
 	hm::mat4::identity(model->model_matrix);
@@ -102,8 +112,6 @@ void render_face(hm::vec3 p1, hm::vec3 p2, hm::vec3 p3, hm::vec3 c) {
 		glEnd();
 	}
 }
-
-void render_object_default(hm::vec3 position, float scale);
 
 void render_object(IndexedModel3D* model) {
 	if (model->texture) {
