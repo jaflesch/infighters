@@ -12,13 +12,6 @@ Chat* g_chat = 0;
 Chat chat;
 linked::Window* chat_window = 0;
 
-enum Font_Type {
-	FONT_OSWALD_REGULAR_16 = 0,
-	FONT_OSWALD_REGULAR_14 = 1,
-	FONT_OSWALD_REGULAR_12 = 2,
-	FONT_OSWALD_REGULAR_24 = 3,
-};
-
 Font_ID fonts[32] = {};
 
 #include "camera.cpp"
@@ -533,6 +526,7 @@ hm::vec4 char_window_hover_color(0.35f, 0.6f, 0.6f, 0.65f);
 hm::vec4 char_window_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 1.0f);
 hm::vec4 char_selected_bg_color(0.4f, 0.7f, 0.7f, 1.0f);
 hm::vec4 greener_cyan(0, 1, 0.7f, 1);
+hm::vec4 color_red(1, 0, 0, 1);
 
 // Button Callbacks
 static void button_select_character(void* arg) {
@@ -746,9 +740,9 @@ void init_char_selection_mode()
 	linked::WindowDiv* left_char_div = new linked::WindowDiv(*left_char_window, 400, 840, 0, 0, hm::vec2(0, 0), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
 	left_char_window->divs.push_back(left_char_div);
 	char_sel_state.last_hovered = CHAR_NONE;
-	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 100, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.97f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
+	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 110, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.97f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_LEFT);
 	
-	linked::Label* left_char_name_label = new linked::Label(*left_char_name_div, (u8*)"", sizeof "", hm::vec2(320.0f, 15.0f), hm::vec4(1, 1, 1, 1), 60.0f, 0, 0);
+	linked::Label* left_char_name_label = new linked::Label(*left_char_name_div, (u8*)"", sizeof "", hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_38, 0, 0);
 	left_char_name_div->getLabels().push_back(left_char_name_label);
 	left_char_window->divs.push_back(left_char_name_div);
 
@@ -776,7 +770,7 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* info_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(624.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(info_label_div);
-	linked::Label* info_label = new linked::Label(*info_label_div, (u8*)"Information", sizeof("Information"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	linked::Label* info_label = new linked::Label(*info_label_div, (u8*)"Information", sizeof("Information"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 	info_label_div->getLabels().push_back(info_label);
 
 	linked::WindowDiv* confirm_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(740.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -786,7 +780,7 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* confirm_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(764.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(confirm_label_div);
-	linked::Label* confirm_label = new linked::Label(*confirm_label_div, (u8*)"Confirm", sizeof("Confirm"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	linked::Label* confirm_label = new linked::Label(*confirm_label_div, (u8*)"Confirm", sizeof("Confirm"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	confirm_label_div->getLabels().push_back(confirm_label);
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -796,12 +790,13 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(back_label_div);
-	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	back_label_div->getLabels().push_back(back_label);
 
 	linked::WindowDiv* play_div = new linked::WindowDiv(*char_selected_window, 148, 48, 0, 0, hm::vec2(740.0f, 50.0f), hm::vec4(0.34f, 0.9f, 0.72f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(play_div);
-	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"), hm::vec2(42.0f, 14.0f), hm::vec4(1, 1, 1, 1), 40.0f, 0, 0);
+	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"), 
+		hm::vec2(44.0f, 48.0f / 2.0f + get_font_size(FONT_OSWALD_REGULAR_24) / 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 	linked::Button* play_button = new linked::Button(*play_div, play_label, hm::vec2(0, 0), 148, 48, hm::vec4(0.34f, 0.73f, 0.62f, 1), 0);
 	play_button->setHoveredBGColor(hm::vec4(0.24f, 0.63f, 0.52f, 1));
 	play_button->setHeldBGColor(char_window_held_color);
@@ -918,7 +913,7 @@ void init_char_information_mode()
 
 	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_info_window_bot, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window_bot->divs.push_back(back_label_div);
-	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(0.0f, 0.0f), hm::vec4(1, 1, 1, 1), 28.0f, 5.0f, 0);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	back_label_div->getLabels().push_back(back_label);
 	
 
@@ -1034,10 +1029,10 @@ void init_combat_mode()
 		player_name->divs.push_back(enemy_name_div);
 		gw.player_name_window = player_name;
 
-		linked::Label* player_label = new linked::Label(*player_name_div, (u8*)"Player Name", sizeof "Player Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), 50.0f, 0, 0);
+		linked::Label* player_label = new linked::Label(*player_name_div, (u8*)"Player Name", sizeof "Player Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_32, 0, 0);
 		player_name_div->getLabels().push_back(player_label);
 
-		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy Name", sizeof "Enemy Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), 50.0f, 0, 0);
+		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy Name", sizeof "Enemy Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_32, 0, 0);
 		enemy_name_div->getLabels().push_back(enemy_label);
 
 		orb_alive_ally = new Texture("res/orbs/alive_orb.png");
@@ -1064,7 +1059,7 @@ void init_combat_mode()
 
 		// end turn button
 		linked::WindowDiv* end_turn = new linked::WindowDiv(*player_name, 200, 45, 0, 0, hm::vec2(0, 20.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP |linked::DIV_CENTER_X);
-		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), 40.0f, 0, 0);
+		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		linked::Button* end_turn_button = new linked::Button(*end_turn, end_turn_label, hm::vec2(0, 0), 200, 45, greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f), 0);
 		combat_state.end_turn_button = end_turn_button;
 		end_turn_button->setClickedCallback(button_end_turn);
@@ -1511,7 +1506,7 @@ void update_game_mode(double frametime)
 					gw.left_char_window->divs[0]->setBackgroundTexture(chars_texture_big[i]);
 					linked::Label* name_label = gw.left_char_window->divs[1]->getLabels()[0];
 					name_label->setText((u8*)char_names[i], char_names_length[i]);
-					name_label->setPosition(hm::vec2(380.0f - (char_names_length[i] - 1) * 18.0f, 15.0f));
+					name_label->setPosition(hm::vec2(gw.left_char_window->divs[0]->getWidth() - name_label->getTextWidth() - 10.0f, get_font_size(name_label->m_font_id) + 5.0f));
 					char_sel_state.last_hovered = (Character_ID)i;
 				}
 			}
@@ -1869,7 +1864,7 @@ static void layout_set_skill_group_from_skill(int skill_index, linked::Label* la
 	default: break;
 	}
 
-	label->setText((u8*)buffer, length);
+	label->setText((u8*)buffer, length + 1);
 }
 
 static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label) {

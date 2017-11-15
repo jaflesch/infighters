@@ -39,11 +39,11 @@ extern Chat* g_chat;
 extern Font_ID fonts[32];
 
 #define DEFAULT_FONT "./res/fonts/Oswald-Regular.ttf"
+#define OSWALD_LIGHT "./res/fonts/Oswald-Light.ttf"
 
 void application_state_init()
 {
 	linked::Window::linkedWindowInit();
-	init_application();
 
 	engine::render_engine_init();
 	font_rendering_init();
@@ -51,6 +51,17 @@ void application_state_init()
 	fonts[1] = load_font(DEFAULT_FONT, 14, false);
 	fonts[2] = load_font(DEFAULT_FONT, 12, false);
 	fonts[3] = load_font(DEFAULT_FONT, 24, false);
+	fonts[4] = load_font(DEFAULT_FONT, 32, false);
+	fonts[5] = load_font(DEFAULT_FONT, 38, false);
+
+	fonts[6]  = load_font(OSWALD_LIGHT, 16, false);
+	fonts[7]  = load_font(OSWALD_LIGHT, 14, false);
+	fonts[8]  = load_font(OSWALD_LIGHT, 12, false);
+	fonts[9]  = load_font(OSWALD_LIGHT, 24, false);
+	fonts[10] = load_font(OSWALD_LIGHT, 32, false);
+	fonts[11] = load_font(OSWALD_LIGHT, 38, false);
+
+	init_application();
 
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 	glDisable(GL_CULL_FACE);

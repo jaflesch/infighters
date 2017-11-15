@@ -7,7 +7,6 @@ extern Window_Info window_info;
 namespace linked
 {
 	/* LABELS */
-	std::vector<FontRenderer*> Label::fontRenderers;
 
 	Label::Label(
 		const WindowDiv& div, 
@@ -15,49 +14,32 @@ namespace linked
 		int textLength, 
 		hm::vec2& position,
 		hm::vec4& textColor, 
-		float fontSize, 
+		Font_ID font_id,
 		float margin, 
 		float padding) :
-		m_text(text), 
-		m_textLength(textLength),
-		m_margin(margin),
-		m_padding(padding), 
 		m_div(div),
 		m_position(position), 
-		defaultLineSpace(true), 
-		lineSpace(0), 
+		m_margin(margin),
+		m_padding(padding), 
+		m_text(text), 
+		m_font_id(font_id),
+		m_textLength(textLength),
 		m_textColor(textColor),
+		defaultLineSpace(true),
+		lineSpace(0), 
 		m_yAdvance(0)
 	{
-		// Create font of size if non existant, use the existing if there is one
-		m_fontRenderer = nullptr;
-		for (unsigned int i = 0; i < Label::fontRenderers.size(); i++)
-		{
-			if (Label::fontRenderers[i]->getFontSize() == fontSize)
-				m_fontRenderer = Label::fontRenderers[i];
-		}
-		if (m_fontRenderer == nullptr)
-		{
-			Label::fontRenderers.push_back(new FontRenderer(fontSize, FONT_QUALITY));
-			m_fontRenderer = fontRenderers[fontRenderers.size() - 1];
-		}
-		// Set default line space to max ascender of the font
-		setLineSpace(m_fontRenderer->getAscender());
+		m_font_size = get_font_size(font_id);
 	}
 
-	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2& position, float fontSize) :
-		Label(div, text, textLength, position, DEFAULT_TEXTCOLOR, fontSize, 0, 0){}
+	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2& position, Font_ID font_id) :
+		Label(div, text, textLength, position, DEFAULT_TEXTCOLOR, font_id, 0, 0){}
 
-	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, float fontSize) :
-		Label(div, text, textLength, hm::vec2(0, 0), DEFAULT_TEXTCOLOR, fontSize, 0, 0){}
-
-	Label::Label(const WindowDiv& div) :
-		Label(div, nullptr, 0, hm::vec2(0, 0), DEFAULT_TEXTCOLOR, DEFAULT_FONTSIZE, 0, 0){}
+	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, Font_ID font_id) :
+		Label(div, text, textLength, hm::vec2(0, 0), DEFAULT_TEXTCOLOR, font_id, 0, 0){}
 
 	void Label::cleanUp()
 	{
-		for (FontRenderer* fr : fontRenderers)
-			delete fr;
 	}
 
 	void Label::render()
@@ -72,10 +54,18 @@ namespace linked
 
 		if (m_text)
 		{
-			TextInfo ti = m_fontRenderer->RenderText(std::string((const char*)m_text),
-				(int)(renderPosition.x * (float)ww), (int)(-renderPosition.y * (float)wh),
-				rightLimit, m_textColor, Window::m_textShader, true);
-			m_yAdvance = ti.num_rows;
+			r32 xPos = (int)(renderPosition.x * (float)ww);
+			r32 yPos = (int)(-renderPosition.y * (float)wh);
+			hm::vec2 start_pos = hm::vec2((xPos / 2.0f) + 800, (yPos / 2.0f) + 450);
+			
+			Font_ID font_id = this->m_font_id;
+			if (m_textLength > 0) {
+				if (font_id >= FONT_NUMBER) {
+					font_id = 0;
+				}
+				render_text(font_id, m_text, m_textLength - 1, start_pos, m_textColor);
+				font_rendering_flush();
+			}
 		}
 	}
 }
