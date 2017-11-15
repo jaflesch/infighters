@@ -608,6 +608,8 @@ static void button_exchange_orbs_close(void* arg) {
 
 static void button_exchange_orbs_confirm(void* arg) {
 	assert(combat_state.exchange_orbs_state.active == true);
+	if (!combat_state.exchange_orbs_state.can_confirm)
+		return;
 	if (combat_state.exchange_orbs_state.state_changed) {
 		// reset state
 		combat_state.exchange_orbs_state.state_changed = false;
@@ -653,16 +655,23 @@ static void button_exchange_orb_arrow(void* arg) {
 			combat_state.exchange_orbs_state.num_lost += 1;
 		}
 	}
+	
 	if (state_changed) {
 		layout_change_exchange_orb_amount((Orb_ID)eba->id, combat_state.exchange_orbs_state.orbs_start_amount[eba->id] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id]);
 		layout_change_exchange_orb_amount(ORB_ALL, combat_state.exchange_orbs_state.accumulated);
 
 		// update confirm button
+		linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
 		if (combat_state.exchange_orbs_state.accumulated == 0) {
-			linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
 			confirm_button->setNormalBGColor(greener_cyan);
 			confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
 			confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+			combat_state.exchange_orbs_state.can_confirm = true;
+		} else {
+			confirm_button->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+			confirm_button->setHoveredBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+			confirm_button->setHoveredTextColor(char_window_color);
+			combat_state.exchange_orbs_state.can_confirm = false;
 		}
 	}
 
@@ -1270,7 +1279,7 @@ void init_combat_mode()
 	
 	{
 		// Multiple Orb Modal
-		linked::Window* exchange_orbs = new linked::Window(360, 200, hm::vec2(win_state.win_width / 2 - 360 / 2, win_state.win_height / 2 - 200 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+		linked::Window* exchange_orbs = new linked::Window(460, 260, hm::vec2(win_state.win_width / 2 - 460 / 2, win_state.win_height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
 			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
 		exchange_orbs->setBorderColor(greener_cyan);
 		exchange_orbs->setTitleColor(char_window_color);
@@ -1281,7 +1290,7 @@ void init_combat_mode()
 		// Close Multiple Orb Modal
 		linked::WindowDiv* close_div = new linked::WindowDiv(*exchange_orbs, 360, 40, 0, 0, hm::vec2(0, -20), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_BOTTOM | linked::DIV_CENTER_X);
 		exchange_orbs->divs.push_back(close_div);
-		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CLOSE", sizeof("CLOSE"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
+		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
 		linked::Button* close_button = new linked::Button(*close_div, close_label, hm::vec2(200, 0), 100, 40, greener_cyan, 0);
 		close_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
 		close_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
@@ -1296,7 +1305,7 @@ void init_combat_mode()
 		close_div->getButtons().push_back(confirm_button);
 
 		// Multiple Orb Modal Orbs
-		linked::WindowDiv* info_div = new linked::WindowDiv(*exchange_orbs, 220, 120, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP|linked::DIV_CENTER_X);
+		linked::WindowDiv* info_div = new linked::WindowDiv(*exchange_orbs, 220, 120, 0, 0, hm::vec2(0, 30), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP|linked::DIV_CENTER_X);
 		exchange_orbs->divs.push_back(info_div);
 		combat_state.exchange_orbs_state.info_div = info_div;
 

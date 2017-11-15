@@ -270,6 +270,7 @@ struct Char_Selection_State {
 struct Orb_Exchange_State {
 	bool active = false;
 	bool state_changed = false;
+	bool can_confirm = false;
 	int num_lost = 0;
 	int num_gain = 0;
 	int accumulated = 0;
