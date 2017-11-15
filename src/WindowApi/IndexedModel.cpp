@@ -1,6 +1,6 @@
 #include "IndexedModel.h"
 #include <fstream>
-#include "..\common.h"
+#include "../common.h"
 
 using namespace std;
 

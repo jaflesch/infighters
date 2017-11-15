@@ -1,6 +1,7 @@
 #include "WindowDiv.h"
+#include "../font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 
 namespace linked
 {
@@ -48,8 +49,8 @@ namespace linked
 				ws->bindTextures(m_backgroundTexture->textureID);
 		
 			hm::vec2 rp = getRelativePosition();
-			float ww_ = roundf(win_state.win_width / 2.0f);
-			float wh_ = roundf(win_state.win_height / 2.0f);
+			float ww_ = roundf(window_info.width / 2.0f);
+			float wh_ = roundf(window_info.height / 2.0f);
 			rp.x /= ww_;
 			rp.y /= wh_;
 
@@ -114,7 +115,7 @@ namespace linked
 			l->render();
 
 		ws->clipTL = hm::vec2(-1, -1);
-		ws->clipBR = hm::vec2((float)win_state.win_width, (float)win_state.win_height);
+		ws->clipBR = hm::vec2((float)window_info.width, (float)window_info.height);
 
 		Window::m_textShader->stopShader();
 		
@@ -198,8 +199,8 @@ namespace linked
 		basePos.x -= m_width / 2.0f;
 		basePos.y -= m_height / 2.0f;
 
-		basePos.x /= win_state.win_width / 2.0f;
-		basePos.y /= win_state.win_height / 2.0f;
+		basePos.x /= window_info.width / 2.0f;
+		basePos.y /= window_info.height / 2.0f;
 
 		return basePos;
 	}
@@ -207,8 +208,8 @@ namespace linked
 	hm::vec2 WindowDiv::getScreenPosition() const
 	{
 		hm::vec2 divPosition = const_cast<hm::vec2&>(m_windowRelativePosition) + hm::vec2(
-			win_state.win_width / 2.0f,
-			win_state.win_height / 2.0f);
+			window_info.width / 2.0f,
+			window_info.height / 2.0f);
 		divPosition.x -= m_width / 2.0f;
 		divPosition.y -= m_height / 2.0f;
 		return divPosition;

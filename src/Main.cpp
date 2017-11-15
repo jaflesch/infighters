@@ -1,22 +1,17 @@
-#include "common.h"
+#include "../common.h"
 #include "input.h"
 #define HOGL_IMPLEMENT
 #include "ho_gl.h"
+#define HO_ARENA_IMPLEMENT
+#include <memory_arena.h>
 #include "util.h"
 #include <hmath.h>
 #include "application.h"
 #include "chat.h"
 #include <stdlib.h>
 #include <time.h>
-#include "debug_table.h"
-
-DebugTable debug_table;
-
-Window_State win_state;
-
-Keyboard_State keyboard_state = { 0 };
-Mouse_State mouse_state = { 0 };
-extern Chat* g_chat;
+#include "font_render/os.h"
+#include "font_render/render_engine.h"
 
 struct Timer
 {
@@ -36,163 +31,95 @@ struct Timer
 	}
 };
 
-LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
+Window_Info window_info;
+Keyboard_State keyboard_state = { 0 };
+Mouse_State mouse_state = { 0 };
+extern Chat* g_chat;
+
+extern Font_ID fonts[32];
+
+#define DEFAULT_FONT "./res/fonts/Oswald-Regular.ttf"
+
+void application_state_init()
 {
-	switch (msg)
-	{
-	case WM_MOUSEMOVE: {
-		int width = win_state.win_width;
-		int height = win_state.win_height;
-		int x = GET_X_LPARAM(lparam);
-		int y = GET_Y_LPARAM(lparam);
+	linked::Window::linkedWindowInit();
+	init_application();
 
-		const float aspect = (float)width / height;
-		float screenX = ((float)x * 2 / width - 1.0f);
-		float screenY = -((float)y * 2 / height - 1.0f);
+	engine::render_engine_init();
+	font_rendering_init();
+	fonts[0] = load_font(DEFAULT_FONT, 16, false);
+	fonts[1] = load_font(DEFAULT_FONT, 14, false);
+	fonts[2] = load_font(DEFAULT_FONT, 12, false);
+	fonts[3] = load_font(DEFAULT_FONT, 24, false);
 
-		mouse_state.x = x;
-		mouse_state.y = y;
-	}break;
-	case WM_LBUTTONDOWN: {
-		int width = win_state.win_width;
-		int height = win_state.win_height;
-
-		const float aspect = (float)width / height;
-		float screenX = ((float)mouse_state.x * 2 / width - 1.0f);
-		float screenY = -((float)mouse_state.x * 2 / height - 1.0f);
-
-		for (unsigned int i = 0; i < linked::Window::openedWindows.size(); i++)
-			linked::Window::openedWindows[i]->mouseCallback(0, 1, 0);
-		linked::Button::mouseCallback(0, 1, 0);
-	}break;
-	case WM_LBUTTONUP: {
-		for (unsigned int i = 0; i < linked::Window::openedWindows.size(); i++)
-			linked::Window::openedWindows[i]->mouseCallback(0, 0, 0);
-		linked::Button::mouseCallback(0, 0, 0);
-	}break;
-	case WM_KILLFOCUS: {
-		ZeroMemory(keyboard_state.key, MAX_KEYS);
-	}break;
-	case WM_CREATE: break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	case WM_SYSKEYDOWN:
-		break;
-	case WM_SYSKEYUP:
-		break;
-	case WM_CHAR:
-		if (g_chat && g_chat->m_active) {
-			g_chat->handle_keystroke(wparam, lparam);
-		}
-		break;
-	case WM_SIZE: {
-		RECT r;
-		GetClientRect(window, &r);
-		win_state.win_width = r.right - r.left;
-		win_state.win_height = r.bottom - r.top;
-		glViewport(0, 0, win_state.win_width, win_state.win_height);
-	} break;
-	case WM_DROPFILES: {
-		char buffer[512];
-		HDROP hDrop = (HDROP)wparam;
-		UINT ret = DragQueryFile(hDrop, 0, buffer, 512);
-		POINT mouse_loc;
-		DragQueryPoint(hDrop, &mouse_loc);
-		DragFinish(hDrop);
-		//create_object(buffer);
-	}break;
-	default:
-		return DefWindowProc(window, msg, wparam, lparam);
-	}
-	return 0;
+	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+	glDisable(GL_CULL_FACE);
 }
 
-
-int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, int cmd_show)
+void application_state_update(double frametime)
 {
-	WNDCLASSEX window_class;
-	window_class.cbSize = sizeof(WNDCLASSEX);
-	window_class.style = 0;
-	window_class.lpfnWndProc = WndProc;
-	window_class.cbClsExtra = 0;
-	window_class.cbWndExtra = 0;
-	window_class.hInstance = instance;
-	window_class.hIcon = LoadIcon(instance, MAKEINTRESOURCE(NULL));
-	window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
-	window_class.hbrBackground = 0;
-	window_class.lpszMenuName = NULL;
-	window_class.lpszClassName = "HoEngineClass";
-	window_class.hIconSm = NULL;
+	update_and_render(frametime);
 
-	if (!RegisterClassEx(&window_class)) error_fatal("Error creating window class.\n", 0);
+	linked::Window::updateWindows();
+	linked::Window::renderWindows();
 
-	// alloc console
+	//font_rendering_flush();
+}
+
+#ifdef _WIN64
+s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, int cmd_show)
+{
 #if _DEBUG
 	AllocConsole();
 	FILE* pCout;
 	freopen_s(&pCout, "CONOUT$", "w", stdout);
 #endif
 
-	u32 window_style_exflags = WS_EX_ACCEPTFILES | WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-	u32 window_style_flags = WS_OVERLAPPEDWINDOW;
-	// Note: Client area must be correct, so windows needs to get the WindowRect
-	// area depending on the style of the window
-	RECT window_rect = { 0 };
-	window_rect.right = 1600;
-	window_rect.bottom = 900;
-	AdjustWindowRectEx(&window_rect, window_style_flags, FALSE, window_style_exflags);
+	bool is_running = true;
 
-	win_state.g_wpPrev.length = sizeof(WINDOWPLACEMENT);
-	win_state.win_width = window_rect.right - window_rect.left;
-	win_state.win_height = window_rect.bottom - window_rect.top;
+	window_info.width = 1600;
+	window_info.height = 900;
+	window_info.hinstance = instance;
+	window_info.cmd_show = cmd_show;
 
-	win_state.window_handle = CreateWindowExA(
-		window_style_exflags,
-		window_class.lpszClassName,
-		"HoEngine",
-		window_style_flags,
-		50, 50,
-		win_state.win_width, win_state.win_height, NULL, NULL, instance, NULL
-	);
-	if (!win_state.window_handle) error_fatal("Error criating window context.\n", 0);
+	if (create_window(&window_info))
+	{
+		print("Error creating window.");
+		return -1;
+	}
 
-	ShowWindow(win_state.window_handle, cmd_show);
-	UpdateWindow(win_state.window_handle);
-
-	init_opengl(win_state.window_handle, &win_state.device_context, &win_state.rendering_context, 3, 1);
-
-	wglSwapIntervalEXT_(1);		// Enable Vsync
-
-	bool running = true;
-	MSG msg;
+	glewExperimental = true;
+	init_opengl(&window_info);
+	if (glewInit() != GLEW_OK)
+	{
+		print("Error loading Glew\n");
+		return -1;
+	}
 
 	// Track mouse events
 	TRACKMOUSEEVENT mouse_event = { 0 };
 	mouse_event.cbSize = sizeof(mouse_event);
 	mouse_event.dwFlags = TME_LEAVE;
 	mouse_event.dwHoverTime = HOVER_DEFAULT;
-	mouse_event.hwndTrack = win_state.window_handle;
+	mouse_event.hwndTrack = window_info.window_handle;
 
-	linked::Window::linkedWindowInit();
-
-	init_application();
+	application_state_init();
 
 	Timer timer;
-
 	srand(time(0));
 
 	double laststart = timer.GetTime();
 	double totaltime = 0.0;
+	MSG msg;
 
-	while (running) {
+	while (is_running)
+	{
 		double endframe = timer.GetTime();
 
 		double frametime = (endframe - laststart);
 		totaltime += frametime;
 		laststart = timer.GetTime();
 
-		//printf("%f\n", totaltime);
 		if (totaltime >= 1.0) {
 			totaltime = 0.0;
 			printf("1 second\n");
@@ -201,7 +128,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 		TrackMouseEvent(&mouse_event);
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0) {
 			if (msg.message == WM_QUIT) {
-				running = false;
+				is_running = false;
 				continue;
 			}
 			switch (msg.message) {
@@ -249,16 +176,11 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			DispatchMessage(&msg);
 		}
 
-		update_and_render(frametime);
-
-		linked::Window::updateWindows();
-		linked::Window::renderWindows();
-
-		SwapBuffers(win_state.device_context);
+		application_state_update(frametime);
+		swap_buffers(&window_info);
 	}
 	linked::Window::linkedWindowDestroy();
-#ifdef _DEBUG
-	FreeConsole();
-#endif
+
 	return 0;
 }
+#endif

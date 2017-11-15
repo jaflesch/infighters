@@ -1,14 +1,25 @@
 #include "application.h"
 #include "input.h"
 #include "chat.h"
+#include "font_render/os.h"
+#include "font_render/font_rendering.h"
 
 #define ARROW_UP 1
 #define ARROW_DOWN 0
 
-extern Window_State win_state;
+extern Window_Info window_info;
 Chat* g_chat = 0;
 Chat chat;
 linked::Window* chat_window = 0;
+
+enum Font_Type {
+	FONT_OSWALD_REGULAR_16 = 0,
+	FONT_OSWALD_REGULAR_14 = 1,
+	FONT_OSWALD_REGULAR_12 = 2,
+	FONT_OSWALD_REGULAR_24 = 3,
+};
+
+Font_ID fonts[32] = {};
 
 #include "camera.cpp"
 #include "load_model.cpp"
@@ -727,7 +738,7 @@ void hide_all_windows() {
 void init_char_selection_mode()
 {
 	// left character window
-	linked::Window* left_char_window = new linked::Window(400, 840, hm::vec2(100, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), 0, 0, linked::W_BORDER);
+	linked::Window* left_char_window = new linked::Window(400, 840, hm::vec2(100, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 	left_char_window->setBorderSizeX(10.0f);
 	left_char_window->setBorderSizeY(0.0f);
 	left_char_window->setBorderColor(hm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
@@ -748,7 +759,7 @@ void init_char_selection_mode()
 	float char_window_height = 300.0f;
 
 	// Character selected lower window (bottom)
-	linked::Window* char_selected_window = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	linked::Window* char_selected_window = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
 	gw.char_selected_window = char_selected_window;
 
 	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -800,7 +811,7 @@ void init_char_selection_mode()
 	char_sel_state.play_button_div = play_div;
 
 	// Character selection window (top)
-	linked::Window* char_selection_window = new linked::Window(6 * char_window_width + 100.0f, 630, hm::vec2(520, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	linked::Window* char_selection_window = new linked::Window(6 * char_window_width + 100.0f, 630, hm::vec2(520, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
 	gw.char_selection_window = char_selection_window;
 
 	Texture* chars_texture[NUM_CHARS] = {};
@@ -1016,7 +1027,7 @@ void init_combat_mode()
 
 	{
 		// Players Names
-		linked::Window* player_name = new linked::Window(win_state.win_width, 80, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.6f), 0, 0, linked::W_UNFOCUSABLE);
+		linked::Window* player_name = new linked::Window(window_info.width, 80, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.6f), 0, 0, linked::W_UNFOCUSABLE);
 		linked::WindowDiv* player_name_div = new linked::WindowDiv(*player_name, 300, 32, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_CENTER_Y | linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		linked::WindowDiv* enemy_name_div = new linked::WindowDiv(*player_name, 300, 32, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), linked::DIV_CENTER_Y | linked::DIV_ANCHOR_RIGHT | linked::DIV_ANCHOR_TOP);
 		player_name->divs.push_back(player_name_div);
@@ -1064,7 +1075,7 @@ void init_combat_mode()
 	}
 	{
 		// Timer window
-		linked::Window* timer_window = new linked::Window(win_state.win_width, 5, hm::vec2(0, 80), greener_cyan, 0, 0, linked::W_UNFOCUSABLE);
+		linked::Window* timer_window = new linked::Window(window_info.width, 5, hm::vec2(0, 80), greener_cyan, 0, 0, linked::W_UNFOCUSABLE);
 		gw.timer_window = timer_window;
 	}
 
@@ -1164,7 +1175,7 @@ void init_combat_mode()
 		float orbs_size = 64.0f;
 
 		hm::vec4 combat_info_bar_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 0.8f);
-		linked::Window* combat_bottom_info = new linked::Window(win_state.win_width, 200, hm::vec2(0, 660), combat_info_bar_color, 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+		linked::Window* combat_bottom_info = new linked::Window(window_info.width, 200, hm::vec2(0, 660), combat_info_bar_color, 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 		linked::WindowDiv* orbs_div = new linked::WindowDiv(*combat_bottom_info, 500, 100, 0, 0, hm::vec2(45.0f, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_Y);
 		combat_bottom_info->divs.push_back(orbs_div);
 
@@ -1279,7 +1290,7 @@ void init_combat_mode()
 	
 	{
 		// Multiple Orb Modal
-		linked::Window* exchange_orbs = new linked::Window(460, 260, hm::vec2(win_state.win_width / 2 - 460 / 2, win_state.win_height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+		linked::Window* exchange_orbs = new linked::Window(460, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
 			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
 		exchange_orbs->setBorderColor(greener_cyan);
 		exchange_orbs->setTitleColor(char_window_color);
@@ -1419,8 +1430,8 @@ void init_application()
 	ggs.last_mode = MODE_INTRO;
 
 	// background @temporary
-	linked::Window* bgwindow = new linked::Window(win_state.win_width, win_state.win_height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
-	linked::WindowDiv* bgdiv = new linked::WindowDiv(*bgwindow, win_state.win_width, win_state.win_height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), DIV_ANCHOR_LEFT | DIV_ANCHOR_TOP);
+	linked::Window* bgwindow = new linked::Window(window_info.width, window_info.height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
+	linked::WindowDiv* bgdiv = new linked::WindowDiv(*bgwindow, window_info.width, window_info.height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), DIV_ANCHOR_LEFT | DIV_ANCHOR_TOP);
 	bgwindow->divs.push_back(bgdiv);
 	Texture* bgtexture = new Texture("res/textures/bg2.jpg");
 	bgdiv->setBackgroundTexture(bgtexture);
@@ -1554,7 +1565,7 @@ void update_game_mode(double frametime)
 				// this is when the turn is flipped
 				end_turn();
 			}
-			double new_w = (int)((double)win_state.win_width * turn_time / TURN_DURATION);
+			double new_w = (int)((double)window_info.width * turn_time / TURN_DURATION);
 			gw.timer_window->setWidth(new_w);
 
 			bool is_hovering_skill = false;
@@ -1718,9 +1729,6 @@ void update_and_render(double frametime)
 
 void input()
 {
-	win_state.move_camera = !chat_window->isAttached();
-	win_state.do_input = !chat.m_enabled;
-
 	if (keyboard_state.key_event[VK_F1]) {
 		keyboard_state.key_event[VK_F1] = false;
 		chat_window->setActive(!chat_window->getActive());
@@ -1753,9 +1761,6 @@ void input()
 		keyboard_state.key_event['Q'] = false;
 		gw.exchange_orbs->setFocus();
 	}
-
-	if (!chat_window->isFocused())
-		chat_window->setFocus();
 }
 
 // Layout functions

@@ -53,11 +53,12 @@ extern Mouse_State mouse_state;
 
 void mouse_move_event(Camera* camera, int valuex, int valuey)
 {
-	if (!win_state.move_camera) return;
+	// @todo readd this
+	//if (!win_state.move_camera) return;
 #define TURNSPEED -0.1f
 
-	float x = (2.0f * valuex) / win_state.win_width - 1;
-	float y = (2.0f * valuey) / win_state.win_height - 1;
+	float x = (2.0f * valuex) / window_info.width - 1;
+	float y = (2.0f * valuey) / window_info.height - 1;
 
 	float amtx = valuex * TURNSPEED;
 	float amty = valuey * TURNSPEED;
@@ -68,7 +69,8 @@ void mouse_move_event(Camera* camera, int valuex, int valuey)
 
 void input_camera(Camera* camera)
 {
-	if (!win_state.do_input) return;
+	// @ todo readd this
+	//if (!win_state.do_input) return;
 	float CAMSPEED = 65.0f;
 	float CAMTURNSPEED = 30.0f;
 
@@ -99,7 +101,7 @@ void input_camera(Camera* camera)
 		mouse_state.y_left = mouse_state.y;
 	}
 
-	float aspect = (float)win_state.win_width / win_state.win_height;
+	float aspect = (float)window_info.width / window_info.height;
 	camera->projection_matrix = mat4::perspective(camera->fov, aspect, camera->near_plane, camera->far_plane);
 
 	camera->move_forward_and_back(camera->current_speed * (1.0f / 60.0f));

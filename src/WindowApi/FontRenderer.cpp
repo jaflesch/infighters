@@ -3,8 +3,10 @@
 #include "Mesh.h"
 #include "..\ResourceLoad\Texture.h"
 #include "Primitive.h"
+#include "../font_render/os.h"
+#include "../font_render/font_rendering.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 
 FontRenderer::FontRenderer(float fontSize, int textureQuality)
 {
@@ -22,15 +24,15 @@ FontRenderer::~FontRenderer()
 	ftgl::texture_font_delete(font);
 	delete fontMesh;
 }
-
+/*
 TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat)
 {
 	TextInfo result;
 	result.start_position = hm::vec2(0, 0);
 	result.end_position = hm::vec2(0, 0);
 
-	float scaleX = win_state.win_width;
-	float scaleY = win_state.win_height;
+	float scaleX = window_info.width;
+	float scaleY = window_info.height;
 
 	float x = xPos / scaleX;
 	float firstPos = (float)xPos;
@@ -182,4 +184,22 @@ TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, floa
 #endif
 
 	return result;
+}
+*/
+TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat)
+{
+	TextInfo info;
+	
+	hm::vec2 start_pos = hm::vec2((xPos / 2.0f) + 800, (yPos / 2.0f) + 450);
+	info.start_position = start_pos;
+	if (text.length() > 0) {
+		render_text(0, (u8*)text.c_str(), text.length(), start_pos, color);
+	}
+	info.width = xPos - start_pos.x;
+	info.height = start_pos.y - yPos;
+	info.end_position = start_pos;
+	info.num_rows = 1;
+
+	font_rendering_flush();
+	return info;
 }

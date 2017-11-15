@@ -2,7 +2,7 @@
 #include "Button.h"
 #include "Label.h"
 #include "Mesh.h"
-#include "..\ResourceLoad\Texture.h"
+#include "../ResourceLoad/Texture.h"
 #include "Window.h"
 #include "WindowShader.h"
 

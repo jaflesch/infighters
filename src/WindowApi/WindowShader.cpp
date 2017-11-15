@@ -1,6 +1,7 @@
 #include "WindowShader.h"
+#include "../font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 
 WindowShader::WindowShader(std::string fileName) : Shader(fileName, nullptr)
 {
@@ -25,8 +26,8 @@ void WindowShader::update(hm::vec2& translation)
 	float x = translation.x * 2.0f;
 	float y = -(translation.y * 2.0f);
 
-	float windowWidth = win_state.win_width;
-	float windowHeight = win_state.win_height;
+	float windowWidth = window_info.width;
+	float windowHeight = window_info.height;
 
 	//glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(x, y, 0));
 	hm::mat4 model = hm::mat4::translate(hm::vec3(x, y, 0));

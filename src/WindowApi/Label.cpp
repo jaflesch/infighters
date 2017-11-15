@@ -1,7 +1,8 @@
 #include "Label.h"
 #include "WindowDiv.h"
+#include "../font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 
 namespace linked
 {
@@ -66,8 +67,8 @@ namespace linked
 
 		float rightLimit = m_div.getWindow().getPosition().x * 2.0f + m_div.getWidth() - 50;
 
-		int ww = win_state.win_width;
-		int wh = win_state.win_height;
+		int ww = window_info.width;
+		int wh = window_info.height;
 
 		if (m_text)
 		{

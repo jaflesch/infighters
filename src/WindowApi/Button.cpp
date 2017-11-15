@@ -1,8 +1,9 @@
 #include "Button.h"
 #include "WindowDiv.h"
 #include "..\input.h"
+#include "../font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 extern Mouse_State mouse_state;
 
 namespace linked
@@ -58,6 +59,16 @@ namespace linked
 
 	void Button::update()
 	{
+		if (!this->m_div.getWindow().isFocusable()) {
+			for (int i = 0; i < Window::openedWindows.size(); ++i) {
+				if (Window::openedWindows[i]->getActive() && Window::openedWindows[i]->isHovered()) {
+					if (Window::openedWindows[i] == &this->m_div.getWindow())
+						continue;
+					return;
+				}
+			}
+		}
+
 		if (Button::clicked)
 		{
 			//if (isHovered() && m_div.getWindow().isFocused())

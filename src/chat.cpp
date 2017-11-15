@@ -1,11 +1,10 @@
 #include "chat.h"
 #include "input.h"
-#include "debug_table.h"
 #include "util.h"
+#include "font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 extern Keyboard_State keyboard_state;
-extern DebugTable debug_table;
 
 Chat::Chat()
 {
@@ -21,7 +20,7 @@ linked::Window* Chat::init_chat()
 	Window* result = 0;
 
 	// Chat Window
-	chatWindow = new Window(500, 140, hm::vec2(10, win_state.win_height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
+	chatWindow = new Window(500, 140, hm::vec2(10, window_info.height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
 		W_BORDER | W_MOVABLE);
 	chatWindow->setBorderColor(hm::vec4(0, 0, 0.1f, 0.6f));
 	chatWindow->setBorderSizeX(1);

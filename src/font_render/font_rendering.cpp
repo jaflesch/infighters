@@ -2,7 +2,7 @@
 #include "render_engine.h"
 #include "os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 
 struct Font_List {
 	Font_Info list[64];
@@ -41,8 +41,15 @@ r32 get_font_size(Font_ID font_id) {
 	}
 }
 
-int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_limit)
+bool get_font_is_unicode(Font_ID font_id) {
+	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
+		return (r32)fonts.list[font_id].unicode;
+	}
+}
+
+int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_limit, bool is_unicode)
 {
+	font->unicode = is_unicode;
 	assert(load_limit <= MAX_UNICODE);
 
 	FT_Library library;
@@ -264,6 +271,9 @@ u32 get_unicode(u8* text, u32* advance) {
 		*advance = 1;
 		result = (u32)text[0];
 	}
+	if (result >= 2000) {
+		int x = 0;
+	}
 	return result;
 }
 
@@ -289,21 +299,35 @@ void font_finish_load(Font_Info* font)
 	}
 }
 
-void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& position, hm::vec4 color)
+void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& position, hm::vec4 color, bool unicode = true)
 {
 	Character* characters = font->characters;
 	glBindBuffer(GL_ARRAY_BUFFER, font->vbo);
 	void* buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
+	position.x = roundf(position.x);
+	position.y = roundf(position.y);
+	r32 start_x = position.x;
+
 	u32 offset = 0, num_chars = 0;
 	u32 previous_index = 0;
 	for (u32 i = 0, c = 0; text[c] != 0; ++i) {
 		u32 advance = 0;
-		u32 index = get_unicode(&text[c], &advance);
+		u32 index = 0;
+		u32 original = 0;
+		if (unicode) {
+			index = get_unicode(&text[c], &advance);
+		} else {
+			index = text[c];
+			advance = 1;
+		}
+		original = index;
 		c += advance;
 
-		if (!characters[index].renderable)
-			index = '.';
+		if (!characters[index].renderable && original != '\n') {
+			//index = ' ';
+			continue;
+		}
 
 		if (font->kerning) {
 			FT_Vector delta;
@@ -311,6 +335,11 @@ void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& pos
 			position.x += delta.x >> 6;
 		}
 		previous_index = index;
+
+		if (original == '\n') {
+			position.x = start_x;
+			position.y -= font->max_height;
+		}
 
 		GLfloat xpos = (GLfloat)position.x + characters[index].bearing[0];
 		GLfloat ypos = (GLfloat)position.y - (characters[index].size[1] - characters[index].bearing[1]);
@@ -359,13 +388,13 @@ Font_ID load_font_not_repeat(string name, u32 type_size) {
 	return id;
 }
 
-Font_ID load_font(const char* name, u32 type_size) {
+Font_ID load_font(const char* name, u32 type_size, bool is_unicode) {
 	s32 index = 0;
 	while (fonts.used[index]) {
 		index++;
 		if (index == 64) return -1;
 	}
-	int err = font_load(&fonts.list[index], name, type_size, 1024);
+	int err = font_load(&fonts.list[index], name, type_size, 1024, is_unicode);
 	if (err == -1) return -2;
 	font_finish_load(&fonts.list[index]);
 	fonts.used[index] = true;
@@ -397,7 +426,7 @@ int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color
 		if (font->text_buffer_offset + text.length >= font->text_buffer_max_length) {
 			text_buffer_realloc(font, font->text_buffer_offset + text.length + 512);
 		}
-		text_draw(font, font->text_buffer_offset, text.data, text.length, position, color);
+		text_draw(font, font->text_buffer_offset, text.data, text.length, position, color, font->unicode);
 		font->text_buffer_offset += text.length;
 		font->text_buffer_length += text.length;
 	} else {
@@ -406,9 +435,32 @@ int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color
 	return 0;
 }
 
+int render_text(Font_ID font_id, u8* text, u32 length, hm::vec2& position, hm::vec4 color) {
+	Font_Info* font = 0;
+	if (font_id >= 0) font = &fonts.list[font_id];
+
+	if (font->loaded) {
+		if (font->text_buffer_offset + length >= font->text_buffer_max_length) {
+			text_buffer_realloc(font, font->text_buffer_offset + length + 512);
+		}
+		text_draw(font, font->text_buffer_offset, text, length, position, color, font->unicode);
+		font->text_buffer_offset += length;
+		font->text_buffer_length += length;
+	}
+	else {
+		return 1;
+	}
+	return 0;
+}
+
 int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out) {
+	bool unicode = get_font_is_unicode(font_id);
 	r32 max_height = position_out.y;
 	u8* text = text_in.data;
+
+	position_out.x = roundf(position_out.x);
+	position_out.y = roundf(position_out.y);
+	r32 start_x = position_out.x;
 
 	Font_Info* font = 0;
 	if (font_id >= 0) font = &fonts.list[font_id];
@@ -419,11 +471,21 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 		u32 previous_index = 0;
 		for (u32 i = 0, c = 0; text[c] != 0; ++i) {
 			u32 advance = 0;
-			u32 index = get_unicode(&text[c], &advance);
+			u32 index = 0;
+			u32 original = 0;
+			if (unicode) {
+				index = get_unicode(&text[c], &advance);
+			} else {
+				index = text[c];
+				advance = 1;
+			}
+			original = index;
 			c += advance;
 
-			if (!characters[index].renderable)
-				index = '.';
+			if (!characters[index].renderable && original != '\n') {
+				//index = ' ';
+				continue;
+			}
 
 			if (font->kerning) {
 				FT_Vector delta;
@@ -431,6 +493,11 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 				position_out.x += delta.x >> 6;
 			}
 			previous_index = index;
+
+			if (original == '\n') {
+				position_out.x = start_x;
+				position_out.y -= font->max_height;
+			}
 
 			GLfloat xpos = (GLfloat)position_out.x + characters[index].bearing[0];
 			GLfloat ypos = (GLfloat)position_out.y - (characters[index].size[1] - characters[index].bearing[1]);

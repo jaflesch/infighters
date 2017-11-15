@@ -55,10 +55,12 @@ class Window
 public: 
 	// Static
 	// Methods
+	static bool update_background;
 	static void renderWindows();
 	static void updateWindows();
 	// Data
 	static std::vector<Window*> openedWindows;
+	static std::vector<Window*> backgroundWindows;
 	static WindowShader* m_windowShader;
 	static FontShader* m_textShader;
 	static void linkedWindowDestroy();
@@ -109,17 +111,18 @@ private:
 public:
 	std::vector<WindowDiv*> divs;
 	bool isFocused();
+	bool isHovered();
 private: 
 	// Methods
 	void attachMouse();
 	void detachMouse();
-	bool isHovered();
 	
 	void handleWindowHints(unsigned int hints);		// hints related
 	void setupBorder();
 
 public: // Getters and Setters
 	void setFocus();
+	inline bool isFocusable() const { return h_focusable; }
 	inline bool getActive() const { return this->m_active; }
 	inline void setActive(bool value) { this->m_active = value; }
 	inline hm::vec2 getPosition() const { return this->m_position; }

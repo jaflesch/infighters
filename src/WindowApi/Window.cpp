@@ -1,14 +1,17 @@
 #include "Window.h"
 #include "..\common.h"
 #include "..\input.h"
+#include "../font_render/os.h"
 
-extern Window_State win_state;
+extern Window_Info window_info;
 extern Mouse_State mouse_state;
 
 using namespace linked;
 std::vector<Window*> Window::openedWindows;
+std::vector<Window*> Window::backgroundWindows;
 FontShader* Window::m_textShader = nullptr;
 WindowShader* Window::m_windowShader = nullptr;
+bool Window::update_background = true;
 
 Window::Window(
 	int width, int height,
@@ -33,18 +36,24 @@ Window::Window(
 	// Set Initial Position
 	m_screenPosition = position;
 	m_position = hm::vec2(
-		position.x + (width - win_state.win_width) / 2.0f,
-		position.y + (height - win_state.win_height) / 2.0f);
+		position.x + (width - window_info.width) / 2.0f,
+		position.y + (height - window_info.height) / 2.0f);
 
 	handleWindowHints(hints);
 
-	// When this window is created it will be focused automatically
-	focused = true;
 	m_active = true;
-	// Unfocus all of the others
-	for (unsigned int i = 0; i < openedWindows.size(); i++)
-		openedWindows[i]->focused = false;
-	Window::openedWindows.push_back(this);
+
+	if (h_focusable) {
+		// When this window is created it will be focused automatically
+		focused = true;
+		// Unfocus all of the others
+		for (unsigned int i = 0; i < openedWindows.size(); i++)
+			openedWindows[i]->focused = false;
+		Window::openedWindows.push_back(this);
+	} else {
+		Window::backgroundWindows.push_back(this);
+	}
+
 }
 
 Window::~Window()
@@ -123,7 +132,7 @@ void Window::render()
 
 	// Set clipping planes back to all the screen
 	Window::m_windowShader->clipTL = hm::vec2(-1, -1);
-	Window::m_windowShader->clipBR = hm::vec2(win_state.win_width, win_state.win_height);
+	Window::m_windowShader->clipBR = hm::vec2(window_info.width, window_info.height);
 
 	// render window title in header if header enabled
 	if (h_header)
@@ -131,7 +140,7 @@ void Window::render()
 		// Set Clipping planes to all the context (to be always rendered)
 		Window::m_textShader->useShader();
 		Window::m_textShader->clipTL = hm::vec2(-1, -1);
-		Window::m_textShader->clipBR = hm::vec2(win_state.win_width, win_state.win_height);
+		Window::m_textShader->clipBR = hm::vec2(window_info.width, window_info.height);
 		Window::m_textShader->update();
 
 		float rightLimit = getWindowBasePosition((float)m_width, 0).x;
@@ -148,21 +157,29 @@ void Window::render()
 
 void Window::update()
 {
-	if (h_movable && m_attached) {
-		int x = 0;
-		focused = true;
-	}
 	if (!m_active)
 		return;
+
+	if (!h_focusable) {
+		return;
+	} else if(isHovered()) {
+		Window::update_background = false;
+	} else {
+		Window::update_background = true;
+	}
+
 	// if the mouse is attached to the window, move it accordingly
 	if (m_attached && h_movable && focused)
 	{
+		update_background = false;
 		hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
 		hm::vec2 delta = m_cursorPosWhenAttached - cursorPosition;
 		setPosition(m_posWhenAttached - delta);
 		// updates the screen position
-		m_screenPosition = m_position + hm::vec2(win_state.win_width / 2.0f, win_state.win_height / 2.0f);
+		m_screenPosition = m_position + hm::vec2(window_info.width / 2.0f, window_info.height / 2.0f);
 		m_screenPosition = m_screenPosition - hm::vec2(m_width / 2.0f, m_height / 2.0f);
+	} else {
+		update_background = true;
 	}
 }
 
@@ -233,15 +250,12 @@ void Window::setFocus()
 
 void Window::attachMouse()
 {
-	if (h_movable) {
-		int x = 0;
-	}
 	if (!h_focusable) {
 		return;
 	}
 
 	// Verify if the window is focused and is beeing hovered
-	if (isHovered())
+	if (isHovered() && m_active)
 	{
 		// If window is focused and is hovered, don't do anything, state is correct as it is
 		for (unsigned int i = 0; i < openedWindows.size(); i++)
@@ -289,8 +303,8 @@ bool Window::isHovered()
 {
 	hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
 	hm::vec2 cursorPosRefWindow = hm::vec2(
-		cursorPosition.x + (m_width - win_state.win_width) / 2.0f,
-		cursorPosition.y + (m_height - win_state.win_height) / 2.0f);
+		cursorPosition.x + (m_width - window_info.width) / 2.0f,
+		cursorPosition.y + (m_height - window_info.height) / 2.0f);
 
 	if (cursorPosRefWindow.x >= m_position.x && cursorPosRefWindow.x <= m_position.x + m_width &&
 		cursorPosRefWindow.y >= m_position.y && cursorPosRefWindow.y <= m_position.y + m_height)
@@ -334,8 +348,8 @@ hm::vec2 Window::getWindowBasePosition(float xoffset, float yoffset) const
 	basePos.x -= m_width / 2.0f;
 	basePos.y -= m_height / 2.0f;
 
-	basePos.x /= win_state.win_width / 2.0f;
-	basePos.y /= win_state.win_height / 2.0f;
+	basePos.x /= window_info.width / 2.0f;
+	basePos.y /= window_info.height / 2.0f;
 
 	return basePos;
 }
@@ -365,9 +379,14 @@ void Window::setupBorder()
 
 void Window::renderWindows()
 {
+	if (backgroundWindows.size() > 0)
+		for (unsigned int i = 0; i < backgroundWindows.size(); ++i)
+			backgroundWindows[i]->render();
+
 	if (openedWindows.size() > 0)
 		for (unsigned int i = 0; i < openedWindows.size(); i++)
 			openedWindows[i]->render();
+
 
 	Button::flush();
 }
@@ -376,6 +395,11 @@ void Window::updateWindows()
 {
 	for (Window* w : Window::openedWindows)
 		w->update();
+
+	if (update_background) {
+		for (Window* w : Window::backgroundWindows)
+			w->update();
+	}
 }
 
 void Window::setBorderSizeY(float newBorderSize)

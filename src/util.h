@@ -1,100 +1,72 @@
 #pragma once
-#include "common.h"
+#include "../common.h"
+#include <memory_arena.h>
 
-#define FLAG(N) (1 << N)
+#ifdef __linux__
+#include <signal.h>
+#define __debugbreak() raise(SIGTRAP)
+#endif
+#define assert(X) if(!(X)) __debugbreak()
 
-#define FOR(N) for(int i = 0; i < N; ++i)
-#define MAX(L, R) ((L > R) ? L : R)
-#define MIN(L, R) ((L < R) ? L : R)
-#define assert(EXP) if(!(EXP)) { printf("Assertion failed at %s (%d)", __FILE__, __LINE__); DebugBreak(); }
+#define MAX(X, Y) ((X < Y) ? Y : X)
+#define MIN(X, Y) ((X < Y) ? X : Y)
 
-#define E_32 2.7182818284f
-#define MINS32 -2147483648
-#define MAXS32 2147483647
-#define MAXS64 9223372036854775807
-#define MINS64 -9223372036854775808
-#define MAXU64 18446744073709551615
+// Alloc memory 'size' bytes
+extern void* memory_alloc(u32 size);
+// Free alloc'd memory block
+extern void memory_free(void* block);
+// Copy 'size' bytes from origin to destination
+extern void memory_copy(void* destination, void* origin, u32 size);
+// Copy string from origin to destination, with \0
+extern void string_copy(s8* destination, s8* origin);
+// Compare two strings, 0 if equal
+extern s32 string_compare(s8* str1, s8* str2);
+// Print to stdout
+extern void print(const char *fmt, ...);
 
-u8* read_entire_file(u8* filename, s64* out_size);
+struct string {
+	s64 length;
+	u8* data;
+
+	string() {
+		length = 0;
+		data = 0;
+	}
+};
+
+extern r32 str_to_r32(string str);
+extern r64 str_to_r64(string str);
+
+string make_string(s8* v);
+string make_string(s8* v, s64 length);
+void free_string(string* s);
+
+string make_string(Memory_Arena* arena, s8* v);
+string make_string(Memory_Arena* arena, s8* v, s64 length);
+
+string concat(string* left, string* right, bool _free = false);
+string concat(string* left, const s8* right, bool _free = false);
+string concat(s8* left, string* right, bool _free = false);
+string concat(s8* left, s8* right);
+
+bool equal(string* left, string* right);
+bool equal(string* left, const s8* right);
+bool equal(s8* left, string* right);
+bool equal(s8* left, s8* right);
+
+bool is_white_space(char str);
+bool str_equal(const char* str1, int str1_size, const char* str2, int str2_size);
+
+u8 hex_from_ascii(u8 c);
+s64 next_2_pow(s64 num);
+
+int s32_to_str_base10(s32 val, char* buffer);
 
 void error_fatal(char* error_type, char* buffer);
 void error_warning(char* error);
-void log_success(char* msg);
 
-#define CLAMP_DOWN(V, MIN) ((V < MIN) ? MIN : V)
-#define CLAMP_UP(V, MAX) ((V > MAX) ? MAX : V)
-#define CLAMP(V, MIN, MAX) ((V < MIN) ? MIN : (V > MAX) ? MAX : V)
+bool is_number(char c);
+bool is_letter(char c);
 
-// misc
 
-int u32_to_str_base10(u32 val, char* buffer);
-int u64_to_str_base10(u64 val, char* buffer);
-int s32_to_str_base10(s32 val, char* buffer);
-int s64_to_str_base10(s64 val, char* buffer);
-int u64_to_str_base16(u64 val, bool leading_zeros, char* buffer);
-int u8_to_str_base16(u8 val, bool leading_zeros, char* buffer);
-
-#define internal static
-
-internal bool is_white_space(char str)
-{
-	if (str == ' ' ||
-		str == '\t' ||
-		//str == '\n' ||
-		str == '\v' ||
-		str == '\f' ||
-		str == '\r')
-	{
-		return true;
-	}
-	return false;
-}
-
-internal bool is_number(char c)
-{
-	if (c >= '0' && c <= '9')
-		return true;
-	return false;
-}
-
-internal bool is_letter(char c)
-{
-	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-		return true;
-	return false;
-}
-
-bool is_string_equal(u8* str1, u8* str2);
-
-//
-//	capacity -1 means immutable string
-//
-struct string
-{
-	s64 capacity;
-	size_t length;
-
-	char* data;
-
-	string();
-	string(s64 capac, size_t strlen, char* str);
-	~string();
-	void cat(string& r);
-	void cat(char* str, size_t len);
-	void cat(s64 num);
-
-	bool is_mutable();
-};
-
-string make_new_string(const char*);
-string make_new_string(s64 capacity);
-void make_immutable_string(string& s, const char* val, s64 length);
-void make_immutable_string(string& s, const char* val);
-void make_immutable_string(string& dest, string& src);
-
-bool str_equal(const char* str1, int str1_size, const char* str2, int str2_size);
-
-#undef internal
-
-void init_timer();
-double get_time();
+u8* read_entire_file(u8* filename, s64* out_size);

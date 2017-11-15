@@ -1,6 +1,7 @@
 #ifndef HOHEX_HOGL_H
 #define HOHEX_HOGL_H
-#include "common.h"
+#include "../common.h"
+#undef internal
 
 //#include <GL/gl.h>
 #include <GL/glew.h>

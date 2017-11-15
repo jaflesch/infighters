@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 
 #define MAX_KEYS 1024
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include "common.h"
-#include "util.h"
+#include "../common.h"
+
+#include "../util.h"
 
 #include <hmath.h>
 #include <GL/glew.h>
@@ -68,6 +69,7 @@ struct Font_Info {
 	bool loaded = false;
 	bool finish_load = false;
 	bool kerning = false;
+	bool unicode = true;
 
 	FT_Face face;
 	Character characters[MAX_UNICODE];
@@ -108,7 +110,7 @@ const char fshader[] = R"(
 
 u32 get_unicode(u8* text, u32* advance);
 
-int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_limit);
+int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_limit, bool is_unicode = true);
 void font_finish_load(Font_Info* font);
 
 void text_buffer_init(Font_Info* font, s64 size);
@@ -116,7 +118,6 @@ void text_buffer_realloc(Font_Info* font, s64 new_size);
 void text_buffer_change(float* dest, float* data, s64 size);
 void text_buffer_draw(Font_Info* font, s32 size, hm::vec2 window_size);
 
-void text_draw(Font_Info* font, s64 offset, u8* text, s32 length, hm::vec2& position, hm::vec4 color);
 
 extern "C" u32 load_font_thread(void *arg);
 
@@ -128,7 +129,7 @@ void font_rendering_flush();
 // positive number is the font id
 // -1 the font list is full
 // -2 could not find the font
-Font_ID load_font(const char* name, u32 type_size);
+Font_ID load_font(const char* name, u32 type_size, bool is_unicode = true);
 
 Font_ID load_font_not_repeat(string name, u32 type_size);
 
@@ -138,6 +139,7 @@ Font_ID load_font_not_repeat(string name, u32 type_size);
 Font_ID load_font_async(const char* name, u32 type_size);
 
 int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color);
+int render_text(Font_ID font_id, u8* text, u32 length, hm::vec2& position, hm::vec4 color);
 int render_text_get_info(Font_ID font_id, string text, hm::vec2& position);
 GLuint get_font_shader();
 GLuint get_font_texture(Font_ID font_id);

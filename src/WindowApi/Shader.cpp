@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include <windows.h>
 #include <fstream>
-#include "..\common.h"
+#include "../common.h"
 #include <iostream>
 
 Shader::Shader(std::string filename, Camera* camera)
