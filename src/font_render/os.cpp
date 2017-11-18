@@ -5,6 +5,7 @@
 // @temporary
 #include "../input.h"
 #include "../WindowApi/Window.h"
+#include "../chat.h"
 
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
@@ -12,6 +13,7 @@
 extern Window_Info window_info;
 extern Mouse_State mouse_state;
 extern Keyboard_State keyboard_state;
+extern Chat* g_chat;
 
 #ifdef _WIN64
 
@@ -61,9 +63,9 @@ LRESULT CALLBACK window_proc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam
 	case WM_SYSKEYUP:
 		break;
 	case WM_CHAR:
-		//if (g_chat && g_chat->m_active) {
-		//	g_chat->handle_keystroke(wparam, lparam);
-		//}
+		if (g_chat && g_chat->m_active) {
+			g_chat->handle_keystroke(wparam, lparam);
+		}
 		break;
 	case WM_SIZE: {
 		RECT r;

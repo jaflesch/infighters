@@ -22,13 +22,16 @@ private:
 
 	GLuint uniformProjection, uniformTextColor, uniformModel;
 	GLuint uniformClipTopLeft, uniformClipBotRight;
+	GLuint uniformOpacity;
 
 	hm::vec4 m_backgroundColor;
 	hm::mat4 m_projection;
 	hm::mat4 m_model;
+	float m_opacity;
 
 	int useTexture;
 public:
+	inline void setOpacity(float opacity) { this->m_opacity = opacity; }
 	inline hm::mat4& getProjection(){ return this->m_projection; }
 	inline hm::mat4& getModel() { return this->m_model; }
 	inline hm::vec4& getBackgroundColor() { return this->m_backgroundColor; }

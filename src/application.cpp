@@ -16,6 +16,7 @@ Font_ID fonts[32] = {};
 
 #include "camera.cpp"
 #include "load_model.cpp"
+#include "game_skills.cpp"
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",
@@ -516,7 +517,7 @@ Texture* orb_dead_enemy = 0;
 
 static GameState ggs = {};
 static Char_Selection_State char_sel_state = {};
-static Combat_State combat_state = {};
+extern Combat_State combat_state = {};
 static Game_Windows gw = {};
 
 static double turn_time = TURN_DURATION;
@@ -527,6 +528,7 @@ hm::vec4 char_window_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 1.0f)
 hm::vec4 char_selected_bg_color(0.4f, 0.7f, 0.7f, 1.0f);
 hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 hm::vec4 color_red(1, 0, 0, 1);
+hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
 
 // Button Callbacks
 static void button_select_character(void* arg) {
@@ -575,9 +577,6 @@ static void button_combat_start_mode(void* arg)
 }
 
 static void button_exchange_orb(void* arg) {
-	for (int i = 0; i < ORB_NUMBER; ++i) {
-		printf("Number of orbs %d\n", combat_state.orbs_amount[i]);
-	}
 	// Setup view and state
 	layout_change_exchange_orb_amount(ORB_ALL, 0);
 	combat_state.exchange_orbs_state.accumulated = 0;
@@ -589,17 +588,15 @@ static void button_exchange_orb(void* arg) {
 
 	// reset confirm button color
 	linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
-	confirm_button->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-	confirm_button->setHoveredBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-	confirm_button->setHoveredTextColor(hm::vec4(0, 0, 0.2f, 1.0f));
+	confirm_button->setActive(false, false);
 
 	// Gray out all upper arrows
 	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
-		combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
-		if(combat_state.exchange_orbs_state.orbs_start_amount[i] <= 0)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+		combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(false, false);
+		if (combat_state.exchange_orbs_state.orbs_start_amount[i] <= 0)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(false, false);
 		else
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(true);
 	}
 
 	combat_state.exchange_orbs_state.active = true;
@@ -627,6 +624,7 @@ static void button_exchange_orbs_confirm(void* arg) {
 		}
 		combat_state.total_orbs -= combat_state.exchange_orbs_state.num_lost;
 		combat_state.total_orbs += combat_state.exchange_orbs_state.num_gain;
+		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
 
 		combat_state.exchange_orbs_state.num_lost = 0;
 		combat_state.exchange_orbs_state.num_gain = 0;
@@ -668,32 +666,28 @@ static void button_exchange_orb_arrow(void* arg) {
 		// update confirm button
 		linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
 		if (combat_state.exchange_orbs_state.accumulated == 0) {
-			confirm_button->setNormalBGColor(greener_cyan);
-			confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
-			confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+			confirm_button->setActive(true);
 			combat_state.exchange_orbs_state.can_confirm = true;
 		} else {
-			confirm_button->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-			confirm_button->setHoveredBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-			confirm_button->setHoveredTextColor(char_window_color);
+			confirm_button->setActive(false);
 			combat_state.exchange_orbs_state.can_confirm = false;
 		}
 	}
 
 	hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
 	if (combat_state.exchange_orbs_state.accumulated >= 3) {
-		for(int i = 0; i < ORB_NUMBER - 1; ++i)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		for (int i = 0; i < ORB_NUMBER - 1; ++i)
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(true);
 	} else {
 		for (int i = 0; i < ORB_NUMBER - 1; ++i)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(false);
 	}
 	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
 		int curr_amt = combat_state.exchange_orbs_state.orbs_start_amount[i] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i];
 		if (curr_amt <= 0)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 0.0f));
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(false);
 		else
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setNormalBGColor(hm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(true);
 	}
 }
 
@@ -770,7 +764,7 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* info_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(624.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(info_label_div);
-	linked::Label* info_label = new linked::Label(*info_label_div, (u8*)"Information", sizeof("Information"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
+	linked::Label* info_label = new linked::Label(*info_label_div, (u8*)"Information", sizeof("Information"), hm::vec2(5.0f, 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 	info_label_div->getLabels().push_back(info_label);
 
 	linked::WindowDiv* confirm_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(740.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -780,7 +774,7 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* confirm_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(764.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(confirm_label_div);
-	linked::Label* confirm_label = new linked::Label(*confirm_label_div, (u8*)"Confirm", sizeof("Confirm"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
+	linked::Label* confirm_label = new linked::Label(*confirm_label_div, (u8*)"Confirm", sizeof("Confirm"), hm::vec2(5.0f, 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	confirm_label_div->getLabels().push_back(confirm_label);
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -790,13 +784,13 @@ void init_char_selection_mode()
 
 	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_selected_window, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(back_label_div);
-	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	back_label_div->getLabels().push_back(back_label);
 
 	linked::WindowDiv* play_div = new linked::WindowDiv(*char_selected_window, 148, 48, 0, 0, hm::vec2(740.0f, 50.0f), hm::vec4(0.34f, 0.9f, 0.72f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_selected_window->divs.push_back(play_div);
-	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"), 
-		hm::vec2(44.0f, 48.0f / 2.0f + get_font_size(FONT_OSWALD_REGULAR_24) / 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"),
+		hm::vec2(44.0f, 48.0f / 2.0f - get_font_size(FONT_OSWALD_REGULAR_24) / 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 	linked::Button* play_button = new linked::Button(*play_div, play_label, hm::vec2(0, 0), 148, 48, hm::vec4(0.34f, 0.73f, 0.62f, 1), 0);
 	play_button->setHoveredBGColor(hm::vec4(0.24f, 0.63f, 0.52f, 1));
 	play_button->setHeldBGColor(char_window_held_color);
@@ -913,7 +907,7 @@ void init_char_information_mode()
 
 	linked::WindowDiv* back_label_div = new linked::WindowDiv(*char_info_window_bot, 256, 24, 0, 0, hm::vec2(864.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window_bot->divs.push_back(back_label_div);
-	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, get_font_size(FONT_OSWALD_LIGHT_16) + 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
+	linked::Label* back_label = new linked::Label(*back_label_div, (u8*)"Back", sizeof("Back"), hm::vec2(5.0f, 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0.0f, 0);
 	back_label_div->getLabels().push_back(back_label);
 	
 
@@ -937,13 +931,13 @@ void init_char_information_mode()
 	// gotta be first
 	linked::WindowDiv* skill_title_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 35.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window->divs.push_back(skill_title_div);
-	linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1,1,1,1), 38.0f, 0, 0);
+	linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1,1,1,1), FONT_OSWALD_REGULAR_18, 0, 0);
 	skill_title_div->getLabels().push_back(skill_title_label);
 
 	// gotta be second
 	linked::WindowDiv* skill_desc_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 85.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window->divs.push_back(skill_desc_div);
-	linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 34.0f, 0, 0);
+	linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 	skill_desc_div->getLabels().push_back(skill_desc_label);
 
 	linked::Window* skill_cost = new linked::Window(300, 48, hm::vec2(530 + 320, 20 + char_window_width + 20 * 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
@@ -961,37 +955,41 @@ void init_char_information_mode()
 	linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 4, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_5);
 
-	linked::WindowDiv* skill_group_div = new linked::WindowDiv(*char_info_window, 640, 48, 0, 0, hm::vec2(25.0f, 140.0f + 85.0f + 48 * 2), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_group_div = new linked::WindowDiv(*char_info_window, 640, 48, 0, 0, hm::vec2(25.0f, 630.0f - 48.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	gw.skill_group_div = skill_group_div;
 	char_info_window->divs.push_back(skill_group_div);
-	linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)/*"VIRTUAL, RANGED, INV, STATIC"*/"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+	linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)/*"VIRTUAL, RANGED, INV, STATIC"*/"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_12, 0, 0);
 	skill_group_div->getLabels().push_back(skill_group_label);
 
-	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_12, 0, 0);
 	skill_group_div->getLabels().push_back(skill_cooldown_label);
 }
 
 void init_combat_mode()
 {
-	char_textures[0]  = new Texture("res/char_square/zero_sq.png");
-	char_textures[1]  = new Texture("res/char_square/one_sq.png");
-	char_textures[2]  = new Texture("res/char_square/serial_sq.png");
-	char_textures[3]  = new Texture("res/char_square/ray_sq.png");
-	char_textures[4]  = new Texture("res/char_square/astar_sq.png");
-	char_textures[5]  = new Texture("res/char_square/deadlock_sq.png");
-	char_textures[6]  = new Texture("res/char_square/norma_sq.png");
-	char_textures[7]  = new Texture("res/char_square/hazard_sq.png");
-	char_textures[8]  = new Texture("res/char_square/qwerty_sq.png");
-	char_textures[9]  = new Texture("res/char_square/bigo_sq.png");
-	char_textures[10] = new Texture("res/char_square/new_sq.png");
-	char_textures[11] = new Texture("res/char_square/clockboy_sq.png");
-
+	// initialize unknown skill texture
 	for (int i = 0; i < NUM_CHARS * 4; i += 4) {
 		skill_textures[i + 0] = new Texture("res/skills/unk_skill1.png");
 		skill_textures[i + 1] = new Texture("res/skills/unk_skill2.png");
 		skill_textures[i + 2] = new Texture("res/skills/unk_skill3.png");
 		skill_textures[i + 3] = new Texture("res/skills/unk_skill4.png");
 	}
+
+	// Initialize Character square textures
+	char_textures[CHAR_ZERO]            = new Texture("res/char_square/zero_sq.png");
+	char_textures[CHAR_ONE]             = new Texture("res/char_square/one_sq.png");
+	char_textures[CHAR_SERIAL_KEYLLER]  = new Texture("res/char_square/serial_sq.png");
+	char_textures[CHAR_RAY_TRACEY]      = new Texture("res/char_square/ray_sq.png");
+	char_textures[CHAR_A_STAR]          = new Texture("res/char_square/astar_sq.png");
+	char_textures[CHAR_DEADLOCK]        = new Texture("res/char_square/deadlock_sq.png");
+	char_textures[CHAR_NORMA]           = new Texture("res/char_square/norma_sq.png");
+	char_textures[CHAR_HAZARD]          = new Texture("res/char_square/hazard_sq.png");
+	char_textures[CHAR_QWERTY]          = new Texture("res/char_square/qwerty_sq.png");
+	char_textures[CHAR_BIG_O]           = new Texture("res/char_square/bigo_sq.png");
+	char_textures[CHAR_NEW]             = new Texture("res/char_square/new_sq.png");
+	char_textures[CHAR_CLOCKBOY]        = new Texture("res/char_square/clockboy_sq.png");
+
+	// Initialize Skill textures
 	skill_textures[CHAR_ZERO * NUM_SKILLS + 0] = new Texture("res/skills/zero/false_rush.png");
 	skill_textures[CHAR_ZERO * NUM_SKILLS + 1] = new Texture("res/skills/zero/contradiction.png");
 	skill_textures[CHAR_ZERO * NUM_SKILLS + 2] = new Texture("res/skills/zero/requiem_zero.png");
@@ -1007,19 +1005,22 @@ void init_combat_mode()
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 2] = new Texture("res/skills/astar/neural_network.png");
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 3] = new Texture("res/skills/astar/hill_climbing.png");
 
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 0] = new Texture("res/skills/clockboy/clock_pulse.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 1] = new Texture("res/skills/clockboy/pipeline.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 2] = new Texture("res/skills/clockboy/overclock.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 3] = new Texture("res/skills/clockboy/branch_damage.png");
 
-	orb_textures[0] = new Texture("res/orbs/hard_orb.png");
-	orb_textures[1] = new Texture("res/orbs/soft_orb.png");
-	orb_textures[2] = new Texture("res/orbs/vr_orb.png");
-	orb_textures[3] = new Texture("res/orbs/bios_orb.png");
-	orb_textures[4] = new Texture("res/orbs/null_orb.png");
+	orb_textures[ORB_HARD] = new Texture("res/orbs/hard_orb.png");
+	orb_textures[ORB_SOFT] = new Texture("res/orbs/soft_orb.png");
+	orb_textures[ORB_VR]   = new Texture("res/orbs/vr_orb.png");
+	orb_textures[ORB_BIOS] = new Texture("res/orbs/bios_orb.png");
+	orb_textures[ORB_NULL] = new Texture("res/orbs/null_orb.png");
 
 	hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
 	hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
 	hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
 	hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
 	
-
 	{
 		// Players Names
 		linked::Window* player_name = new linked::Window(window_info.width, 80, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.6f), 0, 0, linked::W_UNFOCUSABLE);
@@ -1047,7 +1048,7 @@ void init_combat_mode()
 			poff_x += 32.0f + 5.0f;
 			gw.allies_indicator[i] = player_indicator;
 		}
-		//gw.allies_indicator[0]->setBackgroundTexture(orb_dead_ally);
+
 		poff_x = 0.0f;
 		for (int i = 0; i < NUM_ENEMIES; ++i) {
 			linked::WindowDiv* enemy_indicator = new linked::WindowDiv(*player_name, 32, 32, 0, 0, hm::vec2(1200.0f + poff_x, 0), hm::vec4(1, 0, 0, 1), linked::DIV_CENTER_Y | linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -1057,9 +1058,10 @@ void init_combat_mode()
 			gw.enemies_indicator[i] = enemy_indicator;
 		}
 
-		// end turn button
+		// End turn button
 		linked::WindowDiv* end_turn = new linked::WindowDiv(*player_name, 200, 45, 0, 0, hm::vec2(0, 20.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP |linked::DIV_CENTER_X);
 		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		end_turn_label->setPosition(hm::vec2((200.0f - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
 		linked::Button* end_turn_button = new linked::Button(*end_turn, end_turn_label, hm::vec2(0, 0), 200, 45, greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f), 0);
 		combat_state.end_turn_button = end_turn_button;
 		end_turn_button->setClickedCallback(button_end_turn);
@@ -1111,6 +1113,7 @@ void init_combat_mode()
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(hm::vec4(ally_hp_bar_full_color));
 			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 1, 1, 1), k);
 			skill_button->setHoveredBGColor(hm::vec4(0, 1, 1, 0.8f));
+			skill_button->setHeldBGColor(hm::vec4(0, 0.8f, 0.9f, 0.7f));
 			skill_div->getButtons().push_back(skill_button);
 			x_off += skill_img_size + x_spacing;
 		}
@@ -1123,7 +1126,7 @@ void init_combat_mode()
 
 		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies_info[i]->divs.push_back(dummy);
-		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), 28.0f, 0, 0);
+		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
 		dummy->getLabels().push_back(hplabel);
 
 		start_pos.x = 60;
@@ -1159,7 +1162,7 @@ void init_combat_mode()
 		
 		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(dummy);
-		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), enem_hp_bar_full_color, 28.0f, 0, 0);
+		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
 		dummy->getLabels().push_back(hplabel);
 
 		start_pos.x = 1400.0f;
@@ -1171,7 +1174,7 @@ void init_combat_mode()
 
 		hm::vec4 combat_info_bar_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 0.8f);
 		linked::Window* combat_bottom_info = new linked::Window(window_info.width, 200, hm::vec2(0, 660), combat_info_bar_color, 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
-		linked::WindowDiv* orbs_div = new linked::WindowDiv(*combat_bottom_info, 500, 100, 0, 0, hm::vec2(45.0f, 0), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_Y);
+		linked::WindowDiv* orbs_div = new linked::WindowDiv(*combat_bottom_info, 500, 100, 0, 0, hm::vec2(45.0f, 0), hm::vec4(1, 0, 0, 0.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_Y);
 		combat_bottom_info->divs.push_back(orbs_div);
 
 		linked::Button* multiple_orb_button = new linked::Button(*orbs_div, 0, hm::vec2(0, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
@@ -1203,20 +1206,31 @@ void init_combat_mode()
 		orbs_div->getButtons().push_back(exchange_orb_button);
 		exchange_orb_button->setClickedCallback(button_exchange_orb);
 
-		linked::Label* multiple_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		r32 orb_pos_offset = 0;
+		linked::Label* multiple_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		orb_pos_offset = 64.0f / 2.0f - multiple_orb_label->getTextWidth() / 2.0f;
+		multiple_orb_label->setPosition(hm::vec2(orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(multiple_orb_label);
 		combat_state.all_orbs_label = multiple_orb_label;
 
-		linked::Label* hard_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10), 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		r32 base_next_orb = (orbs_size + 10) + 18;
+		linked::Label* hard_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		hard_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(hard_orb_label);
 		combat_state.orb_labels[ORB_HARD] = hard_orb_label;
-		linked::Label* soft_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 2, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		base_next_orb = (orbs_size + 10) * 2 + 18;
+		linked::Label* soft_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		soft_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(soft_orb_label);
-		combat_state.orb_labels[ORB_SOFT] = soft_orb_label;		
-		linked::Label* vr_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 3, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		combat_state.orb_labels[ORB_SOFT] = soft_orb_label;	
+		base_next_orb = (orbs_size + 10) * 3 + 18;
+		linked::Label* vr_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		vr_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(vr_orb_label);
 		combat_state.orb_labels[ORB_VR] = vr_orb_label;
-		linked::Label* bios_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(20 * 2 + (orbs_size + 10) * 4, 74), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		base_next_orb = (orbs_size + 10) * 4 + 18;
+		linked::Label* bios_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
+		bios_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(bios_orb_label);
 		combat_state.orb_labels[ORB_BIOS] = bios_orb_label;
 
@@ -1234,21 +1248,21 @@ void init_combat_mode()
 
 		linked::WindowDiv* skill_title_div = new linked::WindowDiv(*combat_bottom_info, 300, 48, 0, 0, hm::vec2(780.0f, skill_desc_height), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_title_div);
-		linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 38.0f, 0, 0);
+		linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_18, 0, 0);
 		skill_title_div->getLabels().push_back(skill_title_label);
 		skill_title_div->m_render = false;
 
 		linked::WindowDiv* skill_desc_div = new linked::WindowDiv(*combat_bottom_info, 300, 48, 0, 0, hm::vec2(780.0f, skill_desc_height + 28 + 12), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_desc_div);
-		linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 30.0f, 0, 0);
+		linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_14, 0, 0);
 		skill_desc_div->getLabels().push_back(skill_desc_label);
 		skill_desc_div->m_render = false;
 
-		linked::WindowDiv* skill_group_div = new linked::WindowDiv(*combat_bottom_info, 600, 48, 0, 0, hm::vec2(780.0f, skill_desc_height + 126 - 26), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_group_div = new linked::WindowDiv(*combat_bottom_info, 600, 48, 0, 0, hm::vec2(780.0f, skill_desc_height + 126 - 18), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_group_div);
-		linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+		linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
 		skill_group_div->getLabels().push_back(skill_group_label);
-		linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(540, 0), hm::vec4(1, 1, 1, 1), 26.0f, 0, 0);
+		linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(540, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
 		skill_group_div->getLabels().push_back(skill_cooldown_label);
 		skill_desc_div->m_render = false;
 
@@ -1285,7 +1299,7 @@ void init_combat_mode()
 	
 	{
 		// Multiple Orb Modal
-		linked::Window* exchange_orbs = new linked::Window(460, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+		linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
 			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
 		exchange_orbs->setBorderColor(greener_cyan);
 		exchange_orbs->setTitleColor(char_window_color);
@@ -1296,17 +1310,20 @@ void init_combat_mode()
 		// Close Multiple Orb Modal
 		linked::WindowDiv* close_div = new linked::WindowDiv(*exchange_orbs, 360, 40, 0, 0, hm::vec2(0, -20), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_BOTTOM | linked::DIV_CENTER_X);
 		exchange_orbs->divs.push_back(close_div);
-		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
+		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
+		close_label->setPosition(hm::vec2((100.0f - close_label->getTextWidth()) / 2.0f, 10));
 		linked::Button* close_button = new linked::Button(*close_div, close_label, hm::vec2(200, 0), 100, 40, greener_cyan, 0);
 		close_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
 		close_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
 		close_button->setClickedCallback(button_exchange_orbs_close);
 		close_div->getButtons().push_back(close_button);
 
-		linked::Label* confirm_label = new linked::Label(*close_div, (u8*)"CONFIRM", sizeof("CONFIRM"), hm::vec2(10, 10), hm::vec4(0, 0, 0.2f, 1.0f), 38.0f, 0, 0);
-		linked::Button* confirm_button = new linked::Button(*close_div, confirm_label, hm::vec2(60, 0), 100, 40, hm::vec4(0.6f, 0.6f, 0.6f, 1.0f), 0);
-		//confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
-		//confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		linked::Label* confirm_label = new linked::Label(*close_div, (u8*)"CONFIRM", sizeof("CONFIRM"), hm::vec2(10, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
+		confirm_label->setPosition(hm::vec2((100.0f - confirm_label->getTextWidth()) / 2.0f, 10));
+		linked::Button* confirm_button = new linked::Button(*close_div, confirm_label, hm::vec2(60, 0), 100, 40, greener_cyan, 0);
+		confirm_button->setInactiveAllBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+		confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+		confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
 		confirm_button->setClickedCallback(button_exchange_orbs_confirm);
 		close_div->getButtons().push_back(confirm_button);
 
@@ -1339,79 +1356,113 @@ void init_combat_mode()
 		bios_orb_button->setAllBGTexture(orb_textures[3]);
 		info_div->getButtons().push_back(bios_orb_button);
 		
-		float spacing = 18 + 16 - 5;
-		linked::Label* multiple_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing - 18, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		linked::Label* multiple_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(0, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+		r32 text_width = multiple_orb_label->getTextWidth();
+		multiple_orb_label->setPosition(hm::vec2(orbs_size / 2.0f - text_width / 2.0f, 72));
 		info_div->getLabels().push_back(multiple_orb_label);
-		linked::Label* hard_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10), 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+
+		r32 spacing = (18 + (orbs_size + 10)) + (orbs_size / 2.0f - text_width / 2.0f);
+		linked::Label* hard_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
 		info_div->getLabels().push_back(hard_orb_label);
-		linked::Label* soft_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 2, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		spacing += (orbs_size + 10);
+		linked::Label* soft_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
 		info_div->getLabels().push_back(soft_orb_label);
-		linked::Label* vr_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 3, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		spacing += (orbs_size + 10);
+		linked::Label* vr_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
 		info_div->getLabels().push_back(vr_orb_label);
-		linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing + (orbs_size + 10) * 4, 72), hm::vec4(1, 1, 1, 1), orbs_size, 0, 0);
+		spacing += (orbs_size + 10);
+		linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
 		info_div->getLabels().push_back(bios_orb_label);		
 
 		Texture* arrow_up = new Texture("res/orbs/arrow_up.png");
 		Texture* arrow_down = new Texture("res/orbs/arrow_down.png");
 		float arrow_up_size = 24.0f;
 		hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
+		hm::vec4 arrow_normal_color = greener_cyan;
+		arrow_normal_color.z = 0.0f;
 		// up
-		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_HARD);
+		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_HARD);
 		hard_orb_arrow_up->setAllBGTexture(arrow_up);
 		hard_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		hard_orb_arrow_up->setInactiveAllBGColor(darker_gray);
 		hard_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
 		hard_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(hard_orb_arrow_up);
 
-		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_SOFT);
+		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_SOFT);
 		soft_orb_arrow_up->setAllBGTexture(arrow_up);
 		soft_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		soft_orb_arrow_up->setInactiveAllBGColor(darker_gray);
 		soft_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
 		soft_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(soft_orb_arrow_up);
 
-		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_VR);
+		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_VR);
 		vr_orb_arrow_up->setAllBGTexture(arrow_up);
 		vr_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		vr_orb_arrow_up->setInactiveAllBGColor(darker_gray);
 		vr_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
 		vr_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(vr_orb_arrow_up);
 
-		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_BIOS);
+		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_BIOS);
 		bios_orb_arrow_up->setAllBGTexture(arrow_up);
 		bios_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+		bios_orb_arrow_up->setInactiveAllBGColor(darker_gray);
 		bios_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
 		bios_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(bios_orb_arrow_up);
 
 		// down
-		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_HARD);
+		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_HARD);
 		hard_orb_arrow_down->setAllBGTexture(arrow_down);
 		hard_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		hard_orb_arrow_down->setInactiveAllBGColor(darker_gray);
 		hard_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
 		hard_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(hard_orb_arrow_down);
 
-		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_SOFT);
+		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_SOFT);
 		soft_orb_arrow_down->setAllBGTexture(arrow_down);
 		soft_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		soft_orb_arrow_down->setInactiveAllBGColor(darker_gray);
 		soft_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
 		soft_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(soft_orb_arrow_down);
 
-		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_VR);
+		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_VR);
 		vr_orb_arrow_down->setAllBGTexture(arrow_down);
 		vr_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		vr_orb_arrow_down->setInactiveAllBGColor(darker_gray);
 		vr_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
 		vr_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(vr_orb_arrow_down);
 
-		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), arrow_up_size, arrow_up_size, hm::vec4(0, 0, 0, 1), ORB_BIOS);
+		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_BIOS);
 		bios_orb_arrow_down->setAllBGTexture(arrow_down);
 		bios_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+		bios_orb_arrow_down->setInactiveAllBGColor(darker_gray);
 		bios_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
 		bios_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
-		info_div->getButtons().push_back(bios_orb_arrow_down);		
+		info_div->getButtons().push_back(bios_orb_arrow_down);
+
+		Texture* reset_button_texture = new Texture("./res/orbs/reset.png");
+		linked::Button* reset_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 5 + 22, 72 + 12), 32, 32, hm::vec4(0, 1, 0.7f, 0), 10);
+		reset_button->setAllBGTexture(reset_button_texture);
+		reset_button->setHoveredBGColor(hm::vec4(0, 0.7f, 0.5f, 0));
+		info_div->getButtons().push_back(reset_button);
+	}
+}
+
+void init_combat_state() {
+	combat_state.player_turn = true;	//@todo randomize
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		combat_state.enemy.max_hp[i] = 100;
+		combat_state.enemy.hp[i] = 100;
+	}
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		combat_state.player.max_hp[i] = 100;
+		combat_state.player.hp[i] = 100;
 	}
 }
 
@@ -1432,11 +1483,11 @@ void init_application()
 	bgdiv->setBackgroundTexture(bgtexture);
 	gw.bgwindow = bgwindow;
 
-	combat_state.player_turn = true;	//@todo randomize
+	init_combat_state();
+
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
-
 
 #if TEST
 	combat_state.orbs_amount[ORB_HARD] = 2;
@@ -1482,13 +1533,21 @@ void end_turn() {
 	combat_state.player_turn = !combat_state.player_turn;
 	printf("SWITCH TURN\n");
 	hm::vec4 greener_cyan(0, 1, 0.7f, 1);
+	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
 	if (combat_state.player_turn) {
-		combat_state.end_turn_button->getLabel()->setText((u8*)"END TURN", sizeof("END TURN"));
+		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
 		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
 	} else {
-		combat_state.end_turn_button->getLabel()->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
+		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
 		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 	}
+	
+	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
 }
 
 void update_game_mode(double frametime)
@@ -1506,7 +1565,7 @@ void update_game_mode(double frametime)
 					gw.left_char_window->divs[0]->setBackgroundTexture(chars_texture_big[i]);
 					linked::Label* name_label = gw.left_char_window->divs[1]->getLabels()[0];
 					name_label->setText((u8*)char_names[i], char_names_length[i]);
-					name_label->setPosition(hm::vec2(gw.left_char_window->divs[0]->getWidth() - name_label->getTextWidth() - 10.0f, get_font_size(name_label->m_font_id) + 5.0f));
+					name_label->setPosition(hm::vec2(gw.left_char_window->divs[0]->getWidth() - name_label->getTextWidth() - 10.0f, 5.0f));
 					char_sel_state.last_hovered = (Character_ID)i;
 				}
 			}
@@ -1560,8 +1619,7 @@ void update_game_mode(double frametime)
 				// this is when the turn is flipped
 				end_turn();
 			}
-			double new_w = (int)((double)window_info.width * turn_time / TURN_DURATION);
-			gw.timer_window->setWidth(new_w);
+			layout_set_timer_percentage(turn_time / TURN_DURATION);
 
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
@@ -1630,44 +1688,8 @@ void update_game_mode(double frametime)
 void change_game_mode(Game_Mode mode)
 {
 	if (ggs.mode == mode) return;
+	
 	hide_all_windows();
-	/*
-	switch (ggs.mode) {
-		// cleanup the mode you are in
-		case MODE_CHAR_SELECT: {
-			gw.char_selected_window->setActive(false);
-			gw.left_char_window->setActive(false);
-			gw.char_selection_window->setActive(false);
-		}break;
-		case MODE_CHAR_INFO: {
-			gw.left_char_window->setActive(false);
-			gw.char_info_window->setActive(false);
-			gw.char_info_window_bot->setActive(false);
-			gw.char_info_skill_cost->setActive(false);
-			linked::Label* skill_label = gw.char_info_window->divs[NUM_SKILLS]->getLabels()[0];
-			linked::Label* skill_desc_label = gw.char_info_window->divs[NUM_SKILLS + 1]->getLabels()[0];
-			skill_label->setText(0, 0);
-			skill_desc_label->setText(0, 0);
-			gw.skill_group_div->m_render = false;
-		}break;
-		case MODE_COMBAT: {
-			for (int i = 0; i < NUM_ALLIES; ++i) {
-				gw.allies[i]->setActive(false);
-				gw.allies_info[i]->setActive(false);
-				for (int k = 0; k < NUM_SKILLS; ++k) {
-					gw.allies_skills[i * NUM_SKILLS + k]->setActive(false);
-				}
-			}
-			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				gw.enemies[i]->setActive(false);
-				gw.enemies_info[i]->setActive(false);
-			}
-			gw.combat_bottom_info->setActive(false);
-			gw.timer_window->setActive(false);
-			gw.player_name_window->setActive(false);
-		}break;
-	}
-	*/
 
 	ggs.last_mode = ggs.mode;
 	ggs.mode = mode;
@@ -1695,8 +1717,7 @@ void change_game_mode(Game_Mode mode)
 					gw.allies_skills[i * NUM_SKILLS + k]->setActive(true);
 					linked::Button* b = gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0];
 					Texture* skill = skill_textures[index * NUM_SKILLS + k];
-					gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0]->setNormalBGTexture(skill);
-					gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0]->setHoveredBGTexture(skill);
+					gw.allies_skills[i * NUM_SKILLS + k]->divs[0]->getButtons()[0]->setAllBGTexture(skill);
 				}
 			}
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
@@ -1722,6 +1743,8 @@ void update_and_render(double frametime)
 	input();
 }
 
+s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state);
+
 void input()
 {
 	if (keyboard_state.key_event[VK_F1]) {
@@ -1745,16 +1768,10 @@ void input()
 
 	if (keyboard_state.key_event['A']) {
 		keyboard_state.key_event['A'] = false;
-		layout_enemy_die(0);
+		execute_skill(SKILL_FALSE_RUSH, 1, 2, &combat_state);
 	}
-	if (keyboard_state.key_event['B']) {
-		keyboard_state.key_event['B'] = false;
-		layout_ally_die(2);
-	}
+	if (keyboard_state.key['B']) {
 
-	if (keyboard_state.key_event['Q']) {
-		keyboard_state.key_event['Q'] = false;
-		gw.exchange_orbs->setFocus();
 	}
 }
 
@@ -1782,6 +1799,7 @@ static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>
 static void layout_enemy_die(u32 enemy_index) {
 	assert(enemy_index <= NUM_ENEMIES);
 	gw.enemies_indicator[enemy_index]->setBackgroundTexture(orb_dead_enemy);
+	gw.enemies[enemy_index]->divs[0]->setOpacity(0.5f);
 }
 
 static void layout_ally_die(u32 ally_index) {
@@ -1929,4 +1947,50 @@ static void layout_change_exchange_orb_amount(Orb_ID id, int amt) {
 	int count = s32_to_str_base10(amt, selected);
 
 	label->setText((u8*)selected, count + 1);
+}
+
+static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set)
+{
+	// hp_empty
+	// hp_full
+	// hp_label
+
+	static char hp_buffer[NUM_ALLIES][32] = {};
+	memset(hp_buffer[ally_index], 0, sizeof(hp_buffer[NUM_ALLIES]));
+	int count = s32_to_str_base10(hp_to_set, hp_buffer[ally_index]);
+	hp_buffer[ally_index][count++] = '/';
+	count += s32_to_str_base10(max_hp, hp_buffer[ally_index] + count);
+
+	int max_width = gw.allies_info[ally_index]->divs[0]->getWidth() - 2;
+	int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
+	gw.allies_info[ally_index]->divs[1]->setWidth(new_width);
+
+	linked::Label* hp_label = gw.allies_info[ally_index]->divs[2]->getLabels()[0];
+	hp_label->setText((u8*)hp_buffer[ally_index], count + 1);
+}
+
+static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set)
+{
+	// hp_empty
+	// hp_full
+	// hp_label
+
+	static char hp_buffer[NUM_ENEMIES][32] = {};
+	memset(hp_buffer[enemy_index], 0, sizeof(hp_buffer[NUM_ENEMIES]));
+	int count = s32_to_str_base10(hp_to_set, hp_buffer[enemy_index]);
+	hp_buffer[enemy_index][count++] = '/';
+	count += s32_to_str_base10(max_hp, hp_buffer[enemy_index] + count);
+
+	int max_width = gw.enemies_info[enemy_index]->divs[0]->getWidth() - 2;
+	int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
+	gw.enemies_info[enemy_index]->divs[1]->setWidth(new_width);
+
+	linked::Label* hp_label = gw.enemies_info[enemy_index]->divs[2]->getLabels()[0];
+	hp_label->setText((u8*)hp_buffer[enemy_index], count + 1);
+}
+
+static void layout_set_timer_percentage(r32 percentage)
+{
+	int new_w = (int)((double)window_info.width * percentage);
+	gw.timer_window->setWidth(new_w);
 }

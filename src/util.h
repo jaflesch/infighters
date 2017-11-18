@@ -36,6 +36,7 @@ struct string {
 
 extern r32 str_to_r32(string str);
 extern r64 str_to_r64(string str);
+s32 str_to_s32(char* text, int length);
 
 string make_string(s8* v);
 string make_string(s8* v, s64 length);

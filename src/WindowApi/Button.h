@@ -33,6 +33,11 @@ public:
 private:
 	const WindowDiv& m_div;
 	int m_width, m_height;
+	bool m_active;
+	bool m_active_callback;
+	bool m_render;
+	float opacity;
+
 	hm::vec2 m_position;
 	Label* m_label;
 	Mesh* m_buttonMesh;
@@ -46,6 +51,11 @@ private:
 		m_backgroundHeldColor,
 		m_backgroundHoveredColor,
 		m_backgroundNormalColor;
+
+	hm::vec4 m_backgroundInactiveColor,
+		m_backgroundInactiveHeldColor,
+		m_backgroundInactiveHoveredColor,
+		m_backgroundInactiveNormalColor;
 
 	Texture* m_backgroundTexture, 
 		*m_backgroundHeldTexture,
@@ -68,11 +78,22 @@ public:
 	static bool getClicked() { return clicked; }
 	void setClickedCallback(void(*callback)(void*));
 	inline const hm::vec2 getPosition() const { return this->m_position; }
+	inline void setOpacity(float opacity) { this->opacity = opacity; }
+	inline float getOpacity() const { return this->opacity; }
 
 	// setters for bg
 	inline void setNormalBGColor(hm::vec4& color){ this->m_backgroundNormalColor = color; }
 	inline void setHeldBGColor(hm::vec4& color){ this->m_backgroundHeldColor = color; }
 	inline void setHoveredBGColor(hm::vec4& color){ this->m_backgroundHoveredColor = color; }
+
+	inline void setInactiveNormalBGColor(hm::vec4& color) { this->m_backgroundInactiveNormalColor = color; }
+	inline void setInactiveHeldBGColor(hm::vec4& color) { this->m_backgroundInactiveHeldColor = color; }
+	inline void setInactiveHoveredBGColor(hm::vec4& color) { this->m_backgroundInactiveHoveredColor = color; }
+	inline void setInactiveAllBGColor(hm::vec4& color) {
+		this->m_backgroundInactiveNormalColor = color;
+		this->m_backgroundInactiveHeldColor = color;
+		this->m_backgroundInactiveHoveredColor = color; 
+	}
 
 	inline void setNormalBGTexture(Texture* texture){ this->m_backgroundNormalTexture = texture; }
 	inline void setHeldBGTexture(Texture* texture){ this->m_backgroundHeldTexture = texture; }
@@ -92,6 +113,10 @@ public:
 	inline const hm::vec4& getHeldBGColor() const{ return this->m_backgroundHeldColor; }
 	inline const hm::vec4& getHoveredBGColor() const{ return this->m_backgroundHoveredColor; }
 
+	inline const hm::vec4& getInactiveNormalBGColor() const { return this->m_backgroundInactiveNormalColor; }
+	inline const hm::vec4& getInactiveHeldBGColor() const { return this->m_backgroundInactiveHeldColor; }
+	inline const hm::vec4& getInactiveHoveredBGColor() const { return this->m_backgroundInactiveHoveredColor; }
+
 	inline const Texture* getNormalBGTexture() const{ return this->m_backgroundNormalTexture; }
 	inline const Texture* getHeldBGTexture() const{ return this->m_backgroundHeldTexture; }
 	inline const Texture* getHoveredBGTexture() const{ return this->m_backgroundHoveredTexture; }
@@ -99,6 +124,8 @@ public:
 	inline const hm::vec4& getNormalTextColor() const{ return this->m_labelNormalTextColor; }
 	inline const hm::vec4& getHeldText() const{ return this->m_labelHeldTextColor; }
 	inline const hm::vec4& getHoveredTextColor() const{ return this->m_labelHoveredTextColor; }
+
+	inline void setActive(bool active_change_color, bool active_callback = true) { this->m_active = active_change_color; this->m_active_callback = active_callback; }
 };
 
 }

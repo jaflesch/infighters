@@ -24,6 +24,7 @@ namespace linked
 	{
 		handleDivHints(hints);
 		divMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), (float)width, (float)height), true);
+		m_opacity = 1.0f;
 	}
 
 	void WindowDiv::render()
@@ -54,24 +55,10 @@ namespace linked
 			rp.x /= ww_;
 			rp.y /= wh_;
 
-#if 0
-			glUseProgram(0);
-
-			glLineWidth(1.0);
-
-			glBegin(GL_LINES);
-
-			glColor3f(0, 1, 0);
-
-			glVertex3f(rp.x - this->m_width / (ww_ * 2.0f), -rp.y - m_height / (wh_ * 2.0f), -1.0f);
-			glVertex3f(rp.x + this->m_width / (ww_ * 2.0f), -rp.y + m_height / (wh_ * 2.0f), -1.0f);
-
-			glEnd();
-			ws->useShader();
-#endif
-
+			ws->setOpacity(m_opacity);
 			ws->update(getRelativePosition());
 			divMesh->render();
+			ws->setOpacity(1.0f);
 		
 			if (m_backgroundTexture != nullptr)
 				ws->unbindTextures();

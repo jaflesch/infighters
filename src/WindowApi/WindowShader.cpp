@@ -5,6 +5,7 @@ extern Window_Info window_info;
 
 WindowShader::WindowShader(std::string fileName) : Shader(fileName, nullptr)
 {
+	m_opacity = 1.0f;
 	getUniformLocations();
 }
 
@@ -19,6 +20,8 @@ void WindowShader::getUniformLocations()
 
 	uniformClipTopLeft = glGetUniformLocation(shader, "clipTL");
 	uniformClipBotRight = glGetUniformLocation(shader, "clipBR");
+
+	uniformOpacity = glGetUniformLocation(shader, "opacity");
 }
 
 void WindowShader::update(hm::vec2& translation)
@@ -42,6 +45,8 @@ void WindowShader::update(hm::vec2& translation)
 
 	glUniform2fv(uniformClipTopLeft, 1, &clipTL.x);
 	glUniform2fv(uniformClipBotRight, 1, &clipBR.x);
+
+	glUniform1f(uniformOpacity, m_opacity);
 
 	glUniform1i(uniformTexture, 0);
 	glUniform1i(uniformUseTexture, useTexture);

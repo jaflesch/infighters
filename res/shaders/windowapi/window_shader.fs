@@ -9,6 +9,7 @@ uniform vec4 backgroundColor;
 
 uniform vec2 clipTL;
 uniform vec2 clipBR;
+uniform float opacity;
 
 uniform int useTexture;
 uniform sampler2D textureSampler;
@@ -24,8 +25,9 @@ void main(){
 		vec4 textureColor = texture(textureSampler, uvCoords);
 		//float finalAlpha = textureColor.a - 1 + backgroundColor.a;
 		vec3 finalColor = mix(backgroundColor.rgb, textureColor.rgb, vec3(backgroundColor.a));
-		out_Color = vec4(finalColor, textureColor.a);
+		out_Color = vec4(finalColor, textureColor.a * opacity);
 	}
-	else
+	else{
 		out_Color = backgroundColor;
+	}
 }

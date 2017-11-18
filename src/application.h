@@ -87,15 +87,15 @@ enum Orb_ID {
 
 
 enum Skill_Type {
-	SKILL_TYPE_NONE,
-	SKILL_TYPE_PHYSICAL,
-	SKILL_TYPE_VIRTUAL,
-	SKILL_TYPE_MENTAL,
+	SKILL_TYPE_NONE     = 0,
+	SKILL_TYPE_PHYSICAL = FLAG(0),
+	SKILL_TYPE_VIRTUAL  = FLAG(1),
+	SKILL_TYPE_MENTAL   = FLAG(2),
 };
 enum Skill_Mode {
-	SKILL_MODE_NONE,
-	SKILL_MODE_MELEE,
-	SKILL_MODE_RANGED,
+	SKILL_MODE_NONE    = 0,
+	SKILL_MODE_MELEE   = FLAG(0),
+	SKILL_MODE_RANGED  = FLAG(1),
 };
 enum Skill_Category {
 	SKILL_CATEGORY_NORMAL,
@@ -110,6 +110,7 @@ enum Skill_Condition {
 	SKILL_CONDITION_POISON,
 	SKILL_CONDITION_PARALYZE,
 	SKILL_CONDITION_SLEEP,
+	SKILL_CONDITION_NUMBER,
 };
 enum Skill_Damage {
 	SKILL_DMG_NONE,
@@ -123,6 +124,7 @@ enum Skill_Defense {
 	SKILL_DEF_ABSORPTION,
 	SKILL_DEF_RELECTION,
 	SKILL_DEF_INVULNERABILITY,
+	SKILL_DEF_NUMBER,			// needed for reduction points
 };
 enum Skill_Duration {
 	SKILL_DURATION_NONE,
@@ -205,7 +207,7 @@ enum Skill_ID {
 	SKILL_ROLLFORWARD,
 
 	SKILL_ALT,
-	SKILL_CRTL,
+	SKILL_CTRL,
 	SKILL_DELETE,
 	SKILL_ESC,
 
@@ -222,7 +224,8 @@ enum Skill_ID {
 	SKILL_CLOCK_PULSE,
 	SKILL_PIPELINE,
 	SKILL_OVERCLOCK,
-	SKILL_BRANCH_DAMAGE
+	SKILL_BRANCH_DAMAGE,
+	SKILL_NUMBER
 };
 
 enum Game_Mode {
@@ -240,6 +243,9 @@ static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label
 static void layout_change_orb_amount(Orb_ID id, int amt);
 static void layout_change_exchange_orb_amount(Orb_ID id, int amt);
 static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs);
+static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
+static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
+static void layout_set_timer_percentage(r32 percentage);
 
 // Gameplay structures
 #define NUM_CHARS 12
@@ -250,12 +256,6 @@ static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>
 #define FAST 1
 
 struct GameState {
-	Camera camera;
-	GLuint shader;
-
-	IndexedModel3D* models;
-	int num_models;
-
 	Game_Mode mode;
 	Game_Mode last_mode;
 };
@@ -281,11 +281,29 @@ struct Orb_Exchange_State {
 	linked::WindowDiv* info_div;
 };
 
+struct Player {
+	s32 hp[NUM_ALLIES];
+	s32 max_hp[NUM_ALLIES];
+	
+	u32 reduction[NUM_ALLIES];			// Skill_Defense or'd together
+	u32 reduction_type[NUM_ALLIES];		// Skill_Type or'd together
+	u32 reduction_points[NUM_ALLIES][SKILL_DEF_NUMBER];
+	s32 reduction_duration[NUM_ALLIES][SKILL_DEF_NUMBER];
+
+	u32 status[NUM_ALLIES];				// Skill_Condition or'd together
+	s32 status_duration[NUM_ALLIES][SKILL_CONDITION_NUMBER];
+
+	s32 cumulative_skill[NUM_ALLIES][SKILL_NUMBER];
+};
+
 struct Combat_State {
 	// Gameplay
 	bool player_turn;
 	int orbs_amount[ORB_NUMBER];
 	int total_orbs;
+
+	Player player;
+	Player enemy;
 
 	Orb_Exchange_State exchange_orbs_state;
 

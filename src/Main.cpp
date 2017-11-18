@@ -47,19 +47,21 @@ void application_state_init()
 
 	engine::render_engine_init();
 	font_rendering_init();
-	fonts[0] = load_font(DEFAULT_FONT, 16, false);
-	fonts[1] = load_font(DEFAULT_FONT, 14, false);
-	fonts[2] = load_font(DEFAULT_FONT, 12, false);
-	fonts[3] = load_font(DEFAULT_FONT, 24, false);
-	fonts[4] = load_font(DEFAULT_FONT, 32, false);
-	fonts[5] = load_font(DEFAULT_FONT, 38, false);
+	fonts[FONT_OSWALD_REGULAR_12] = load_font(DEFAULT_FONT, 12, false);
+	fonts[FONT_OSWALD_REGULAR_14] = load_font(DEFAULT_FONT, 14, false);
+	fonts[FONT_OSWALD_REGULAR_16] = load_font(DEFAULT_FONT, 16, false);
+	fonts[FONT_OSWALD_REGULAR_18] = load_font(DEFAULT_FONT, 18, false);
+	fonts[FONT_OSWALD_REGULAR_24] = load_font(DEFAULT_FONT, 24, false);
+	fonts[FONT_OSWALD_REGULAR_32] = load_font(DEFAULT_FONT, 32, false);
+	fonts[FONT_OSWALD_REGULAR_38] = load_font(DEFAULT_FONT, 38, false);
 
-	fonts[6]  = load_font(OSWALD_LIGHT, 16, false);
-	fonts[7]  = load_font(OSWALD_LIGHT, 14, false);
-	fonts[8]  = load_font(OSWALD_LIGHT, 12, false);
-	fonts[9]  = load_font(OSWALD_LIGHT, 24, false);
-	fonts[10] = load_font(OSWALD_LIGHT, 32, false);
-	fonts[11] = load_font(OSWALD_LIGHT, 38, false);
+	fonts[FONT_OSWALD_REGULAR_12] = load_font(OSWALD_LIGHT, 12, false);
+	fonts[FONT_OSWALD_REGULAR_14] = load_font(OSWALD_LIGHT, 14, false);
+	fonts[FONT_OSWALD_REGULAR_16] = load_font(OSWALD_LIGHT, 16, false);
+	fonts[FONT_OSWALD_REGULAR_16] = load_font(OSWALD_LIGHT, 18, false);
+	fonts[FONT_OSWALD_REGULAR_24] = load_font(OSWALD_LIGHT, 24, false);
+	fonts[FONT_OSWALD_REGULAR_32] = load_font(OSWALD_LIGHT, 32, false);
+	fonts[FONT_OSWALD_REGULAR_38] = load_font(OSWALD_LIGHT, 38, false);
 
 	init_application();
 

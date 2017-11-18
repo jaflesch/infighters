@@ -54,15 +54,16 @@ namespace linked
 
 		if (m_text)
 		{
+			Font_ID font_id = this->m_font_id;
+			if (font_id >= FONT_NUMBER) {
+				font_id = 0;
+			}
 			r32 xPos = (int)(renderPosition.x * (float)ww);
 			r32 yPos = (int)(-renderPosition.y * (float)wh);
-			hm::vec2 start_pos = hm::vec2((xPos / 2.0f) + 800, (yPos / 2.0f) + 450);
+			hm::vec2 start_pos = hm::vec2((xPos / 2.0f) + 800, (yPos / 2.0f) + 450 - get_font_size(font_id));
 			
-			Font_ID font_id = this->m_font_id;
 			if (m_textLength > 0) {
-				if (font_id >= FONT_NUMBER) {
-					font_id = 0;
-				}
+				
 				render_text(font_id, m_text, m_textLength - 1, start_pos, m_textColor);
 				font_rendering_flush();
 			}

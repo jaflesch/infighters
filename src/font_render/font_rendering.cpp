@@ -338,7 +338,7 @@ void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& pos
 
 		if (original == '\n') {
 			position.x = start_x;
-			position.y -= font->max_height;
+			position.y -= (r32)font->max_height;
 		}
 
 		GLfloat xpos = (GLfloat)position.x + characters[index].bearing[0];

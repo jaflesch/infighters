@@ -238,6 +238,15 @@ bool str_equal(const char* str1, int str1_size, const char* str2, int str2_size)
 	return false;
 }
 
+s32 str_to_s32(char* text, int length)
+{
+	s32 result = 0;
+	s32 tenths = 1;
+	for (int i = length - 1; i >= 0; --i, tenths *= 10)
+		result += (text[i] - 0x30) * tenths;
+	return result;
+}
+
 int s32_to_str_base10(s32 val, char* buffer)
 {
 	s32 aux = (val < 0) ? (u64)-val : (u64)val;

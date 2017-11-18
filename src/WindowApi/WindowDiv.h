@@ -49,10 +49,13 @@ public:
 	hm::vec4 getBackgroundColor()const { return this->m_backGroundColor; }
 	void setBackgroundTexture(Texture* texture){ this->m_backgroundTexture = texture; }
 	Texture* getBackgroundTexture(){ return this->m_backgroundTexture; }
+	inline void setOpacity(float opacity) { this->m_opacity = opacity; }
+	inline float getOpacity() const { return this->m_opacity; }
 private:
 	// Data
 	float m_margin, m_padding;
 	int m_width, m_height;
+	float m_opacity;
 	hm::vec2 m_windowRelativePosition;
 	hm::vec2 m_position;		// Position in pixel coords
 	hm::vec4 m_backGroundColor;

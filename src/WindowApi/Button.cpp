@@ -19,6 +19,10 @@ namespace linked
 		m_width(width), m_height(height),
 		clickedCallback(nullptr)
 	{
+		opacity = 1.0f;
+		m_active = true;
+		m_active_callback = true;
+		m_render = true;
 		button_info.id = id;
 		if(label)
 			label->setPosition(m_position + label->getPosition());
@@ -33,6 +37,11 @@ namespace linked
 		m_backgroundNormalColor = backgroundColor;
 		m_backgroundHoveredColor = backgroundColor;
 		m_backgroundHeldColor = backgroundColor;
+
+		m_backgroundInactiveColor = backgroundColor;
+		m_backgroundInactiveHeldColor = backgroundColor;
+		m_backgroundInactiveHoveredColor = backgroundColor;
+		m_backgroundInactiveNormalColor = backgroundColor;
 
 		if(label)
 			m_labelTextColor = label->getTextColor();
@@ -74,7 +83,7 @@ namespace linked
 			//if (isHovered() && m_div.getWindow().isFocused())
 			if(isHovered())
 			{
-				if (clickedCallback)
+				if (clickedCallback && m_active_callback)
 					clickedCallback(&button_info);
 				Button::clicked = false;
 			}
@@ -83,7 +92,10 @@ namespace linked
 		//if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 0)
 		if(isHovered() && mouseStatus == 0)
 		{
-			m_backgroundColor = m_backgroundHoveredColor;
+			if (m_active)
+				m_backgroundColor = m_backgroundHoveredColor;
+			else
+				m_backgroundColor = m_backgroundInactiveHoveredColor;
 			m_backgroundTexture = m_backgroundHoveredTexture;
 			if (m_label)
 				m_label->setTextColor(m_labelHoveredTextColor);
@@ -92,16 +104,22 @@ namespace linked
 		//else if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 1)
 		else if(isHovered() && mouseStatus == 1)
 		{
+			if (m_active)
+				m_backgroundColor = m_backgroundHeldColor;
+			else
+				m_backgroundColor = m_backgroundInactiveHeldColor;
 			m_backgroundTexture = m_backgroundHeldTexture;
-			m_backgroundColor = m_backgroundHeldColor;
 			if (m_label)
 				m_label->setTextColor(m_labelHeldTextColor);
 		}
 		// Not hovered
 		else
 		{
+			if(m_active)
+				m_backgroundColor = m_backgroundNormalColor;
+			else
+				m_backgroundColor = m_backgroundInactiveNormalColor;
 			m_backgroundTexture = m_backgroundNormalTexture;
-			m_backgroundColor = m_backgroundNormalColor;
 			if(m_label)
 				m_label->setTextColor(m_labelNormalTextColor);
 		}
@@ -123,7 +141,7 @@ namespace linked
 		{
 			return true;
 		}
-#if 1	// Font debug
+#if 0	// Font debug
 		glUseProgram(0);
 
 		glLineWidth(1.0);
