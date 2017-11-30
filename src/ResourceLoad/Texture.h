@@ -1,5 +1,5 @@
 #pragma once
-#include "..\ho_gl.h"
+#include <ho_gl.h>
 #include <string>
 #include "ImageLoader.h"
 

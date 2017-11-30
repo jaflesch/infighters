@@ -1,7 +1,6 @@
 #pragma once
 
 //#include "external/freetypegl/freetype-gl.h"
-#include "..\freetypegl\freetype-gl.h"
 #include <string>
 #include <hmath.h>
 
@@ -24,8 +23,6 @@ public:
 	~FontRenderer();
 	TextInfo RenderText(std::string text, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat);
 private:
-	ftgl::texture_atlas_t* atlas;
-	ftgl::texture_font_t* font;
 	unsigned int* data;
 	float fontSize;
 	float ascender;

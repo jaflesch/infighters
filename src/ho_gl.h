@@ -263,7 +263,7 @@ void init_gl_extensions()
 	glDebugMessageCallbackARB = (void(__stdcall*)(void(__stdcall*)(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *, const void*), const void*)) wglGetProcAddress("glDebugMessageCallbackARB");
 }
 */
-
+#if 0
 int init_opengl(HWND window_handle, HDC* device_context, HGLRC* rendering_context, int major_ver, int minor_ver)
 {
 	int PixelFormat;
@@ -308,6 +308,7 @@ int init_opengl(HWND window_handle, HDC* device_context, HGLRC* rendering_contex
 
 	return 0;
 }
+#endif
 
 #endif // HOGL_IMPLEMENT
 #endif // HOHEX_HOGL_H

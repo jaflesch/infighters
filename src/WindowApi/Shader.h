@@ -1,5 +1,5 @@
 #pragma once
-#include "..\ho_gl.h"
+#include <ho_gl.h>
 #include <string>
 class Camera;
 class Entity;

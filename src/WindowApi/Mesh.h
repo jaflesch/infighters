@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <hmath.h>
-#include "..\ho_gl.h"
+#include <ho_gl.h>
 
 class Quad;
 class IndexedModel;

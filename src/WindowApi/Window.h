@@ -6,7 +6,7 @@
 #include "WindowDiv.h"
 #include "Label.h"
 #include "Mesh.h"
-#include "../ho_gl.h"
+#include <ho_gl.h>
 
 #include <vector>
 #include <hmath.h>
