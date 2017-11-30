@@ -1,5 +1,5 @@
 #pragma once
-#include "WindowApi\Window.h"
+#include "WindowApi/Window.h"
 #include <string>
 #include <sstream>
 #include <vector>

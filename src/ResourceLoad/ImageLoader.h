@@ -2,7 +2,7 @@
 #include <string>
 //#include <glm/glm.hpp>
 #include <hmath.h>
-#include "..\ho_gl.h"
+#include <ho_gl.h>
 
 struct ImageLoader
 {

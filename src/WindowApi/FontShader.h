@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include <string>
 #include <hmath.h>
-#include "..\ho_gl.h"
+#include <ho_gl.h>
 
 class FontShader : public Shader
 {

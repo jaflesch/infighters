@@ -25,17 +25,31 @@ typedef double r64;
 #include <windows.h>
 #include <windowsx.h>
 
+#elif defined(__linux__)
+#define __stdcall
+#include <X11/Xlib.h>
+#include <X11/X.h>
+#include <X11/Xutil.h>
+#include <string.h>
+#include <pthread.h>
+typedef void* Thread_Proc_Return;
+typedef pthread_t Thread_Handle;
+
+#endif
+
 typedef struct {
+	int win_width, win_height;
+#if defined(_WIN32) || defined(_WIN64)
 	HWND window_handle;
-	LONG win_width, win_height;
 	WINDOWPLACEMENT g_wpPrev;
 	HDC device_context;
 	HGLRC rendering_context;
+#elif __linux__
+	Display* display;
+	Window win;
+#endif
 
 	bool move_camera = true;
 	bool do_input = true;
 } Window_State;
 
-#else
-#error OS not yet supported
-#endif

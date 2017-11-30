@@ -327,7 +327,7 @@ s64 next_2_pow(s64 num) {
 #define LOG_LEVEL_ERROR 1
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_SUCCESS 3
-
+#if defined (_WIN32) || defined (_WIN64)
 s16 set_error_color(u32 level, HANDLE hConsole)
 {
 	CONSOLE_SCREEN_BUFFER_INFO console_info;
@@ -415,3 +415,5 @@ u8* read_entire_file(u8* filename, s64* out_size)
 	CloseHandle(fhandle);
 	return (u8*)memory;
 }
+#elif defined(__linux__)
+#endif
