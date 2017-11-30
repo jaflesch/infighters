@@ -59,8 +59,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_BUFFER_OVERFLOW: {
 			deal_damage_to_target_enemy(target_index, 15, SKILL_DMG_PIERCING, combat_state);
 			// @todo account for counters?
-			combat_state->enemy.status[target_index] |= SKILL_CONDITION_PARALYZE;	// @todo No stun?
-			combat_state->enemy.status_duration[target_index][SKILL_CONDITION_PARALYZE] = 1;
+			combat_state->enemy.status[target_index] |= SKILL_CONDITION_STUN;
+			combat_state->enemy.status_duration[target_index][SKILL_CONDITION_STUN] = 1;
 		}break;
 		case SKILL_DDOS_ATTACK: {
 			// @todo account for counters?
@@ -86,7 +86,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_DYNAMIC_FRUSTUM_ATTACK: {
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				deal_damage_to_target_enemy(target_index, 35, SKILL_DMG_NORMAL, combat_state);
+				deal_damage_to_target_enemy(i, 35, SKILL_DMG_NORMAL, combat_state);
 			}
 		}break;
 

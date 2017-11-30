@@ -175,7 +175,7 @@ int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
 char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
 	// Zer0
 	"Ataca um oponente e realiza 20 de dano.",
-	"Marca um adversário e, se no próximo turno ele realizar um ataque em\nZer0, seu golpe é negado, sofre 20 de dano e recebe status Paralyze\npor 1 turno.",
+	"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
 	"Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
 	"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno.",
 
@@ -249,7 +249,7 @@ char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
 int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
 	// Zer0
 	sizeof "Ataca um oponente e realiza 20 de dano.",
-	sizeof "Marca um adversário e, se no próximo turno ele realizar um ataque em\nZer0, seu golpe é negado, sofre 20 de dano e recebe status Paralyze\npor 1 turno.",
+	sizeof "Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
 	sizeof "Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
 	sizeof "Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno.",
 
@@ -550,8 +550,8 @@ static void button_select_character(void* arg) {
 		char_sel_state.num_selected += 1;
 	} else {
 	
-#if REPLACE_FIRST
-		gui_toggle_char_selection(char_sel_state.selections[0], divs);
+#if 0
+		layout_toggle_char_selection(char_sel_state.selections[0], divs);
 		char_sel_state.selections[0] = char_sel_state.selections[1];
 		char_sel_state.selections[1] = char_sel_state.selections[2];
 		char_sel_state.selections[2] = id;
@@ -624,6 +624,13 @@ static void button_exchange_orbs_confirm(void* arg) {
 		}
 		combat_state.total_orbs -= combat_state.exchange_orbs_state.num_lost;
 		combat_state.total_orbs += combat_state.exchange_orbs_state.num_gain;
+
+		// @todo test this
+		int sum_orbs = 0;
+		for (int i = 0; i < ORB_NUMBER; ++i)
+			sum_orbs += combat_state.orbs_amount[i];
+		assert(combat_state.total_orbs == sum_orbs);
+
 		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
 
 		combat_state.exchange_orbs_state.num_lost = 0;
@@ -666,6 +673,7 @@ static void button_exchange_orb_arrow(void* arg) {
 		// update confirm button
 		linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
 		if (combat_state.exchange_orbs_state.accumulated == 0) {
+			assert(combat_state.exchange_orbs_state.num_lost % 3 == 0);
 			confirm_button->setActive(true);
 			combat_state.exchange_orbs_state.can_confirm = true;
 		} else {
@@ -734,7 +742,7 @@ void init_char_selection_mode()
 	linked::WindowDiv* left_char_div = new linked::WindowDiv(*left_char_window, 400, 840, 0, 0, hm::vec2(0, 0), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
 	left_char_window->divs.push_back(left_char_div);
 	char_sel_state.last_hovered = CHAR_NONE;
-	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 110, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.97f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_LEFT);
+	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 110, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.65f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_LEFT);
 	
 	linked::Label* left_char_name_label = new linked::Label(*left_char_name_div, (u8*)"", sizeof "", hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_38, 0, 0);
 	left_char_name_div->getLabels().push_back(left_char_name_label);
@@ -865,7 +873,7 @@ void init_char_selection_mode()
 			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x + char_window_width - 5.0f, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
 			hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		char_selection_window->divs.push_back(select_div_r);
-		select_div_r->m_render = false;
+		select_div_r->m_render = false;		
 
 		char_div_offset_x += 1.0f;
 		if (i + 1 == NUM_CHARS / 2) {
@@ -1162,7 +1170,7 @@ void init_combat_mode()
 		
 		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(dummy);
-		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
+		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(/*size_info - sizeof("100/100") * 10.0f*/ 0.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
 		dummy->getLabels().push_back(hplabel);
 
 		start_pos.x = 1400.0f;
@@ -1248,7 +1256,7 @@ void init_combat_mode()
 
 		linked::WindowDiv* skill_title_div = new linked::WindowDiv(*combat_bottom_info, 300, 48, 0, 0, hm::vec2(780.0f, skill_desc_height), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_title_div);
-		linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_18, 0, 0);
+		linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
 		skill_title_div->getLabels().push_back(skill_title_label);
 		skill_title_div->m_render = false;
 
@@ -1260,9 +1268,9 @@ void init_combat_mode()
 
 		linked::WindowDiv* skill_group_div = new linked::WindowDiv(*combat_bottom_info, 600, 48, 0, 0, hm::vec2(780.0f, skill_desc_height + 126 - 18), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_group_div);
-		linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
+		linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 		skill_group_div->getLabels().push_back(skill_group_label);
-		linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(540, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
+		linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(540, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 		skill_group_div->getLabels().push_back(skill_cooldown_label);
 		skill_desc_div->m_render = false;
 
@@ -1488,6 +1496,7 @@ void init_application()
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
+	int x = 0;
 
 #if TEST
 	combat_state.orbs_amount[ORB_HARD] = 2;
@@ -1766,12 +1775,12 @@ void input()
 		}
 	}
 
-	if (keyboard_state.key_event['A']) {
-		keyboard_state.key_event['A'] = false;
-		execute_skill(SKILL_FALSE_RUSH, 1, 2, &combat_state);
-	}
-	if (keyboard_state.key['B']) {
+	if (keyboard_state.key_event[VK_UP]) {
+		keyboard_state.key_event[VK_UP] = false;
 
+	}
+	if (keyboard_state.key_event[VK_DOWN]) {
+		keyboard_state.key_event[VK_DOWN] = false;
 	}
 }
 
