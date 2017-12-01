@@ -412,7 +412,12 @@ Font_ID load_font_async(const char* name, u32 type_size) {
 	}
 	font_list.used[index] = true;
 	u32 tid;
+// @temp
+#if defined(_WIN32) || defined(_WIN64)
+	create_thread(load_font_thread, &font_list.list[index], &tid);
+#elif defined(__linux__)
 	create_thread((void*(*)(void*))load_font_thread, &font_list.list[index], &tid);
+#endif
 
 	text_buffer_init(&font_list.list[index], 1024);
 	return index;
