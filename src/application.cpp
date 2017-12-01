@@ -8,14 +8,16 @@
 #define ARROW_DOWN 0
 
 extern Window_Info window_info;
+extern Keyboard_State keyboard_state;
+extern Mouse_State mouse_state;
 Chat* g_chat = 0;
 Chat chat;
 linked::Window* chat_window = 0;
 
 Font_ID fonts[32] = {};
 
-#include "camera.cpp"
-#include "load_model.cpp"
+//#include "camera.cpp"
+//#include "load_model.cpp"
 #include "game_skills.cpp"
 
 char* char_names[NUM_CHARS] = {
@@ -529,6 +531,7 @@ hm::vec4 char_selected_bg_color(0.4f, 0.7f, 0.7f, 1.0f);
 hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 hm::vec4 color_red(1, 0, 0, 1);
 hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
+hm::vec4 cyan(0.0f, 1.0f, 1.0f, 1.0f);
 
 // Button Callbacks
 static void button_select_character(void* arg) {
@@ -729,7 +732,7 @@ void init_char_selection_mode()
 	linked::Window* left_char_window = new linked::Window(400, 840, hm::vec2(100, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 	left_char_window->setBorderSizeX(10.0f);
 	left_char_window->setBorderSizeY(0.0f);
-	left_char_window->setBorderColor(hm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
+	left_char_window->setBorderColor(cyan);
 	gw.left_char_window = left_char_window;
 	linked::WindowDiv* left_char_div = new linked::WindowDiv(*left_char_window, 400, 840, 0, 0, hm::vec2(0, 0), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_RIGHT);
 	left_char_window->divs.push_back(left_char_div);
@@ -792,7 +795,8 @@ void init_char_selection_mode()
 	linked::Label* play_label = new linked::Label(*play_div, (u8*)"FIGHT", sizeof("FIGHT"),
 		hm::vec2(44.0f, 48.0f / 2.0f - get_font_size(FONT_OSWALD_REGULAR_24) / 2.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 	linked::Button* play_button = new linked::Button(*play_div, play_label, hm::vec2(0, 0), 148, 48, hm::vec4(0.34f, 0.73f, 0.62f, 1), 0);
-	play_button->setHoveredBGColor(hm::vec4(0.24f, 0.63f, 0.52f, 1));
+	hm::vec4 hovered_play_div_color(0.24f, 0.63f, 0.52f, 1);
+	play_button->setHoveredBGColor(hovered_play_div_color);
 	play_button->setHeldBGColor(char_window_held_color);
 	play_button->setClickedCallback(button_combat_start_mode);
 	play_div->getButtons().push_back(play_button);
@@ -1061,14 +1065,17 @@ void init_combat_mode()
 		// End turn button
 		linked::WindowDiv* end_turn = new linked::WindowDiv(*player_name, 200, 45, 0, 0, hm::vec2(0, 20.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP |linked::DIV_CENTER_X);
 		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
-		end_turn_label->setPosition(hm::vec2((200.0f - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
+		hm::vec2 end_turn_label_pos((200.0f - end_turn_label->getTextWidth()) / 2.0f, 10.0f);
+		end_turn_label->setPosition(end_turn_label_pos);
 		linked::Button* end_turn_button = new linked::Button(*end_turn, end_turn_label, hm::vec2(0, 0), 200, 45, greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f), 0);
 		combat_state.end_turn_button = end_turn_button;
 		end_turn_button->setClickedCallback(button_end_turn);
 		player_name->divs.push_back(end_turn);
 		end_turn->getButtons().push_back(end_turn_button);
-		end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
-		end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
+		hm::vec4 end_turn_button_hovered_bgcolor = greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f);
+		end_turn_button->setHoveredBGColor(end_turn_button_hovered_bgcolor);
+		hm::vec4 end_turn_button_held_bgcolor = hm::vec4(0.4f, 0.65f, 0.45f, 1.0f);
+		end_turn_button->setHeldBGColor(end_turn_button_held_bgcolor);
 	}
 	{
 		// Timer window
@@ -1091,7 +1098,7 @@ void init_combat_mode()
 		gw.allies[i] = new linked::Window(size_img, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.allies[i]->setBorderSizeX(1.0f);
 		gw.allies[i]->setBorderSizeY(1.0f);
-		gw.allies[i]->setBorderColor(hm::vec4(0, 1, 1, 1));
+		gw.allies[i]->setBorderColor(cyan);
 		linked::WindowDiv* allies_div = new linked::WindowDiv(*gw.allies[i], size_img, size_img, 0, 0, hm::vec2(0, 0), char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies[i]->divs.push_back(allies_div);
 		linked::Button* dummy_ally_button = new linked::Button(*allies_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
@@ -1101,7 +1108,7 @@ void init_combat_mode()
 		gw.allies_info[i] = new linked::Window(size_info, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.allies_info[i]->setBorderSizeX(1.0f);
 		gw.allies_info[i]->setBorderSizeY(1.0f);
-		gw.allies_info[i]->setBorderColor(hm::vec4(0, 1, 1, 1));
+		gw.allies_info[i]->setBorderColor(cyan);
 
 		float x_off = 0.0f;
 		for (int k = 0; k < NUM_SKILLS; ++k) {
@@ -1110,10 +1117,12 @@ void init_combat_mode()
 			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
-			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(hm::vec4(ally_hp_bar_full_color));
+			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(ally_hp_bar_full_color);
 			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 1, 1, 1), k);
-			skill_button->setHoveredBGColor(hm::vec4(0, 1, 1, 0.8f));
-			skill_button->setHeldBGColor(hm::vec4(0, 0.8f, 0.9f, 0.7f));
+			hm::vec4 skill_button_hovered_bgcolor(0, 1, 1, 0.8f);
+			skill_button->setHoveredBGColor(skill_button_hovered_bgcolor);
+			hm::vec4 skill_button_held_bgcolor(0, 0.8f, 0.9f, 0.7f);
+			skill_button->setHeldBGColor(skill_button_held_bgcolor);
 			skill_div->getButtons().push_back(skill_button);
 			x_off += skill_img_size + x_spacing;
 		}
@@ -1201,15 +1210,18 @@ void init_combat_mode()
 		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		Texture* xchg_orb_texture = new Texture("res/orbs/exchange_orb.png");
 		exchange_orb_button->setAllBGTexture(xchg_orb_texture);
-		exchange_orb_button->setHoveredBGColor(hm::vec4(0, 1, 1, 0.7f));
-		exchange_orb_button->setHeldBGColor(hm::vec4(0, 0.38f, 0.32f, 0.7f));
+		hm::vec4 exchange_orb_button_hovered_bgcolor(0, 1, 1, 0.7f);
+		exchange_orb_button->setHoveredBGColor(exchange_orb_button_hovered_bgcolor);
+		hm::vec4 exchange_orb_button_held_bgcolor(0, 0.38f, 0.32f, 0.7f);
+		exchange_orb_button->setHeldBGColor(exchange_orb_button_held_bgcolor);
 		orbs_div->getButtons().push_back(exchange_orb_button);
 		exchange_orb_button->setClickedCallback(button_exchange_orb);
 
 		r32 orb_pos_offset = 0;
 		linked::Label* multiple_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		orb_pos_offset = 64.0f / 2.0f - multiple_orb_label->getTextWidth() / 2.0f;
-		multiple_orb_label->setPosition(hm::vec2(orb_pos_offset, 74));
+		hm::vec2 multiple_orb_label_position(orb_pos_offset, 74);
+		multiple_orb_label->setPosition(multiple_orb_label_position);
 		orbs_div->getLabels().push_back(multiple_orb_label);
 		combat_state.all_orbs_label = multiple_orb_label;
 
@@ -1747,18 +1759,18 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 void input()
 {
-	if (keyboard_state.key_event[VK_F1]) {
-		keyboard_state.key_event[VK_F1] = false;
+	if (keyboard_state.key_event[KEY_F1]) {
+		keyboard_state.key_event[KEY_F1] = false;
 		chat_window->setActive(!chat_window->getActive());
 		g_chat->m_active = !g_chat->m_active;
 	}
-	if (keyboard_state.key_event[VK_ESCAPE]) {
-		keyboard_state.key_event[VK_ESCAPE] = false;
+	if (keyboard_state.key_event[KEY_ESCAPE]) {
+		keyboard_state.key_event[KEY_ESCAPE] = false;
 		change_game_mode(ggs.last_mode);
 	}
 
-	if (keyboard_state.key_event[VK_SPACE]) {
-		keyboard_state.key_event[VK_SPACE] = false;
+	if (keyboard_state.key_event[KEY_SPACE]) {
+		keyboard_state.key_event[KEY_SPACE] = false;
 		
 		if (ggs.mode == MODE_CHAR_SELECT && char_sel_state.last_hovered != CHAR_NONE) {
 			printf("last hovered %d\n", char_sel_state.last_hovered);

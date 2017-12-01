@@ -404,9 +404,12 @@ static mat4 get_transpose(mat4& m) {
 inline mat4 mat4::look_at(vec3 position, vec3 target, vec3 world_up) {
 	// 1. Position = known
 	// 2. Calculate cameraDirection
-	vec3 zaxis = vec3::normalize(position - target);
+	vec3 diff_pos_target = position - target;
+	vec3 zaxis = vec3::normalize(diff_pos_target);
 	// 3. Get positive right axis vector
-	vec3 xaxis = vec3::normalize(vec3::cross(vec3::normalize(world_up), zaxis));
+	vec3 normalized_world = vec3::normalize(world_up);
+	vec3 crossed_normalized_world_z_axis = vec3::cross(normalized_world, zaxis);
+	vec3 xaxis = vec3::normalize(crossed_normalized_world_z_axis);
 	// 4. Calculate camera up vector
 	vec3 yaxis = vec3::cross(zaxis, xaxis);
 

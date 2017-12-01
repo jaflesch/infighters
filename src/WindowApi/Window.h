@@ -127,7 +127,7 @@ public: // Getters and Setters
 	inline void setActive(bool value) { this->m_active = value; }
 	inline hm::vec2 getPosition() const { return this->m_position; }
 	inline hm::vec2 getScreenPosition() const { return this->m_screenPosition; }
-	void setPosition(const hm::vec2& newPosition);
+	void setPosition(const hm::vec2 newPosition);
 
 	inline int getWidth()const{ return this->m_width; }
 	inline int getHeight()const{ return this->m_height; }
@@ -141,18 +141,18 @@ public: // Getters and Setters
 	}
 
 	inline hm::vec4 getBackGroundColor() const { return this->m_backgroundColor; }
-	inline void setBackGroundColor(const hm::vec4& newBackGroundColor) { this->m_backgroundColor = newBackGroundColor; }
+	inline void setBackGroundColor(const hm::vec4 newBackGroundColor) { this->m_backgroundColor = newBackGroundColor; }
 	
 	inline float getBorderSizeX() const{ return this->m_borderSizeX; }
 	void setBorderSizeX(float newBorderSize);
 	inline float getBorderSizeY() const{ return this->m_borderSizeY; }
 	void setBorderSizeY(float newBorderSize);
 	
-	inline void setBorderColor(hm::vec4& newBorderColor){ this->m_borderColor = newBorderColor; }
+	inline void setBorderColor(hm::vec4 newBorderColor){ this->m_borderColor = newBorderColor; }
 	inline hm::vec4 getBorderColor()const{ return this->m_borderColor; }
 	
 	void setTitle(unsigned char* title, int titleLength);
-	inline void setTitleColor(const hm::vec4& titleColor){ m_titleColor = titleColor; }
+	inline void setTitleColor(const hm::vec4 titleColor){ m_titleColor = titleColor; }
 	
 	inline bool isFocused() const{ return focused; }
 	inline bool isAttached() const { return m_attached; }

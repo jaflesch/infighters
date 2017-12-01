@@ -8,7 +8,7 @@ struct Skill_State {
 	s32 tautology_active_target = -1;
 };
 
-static Skill_State skill_state = { 0 };
+static Skill_State skill_state = {  };
 
 void deal_damage_to_target_enemy(int target_index, int damage, Skill_Damage dmg_type, Combat_State* combat_state) {
 	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - damage);

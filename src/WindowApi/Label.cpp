@@ -12,8 +12,8 @@ namespace linked
 		const WindowDiv& div, 
 		unsigned char* text, 
 		int textLength, 
-		hm::vec2& position,
-		hm::vec4& textColor, 
+		hm::vec2 position,
+		hm::vec4 textColor, 
 		Font_ID font_id,
 		float margin, 
 		float padding) :
@@ -32,7 +32,7 @@ namespace linked
 		m_font_size = get_font_size(font_id);
 	}
 
-	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2& position, Font_ID font_id) :
+	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2 position, Font_ID font_id) :
 		Label(div, text, textLength, position, DEFAULT_TEXTCOLOR, font_id, 0, 0){}
 
 	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, Font_ID font_id) :

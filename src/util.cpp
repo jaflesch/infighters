@@ -416,4 +416,16 @@ u8* read_entire_file(u8* filename, s64* out_size)
 	return (u8*)memory;
 }
 #elif defined(__linux__)
+void error_fatal(char* error_type, char* buffer)
+{
+	printf("%s %s", error_type, buffer);
+	exit(-1);
+}
+
+void error_warning(char* error)
+{
+	printf("%s", error);
+	exit(-1);
+}
+
 #endif

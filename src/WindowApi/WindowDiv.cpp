@@ -9,8 +9,8 @@ namespace linked
 		const Window& window, 
 		int width, int height,
 		float margin, float padding,
-		hm::vec2& position,
-		hm::vec4& backGroundColor, 
+		hm::vec2 position,
+		hm::vec4 backGroundColor, 
 		unsigned int hints) :
 		m_window(window), 
 		m_margin(margin), 
@@ -56,7 +56,8 @@ namespace linked
 			rp.y /= wh_;
 
 			ws->setOpacity(m_opacity);
-			ws->update(getRelativePosition());
+			hm::vec2 relative_pos = getRelativePosition();
+			ws->update(relative_pos);
 			divMesh->render();
 			ws->setOpacity(1.0f);
 		
@@ -116,7 +117,7 @@ namespace linked
 			b->update();
 	}
 
-	void WindowDiv::setAbsolutePosition(hm::vec2& absolutePos)
+	void WindowDiv::setAbsolutePosition(hm::vec2 absolutePos)
 	{
 		if (m_anchor_left || m_anchor_right || m_anchor_top || m_anchor_bottom || m_center_x || m_center_y)
 		{

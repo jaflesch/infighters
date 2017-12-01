@@ -13,6 +13,7 @@
 #include "font_render/os.h"
 #include "font_render/render_engine.h"
 
+#if defined(_WIN32) || defined(_WIN64)
 struct Timer
 {
 	double g_freq;
@@ -30,6 +31,19 @@ struct Timer
 		return double(li.QuadPart) / this->g_freq;
 	}
 };
+#elif defined(__linux__)
+struct Timer{
+	Timer(){}
+	double GetTime()
+	{
+		clockid_t clockid;
+		struct timespec t_spec;
+		int r = clock_gettime(clockid, &t_spec);
+		double res = t_spec.tv_sec + t_spec.tv_nsec;
+		return res;
+	}
+};
+#endif
 
 Window_Info window_info;
 Keyboard_State keyboard_state = { 0 };
@@ -196,4 +210,86 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 
 	return 0;
 }
+#elif defined(__linux__)
+#include <unistd.h>
+s32 main(int argc, char** argv)
+{
+	window_info.width  = 1600;
+	window_info.height = 900;
+	create_window(&window_info);
+	XEvent xev;
+
+	glewExperimental = true;
+	if(glewInit() != GLEW_OK){
+		print("Error trying to initialize glew\n");
+		return -1;
+	}
+	
+	application_state_init();
+	
+	Window root;
+	int x, y;
+	u32 width_return, height_return, border_width_return, depth_return;
+	XGetGeometry(window_info.display, window_info.win, &root, &x, &y, &width_return, &height_return, &border_width_return, &depth_return);
+	print("got window info\n");
+	print("x: %d\ny: %d\nwidth: %d\nheight: %d\nborder_width: %d\ndepth: %d\n", x, y, width_return, height_return, border_width_return, depth_return);
+	Screen*  s = DefaultScreenOfDisplay(window_info.display);
+	print("Width of Screen: %d\n", WidthOfScreen(s));
+	print("Height of Screen: %d\n", HeightOfScreen(s));
+//	void(*glXSwapIntervalEXT)(Display*, GLXDrawable, int) = (void(*)(Display*, GLXDrawable, int))glXGetProcAddressARB((const GLubyte*)"glXSwapIntervalEXT");
+//	GLXDrawable(*teste)() = (GLXDrawable(*)())glXGetProcAddressARB((const GLubyte*)"glXGetCurrentDrawable");
+//	print("address of glXSwapIntervalEXT: %p\n", glXSwapIntervalEXT);
+//	print("address of glXGetCurrentDrawable: %p\n", teste);
+	
+//	GLXDrawable glxdrawable = teste();
+//	glXSwapIntervalEXT(window_info.display, glxdrawable, 1);
+
+	int fps = 0;
+	while(true)
+	{
+		//XNextEvent(window_info.display, &xev);
+
+		// On this website it lists all the event masks
+		// tronche.com/gui/x/xlib/events/mask.html/
+		//
+		if(XCheckWindowEvent(window_info.display, window_info.win, ExposureMask | ButtonPressMask | KeyPressMask | FocusChangeMask | ResizeRedirectMask , &xev))
+		{
+			// /usr/include/X11/X.h line 181 has #define of all types of events
+			if(xev.type == KeyPress){
+				XKeyEvent* kev = (XKeyEvent*)&xev;
+				int key = XLookupKeysym(kev, 0);
+				print("Key Press %d\n", key);
+			}
+			if(xev.type == FocusIn)
+				print("Focus In\n");
+			if(xev.type == FocusOut)
+				print("Focus Out\n");
+			if(xev.type == Expose) {
+				//print("Resize\n");
+				XExposeEvent* xexp = (XExposeEvent*)&xev;
+				//print("%d %d\n", xexp->width, xexp->height);
+				static int c = 3;
+				if(c == 0){
+					//print("Event: %d %d\n", xexp->width, xexp->height);
+					window_info.width = xexp->width;
+					window_info.height = xexp->height;
+					engine::update_window_size();
+				} else {
+					c-=1;
+				}
+			}
+		}
+		glClear(GL_COLOR_BUFFER_BIT);
+		if(fps >= 60){
+			fps = 0;
+			//print("fps\n");
+		}
+		usleep(1500);
+		fps+=1;
+		application_state_update(1.0/60.0);
+		swap_buffers(&window_info);
+	}
+	return 0;
+}
+
 #endif

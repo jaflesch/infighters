@@ -17,8 +17,8 @@ class Label
 #define FONT_QUALITY 512		// size of the font image
 #define DEFAULT_TEXTCOLOR hm::vec4(0,0,0,1)
 public:
-	Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2& position, hm::vec4& textColor, Font_ID font_id, float margin, float padding);
-	Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2& position, Font_ID font_id);
+	Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2 position, hm::vec4 textColor, Font_ID font_id, float margin, float padding);
+	Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2 position, Font_ID font_id);
 	Label(const WindowDiv& div, unsigned char* text, int textLength, Font_ID font_id);
 	void render();
 	static void cleanUp();
@@ -51,9 +51,9 @@ public:
 	}
 	inline void setLineSpace(float lineSpace) { this->lineSpace = lineSpace; }
 	inline hm::vec2 getPosition()const{ return this->m_position; }
-	inline void setPosition(hm::vec2& position){ this->m_position = position; }
+	inline void setPosition(hm::vec2 position){ this->m_position = position; }
 	inline hm::vec4 getTextColor() const{ return this->m_textColor; }
-	inline void setTextColor(hm::vec4& color) { this->m_textColor = color; }
+	inline void setTextColor(hm::vec4 color) { this->m_textColor = color; }
 
 	inline void setMargin(float margin){ this->m_margin = margin; }
 	inline float getMargin() const{ return this->m_margin; }

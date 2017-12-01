@@ -22,7 +22,7 @@ class WindowDiv
 public:
 	// Methods
 	WindowDiv(const Window& window, int width, int height, float margin, float padding,
-		hm::vec2& position, hm::vec4& backGroundColor, unsigned int hints);
+		hm::vec2 position, hm::vec4 backGroundColor, unsigned int hints);
 	~WindowDiv();
 	void render();
 	void update();
@@ -31,8 +31,8 @@ public:
 	// Getters and setters
 	hm::vec2 getRelativePosition() const { return m_windowRelativePosition; }
 	hm::vec2 getPosition() const { return this->m_position; }
-	inline void setWindowRelativePosition(hm::vec2& relativePos) { this->m_windowRelativePosition = relativePos; }
-	void setAbsolutePosition(hm::vec2& absolutePos);
+	inline void setWindowRelativePosition(hm::vec2 relativePos) { this->m_windowRelativePosition = relativePos; }
+	void setAbsolutePosition(hm::vec2 absolutePos);
 	float getAlphaValue() const { return this->m_backGroundColor.a; }
 	hm::vec2 getDivBasePosition(float xoffset, float yoffset) const;
 	inline int getWidth() const{ return this->m_width; }
@@ -45,7 +45,7 @@ public:
 	hm::vec2 getScreenPosition() const;
 	std::vector<Label*>& getLabels(){ return this->labels; }
 	std::vector<Button*>& getButtons(){ return this->buttons; }
-	void setBackgroundColor(hm::vec4& color){ this->m_backGroundColor = color; }
+	void setBackgroundColor(hm::vec4 color){ this->m_backGroundColor = color; }
 	hm::vec4 getBackgroundColor()const { return this->m_backGroundColor; }
 	void setBackgroundTexture(Texture* texture){ this->m_backgroundTexture = texture; }
 	Texture* getBackgroundTexture(){ return this->m_backgroundTexture; }

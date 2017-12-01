@@ -1,6 +1,6 @@
 #include "Button.h"
 #include "WindowDiv.h"
-#include "..\input.h"
+#include "../input.h"
 #include "../font_render/os.h"
 
 extern Window_Info window_info;
@@ -11,7 +11,7 @@ namespace linked
 	int Button::mouseStatus;
 	bool Button::clicked;
 
-	Button::Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor, int id)
+	Button::Button(const WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id)
 		:
 		m_div(div),
 		m_label(label),
@@ -24,8 +24,10 @@ namespace linked
 		m_active_callback = true;
 		m_render = true;
 		button_info.id = id;
-		if(label)
-			label->setPosition(m_position + label->getPosition());
+		if(label){
+			hm::vec2 final_pos = m_position + label->getPosition();
+			label->setPosition(final_pos);
+		}
 		m_buttonMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), (float)m_width, (float)m_height), true);
 		
 		m_backgroundTexture = nullptr;

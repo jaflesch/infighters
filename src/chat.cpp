@@ -84,10 +84,10 @@ linked::Window* Chat::init_chat()
 	history_index = 0;
 #define CHAT_MAX_MSGS 7
 	using namespace linked;
-	Window* result = 0;
+	linked::Window* result = 0;
 
 	// Chat Window
-	chatWindow = new Window(500, 140, hm::vec2(10, window_info.height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
+	chatWindow = new linked::Window(500, 140, hm::vec2(10, window_info.height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
 		W_BORDER | W_MOVABLE);
 	chatWindow->setBorderColor(hm::vec4(0, 0, 0.1f, 0.6f));
 	chatWindow->setBorderSizeX(1);
