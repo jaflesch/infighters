@@ -1,7 +1,7 @@
 #include "FontRenderer.h"
 #include "FontShader.h"
 #include "Mesh.h"
-#include "..\ResourceLoad\Texture.h"
+#include "../ResourceLoad/Texture.h"
 #include "Primitive.h"
 #include "../font_render/os.h"
 #include "../font_render/font_rendering.h"
@@ -10,18 +10,12 @@ extern Window_Info window_info;
 
 FontRenderer::FontRenderer(float fontSize, int textureQuality)
 {
-	atlas = ftgl::texture_atlas_new(textureQuality, textureQuality, 1);
-	font = ftgl::texture_font_new_from_file(atlas, fontSize, "./res/fonts/LiberationMono-Regular.ttf");
-
-	ascender = font->ascender;
 	this->fontSize = fontSize;
 	fontMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), 0, 0), true);
 }
 
 FontRenderer::~FontRenderer()
 {
-	ftgl::texture_atlas_delete(atlas);
-	ftgl::texture_font_delete(font);
 	delete fontMesh;
 }
 /*

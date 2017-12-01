@@ -1,17 +1,19 @@
 #include "Window.h"
-#include "..\common.h"
-#include "..\input.h"
+#include "../common.h"
+#include "../input.h"
 #include "../font_render/os.h"
 
 extern Window_Info window_info;
 extern Mouse_State mouse_state;
 
 using namespace linked;
-std::vector<Window*> Window::openedWindows;
-std::vector<Window*> Window::backgroundWindows;
-FontShader* Window::m_textShader = nullptr;
-WindowShader* Window::m_windowShader = nullptr;
-bool Window::update_background = true;
+std::vector<linked::Window*> linked::Window::openedWindows;
+std::vector<linked::Window*> linked::Window::backgroundWindows;
+FontShader* linked::Window::m_textShader = nullptr;
+WindowShader* linked::Window::m_windowShader = nullptr;
+bool linked::Window::update_background = true;
+
+namespace linked {
 
 Window::Window(
 	int width, int height,
@@ -327,7 +329,7 @@ bool Window::isFocused()
 {
 	return focused;
 }
-void Window::setPosition(const hm::vec2& newPosition)
+void Window::setPosition(const hm::vec2 newPosition)
 {
 	m_position = newPosition;
 }
@@ -435,3 +437,4 @@ void Window::setBorderSizeX(float newBorderSize)
 	this->m_borderSizeX = newBorderSize;
 }
 
+} // namespace linked

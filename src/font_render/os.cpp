@@ -345,6 +345,13 @@ s32 create_window(Window_Info* info)
 		return -1;
 	}
 
+	XClassHint* class_hint = XAllocClassHint();
+	u8 class_name[] = "infighters";
+	u8 class_class[] = "infclass";
+	class_hint->res_name = (char*)class_name;
+	class_hint->res_class = (char*)class_class;
+	XSetClassHint(info->display, info->win, class_hint);
+
 	// Done with the visual info data
 	XFree(vi);
 

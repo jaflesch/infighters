@@ -20,7 +20,7 @@ struct Button_Info {
 class Button
 {
 public:
-	Button(const WindowDiv& div, Label* label, hm::vec2& position, int width, int height, hm::vec4& backgroundColor, int id);
+	Button(const WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id);
 	Button(const WindowDiv& div, int width, int height);
 	~Button();
 	void render();
@@ -82,14 +82,14 @@ public:
 	inline float getOpacity() const { return this->opacity; }
 
 	// setters for bg
-	inline void setNormalBGColor(hm::vec4& color){ this->m_backgroundNormalColor = color; }
-	inline void setHeldBGColor(hm::vec4& color){ this->m_backgroundHeldColor = color; }
-	inline void setHoveredBGColor(hm::vec4& color){ this->m_backgroundHoveredColor = color; }
+	inline void setNormalBGColor(hm::vec4 color){ this->m_backgroundNormalColor = color; }
+	inline void setHeldBGColor(hm::vec4 color){ this->m_backgroundHeldColor = color; }
+	inline void setHoveredBGColor(hm::vec4 color){ this->m_backgroundHoveredColor = color; }
 
-	inline void setInactiveNormalBGColor(hm::vec4& color) { this->m_backgroundInactiveNormalColor = color; }
-	inline void setInactiveHeldBGColor(hm::vec4& color) { this->m_backgroundInactiveHeldColor = color; }
-	inline void setInactiveHoveredBGColor(hm::vec4& color) { this->m_backgroundInactiveHoveredColor = color; }
-	inline void setInactiveAllBGColor(hm::vec4& color) {
+	inline void setInactiveNormalBGColor(hm::vec4 color) { this->m_backgroundInactiveNormalColor = color; }
+	inline void setInactiveHeldBGColor(hm::vec4 color) { this->m_backgroundInactiveHeldColor = color; }
+	inline void setInactiveHoveredBGColor(hm::vec4 color) { this->m_backgroundInactiveHoveredColor = color; }
+	inline void setInactiveAllBGColor(hm::vec4 color) {
 		this->m_backgroundInactiveNormalColor = color;
 		this->m_backgroundInactiveHeldColor = color;
 		this->m_backgroundInactiveHoveredColor = color; 
@@ -104,9 +104,9 @@ public:
 		this->m_backgroundHoveredTexture = texture;
 	}
 
-	inline void setNormalTextColor(hm::vec4& color){ this->m_labelNormalTextColor = color; }
-	inline void setHeldText(hm::vec4& color){ this->m_labelHeldTextColor = color; }
-	inline void setHoveredTextColor(hm::vec4& color){ this->m_labelHoveredTextColor = color; }
+	inline void setNormalTextColor(hm::vec4 color){ this->m_labelNormalTextColor = color; }
+	inline void setHeldText(hm::vec4 color){ this->m_labelHeldTextColor = color; }
+	inline void setHoveredTextColor(hm::vec4 color){ this->m_labelHoveredTextColor = color; }
 
 	// getters for bg
 	inline const hm::vec4& getNormalBGColor() const{ return this->m_backgroundNormalColor; }

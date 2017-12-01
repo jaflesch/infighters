@@ -34,7 +34,9 @@ Quad::Quad(vec3 center, float sizeX, float sizeY, int textureNumRows, int textur
 	model->getPositions()->push_back(botL);
 	model->getPositions()->push_back(botR);
 
-	vec4 normal_v4 = mat4::rotate(vec3(1, 0, 0), -ANGLE) * vec4(0, 0, 1, 1);
+	vec3 xaxis(1,0,0);
+	mat4 rotation_mat = mat4::rotate(xaxis, -ANGLE);
+	vec4 normal_v4 = rotation_mat * vec4(0, 0, 1, 1);
 	vec3 normal = vec3(normal_v4.x, normal_v4.y, normal_v4.z);
 	model->getNormals()->push_back(normal);
 	model->getNormals()->push_back(normal);

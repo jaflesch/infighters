@@ -10,40 +10,40 @@ struct Font_List {
 	GLuint shader = -1;
 };
 
-Font_List fonts;
+Font_List font_list;
 Font_Table font_table(512);
 
 GLuint get_font_shader() {
-	return fonts.shader;
+	return font_list.shader;
 }
 
 GLuint get_font_texture(Font_ID font_id) {
-	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
-		return fonts.list[font_id].atlas_full_id;
+	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
+		return font_list.list[font_id].atlas_full_id;
 	}
 }
 
 r32 get_font_max_height(Font_ID font_id) {
-	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
-		return (r32)fonts.list[font_id].max_height;
+	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
+		return (r32)font_list.list[font_id].max_height;
 	}
 }
 
 r32 get_font_max_width(Font_ID font_id) {
-	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
-		return (r32)fonts.list[font_id].max_width;
+	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
+		return (r32)font_list.list[font_id].max_width;
 	}
 }
 
 r32 get_font_size(Font_ID font_id) {
-	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
-		return (r32)fonts.list[font_id].font_size;
+	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
+		return (r32)font_list.list[font_id].font_size;
 	}
 }
 
 bool get_font_is_unicode(Font_ID font_id) {
-	if (font_id >= 0 && fonts.used[font_id] && fonts.list[font_id].loaded) {
-		return (r32)fonts.list[font_id].unicode;
+	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
+		return (r32)font_list.list[font_id].unicode;
 	}
 }
 
@@ -372,11 +372,11 @@ extern "C" u32 load_font_thread(void *arg)
 }
 
 void font_rendering_init() {
-	fonts.shader = engine::shader_load(vshader, fshader, sizeof(vshader) - 1, sizeof(fshader) - 1);
+	font_list.shader = engine::shader_load(vshader, fshader, sizeof(vshader) - 1, sizeof(fshader) - 1);
 }
 
 void font_rendering_release() {
-	glDeleteProgram(fonts.shader);
+	glDeleteProgram(font_list.shader);
 }
 
 Font_ID load_font_not_repeat(string name, u32 type_size) {
@@ -390,37 +390,37 @@ Font_ID load_font_not_repeat(string name, u32 type_size) {
 
 Font_ID load_font(const char* name, u32 type_size, bool is_unicode) {
 	s32 index = 0;
-	while (fonts.used[index]) {
+	while (font_list.used[index]) {
 		index++;
 		if (index == 64) return -1;
 	}
-	int err = font_load(&fonts.list[index], name, type_size, 1024, is_unicode);
+	int err = font_load(&font_list.list[index], name, type_size, 1024, is_unicode);
 	if (err == -1) return -2;
-	font_finish_load(&fonts.list[index]);
-	fonts.used[index] = true;
-	fonts.list[index].shader = fonts.shader;
+	font_finish_load(&font_list.list[index]);
+	font_list.used[index] = true;
+	font_list.list[index].shader = font_list.shader;
 
-	text_buffer_init(&fonts.list[index], 1024);
+	text_buffer_init(&font_list.list[index], 1024);
 	return index;
 }
 
 Font_ID load_font_async(const char* name, u32 type_size) {
 	s32 index = 0;
-	while (fonts.used[index]) {
+	while (font_list.used[index]) {
 		index++;
 		if (index == 64) return -1;
 	}
-	fonts.used[index] = true;
+	font_list.used[index] = true;
 	u32 tid;
-	create_thread(load_font_thread, &fonts.list[index], &tid);
+	create_thread((void*(*)(void*))load_font_thread, &font_list.list[index], &tid);
 
-	text_buffer_init(&fonts.list[index], 1024);
+	text_buffer_init(&font_list.list[index], 1024);
 	return index;
 }
 
 int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color) {
 	Font_Info* font = 0;
-	if (font_id >= 0) font = &fonts.list[font_id];
+	if (font_id >= 0) font = &font_list.list[font_id];
 
 	if (font->loaded) {
 		if (font->text_buffer_offset + text.length >= font->text_buffer_max_length) {
@@ -437,7 +437,7 @@ int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color
 
 int render_text(Font_ID font_id, u8* text, u32 length, hm::vec2& position, hm::vec4 color) {
 	Font_Info* font = 0;
-	if (font_id >= 0) font = &fonts.list[font_id];
+	if (font_id >= 0) font = &font_list.list[font_id];
 
 	if (font->loaded) {
 		if (font->text_buffer_offset + length >= font->text_buffer_max_length) {
@@ -463,7 +463,7 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 	r32 start_x = position_out.x;
 
 	Font_Info* font = 0;
-	if (font_id >= 0) font = &fonts.list[font_id];
+	if (font_id >= 0) font = &font_list.list[font_id];
 	if (font->loaded) {
 		Character* characters = font->characters;
 
@@ -521,16 +521,16 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 
 
 void font_rendering_flush() {
-	glUseProgram(fonts.shader);
+	glUseProgram(font_list.shader);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	for (int i = 0; i < sizeof(fonts.list) / sizeof(Font_Info); ++i) {
-		if (fonts.used[i] && fonts.list[i].loaded) {
-			text_buffer_draw(&fonts.list[i], fonts.list[i].text_buffer_length, hm::vec2(window_info.width, window_info.height));
-			fonts.list[i].text_buffer_length = 0;
-			fonts.list[i].text_buffer_offset = 0;
+	for (int i = 0; i < sizeof(font_list.list) / sizeof(Font_Info); ++i) {
+		if (font_list.used[i] && font_list.list[i].loaded) {
+			text_buffer_draw(&font_list.list[i], font_list.list[i].text_buffer_length, hm::vec2(window_info.width, window_info.height));
+			font_list.list[i].text_buffer_length = 0;
+			font_list.list[i].text_buffer_offset = 0;
 		}
 	}
 	glDisable(GL_BLEND);
