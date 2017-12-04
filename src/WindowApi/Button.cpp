@@ -23,7 +23,11 @@ namespace linked
 		m_active = true;
 		m_active_callback = true;
 		m_render = true;
+		m_is_toggle = false;
+		m_toggled = false;
+
 		button_info.id = id;
+		button_info.this_button = this;
 		if(label){
 			hm::vec2 final_pos = m_position + label->getPosition();
 			label->setPosition(final_pos);
@@ -39,6 +43,11 @@ namespace linked
 		m_backgroundNormalColor = backgroundColor;
 		m_backgroundHoveredColor = backgroundColor;
 		m_backgroundHeldColor = backgroundColor;
+
+		m_backgroundToggledColor = backgroundColor;
+		m_backgroundToggledNormalColor = backgroundColor;
+		m_backgroundToggledHoveredColor = backgroundColor;
+		m_backgroundToggledHeldColor = backgroundColor;
 
 		m_backgroundInactiveColor = backgroundColor;
 		m_backgroundInactiveHeldColor = backgroundColor;
@@ -94,8 +103,12 @@ namespace linked
 		//if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 0)
 		if(isHovered() && mouseStatus == 0)
 		{
-			if (m_active)
-				m_backgroundColor = m_backgroundHoveredColor;
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledHoveredColor;
+				else
+					m_backgroundColor = m_backgroundHoveredColor;
+			}
 			else
 				m_backgroundColor = m_backgroundInactiveHoveredColor;
 			m_backgroundTexture = m_backgroundHoveredTexture;
@@ -106,9 +119,12 @@ namespace linked
 		//else if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 1)
 		else if(isHovered() && mouseStatus == 1)
 		{
-			if (m_active)
-				m_backgroundColor = m_backgroundHeldColor;
-			else
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledHeldColor;
+				else
+					m_backgroundColor = m_backgroundHeldColor;
+			} else
 				m_backgroundColor = m_backgroundInactiveHeldColor;
 			m_backgroundTexture = m_backgroundHeldTexture;
 			if (m_label)
@@ -117,9 +133,12 @@ namespace linked
 		// Not hovered
 		else
 		{
-			if(m_active)
-				m_backgroundColor = m_backgroundNormalColor;
-			else
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledNormalColor;
+				else
+					m_backgroundColor = m_backgroundNormalColor;
+			} else
 				m_backgroundColor = m_backgroundInactiveNormalColor;
 			m_backgroundTexture = m_backgroundNormalTexture;
 			if(m_label)

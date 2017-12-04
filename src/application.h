@@ -253,7 +253,7 @@ static void layout_set_timer_percentage(r32 percentage);
 #define NUM_SKILLS 4
 #define NUM_ALLIES 3
 #define NUM_ENEMIES 3
-#define TURN_DURATION 5.0
+#define TURN_DURATION 60.0
 #define FAST 1
 
 struct GameState {

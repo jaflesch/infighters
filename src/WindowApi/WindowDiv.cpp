@@ -73,8 +73,10 @@ namespace linked
 			if (b->getBackgroundTexture() != nullptr)
 				ws->bindTextures(b->getBackgroundTexture()->textureID);
 		
+			ws->setOpacity(b->getOpacity());
 			ws->update(v);
 			b->getButtonMesh().render();
+			ws->setOpacity(1.0f);
 		
 			if (b->getBackgroundTexture() != nullptr)
 				ws->unbindTextures();

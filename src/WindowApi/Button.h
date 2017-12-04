@@ -11,10 +11,12 @@ namespace linked
 {
 class WindowDiv;
 class Label;
+class Button;
 
 struct Button_Info {
 	int id;
 	void* data;
+	linked::Button* this_button;
 };
 
 class Button
@@ -36,6 +38,8 @@ private:
 	bool m_active;
 	bool m_active_callback;
 	bool m_render;
+	bool m_is_toggle;
+	bool m_toggled;
 	float opacity;
 
 	hm::vec2 m_position;
@@ -56,6 +60,11 @@ private:
 		m_backgroundInactiveHeldColor,
 		m_backgroundInactiveHoveredColor,
 		m_backgroundInactiveNormalColor;
+
+	hm::vec4 m_backgroundToggledColor,
+		m_backgroundToggledHeldColor,
+		m_backgroundToggledHoveredColor,
+		m_backgroundToggledNormalColor;
 
 	Texture* m_backgroundTexture, 
 		*m_backgroundHeldTexture,
@@ -80,6 +89,9 @@ public:
 	inline const hm::vec2 getPosition() const { return this->m_position; }
 	inline void setOpacity(float opacity) { this->opacity = opacity; }
 	inline float getOpacity() const { return this->opacity; }
+	inline void setIsToggle(bool value) { this->m_is_toggle = value; }
+	inline void toggle() { this->m_toggled = !this->m_toggled; }
+	inline bool getIsToggled() { return this->m_toggled; }
 
 	// setters for bg
 	inline void setNormalBGColor(hm::vec4 color){ this->m_backgroundNormalColor = color; }
@@ -93,6 +105,15 @@ public:
 		this->m_backgroundInactiveNormalColor = color;
 		this->m_backgroundInactiveHeldColor = color;
 		this->m_backgroundInactiveHoveredColor = color; 
+	}
+
+	inline void setToggledNormalBGColor(hm::vec4 color) { this->m_backgroundToggledNormalColor = color; }
+	inline void setToggledHeldBGColor(hm::vec4 color) { this->m_backgroundToggledHeldColor = color; }
+	inline void setToggledHoveredBGColor(hm::vec4 color) { this->m_backgroundToggledHoveredColor = color; }
+	inline void setToggledAllBGColor(hm::vec4 color) {
+		this->m_backgroundToggledNormalColor = color;
+		this->m_backgroundToggledHeldColor = color;
+		this->m_backgroundToggledHoveredColor = color;
 	}
 
 	inline void setNormalBGTexture(Texture* texture){ this->m_backgroundNormalTexture = texture; }
@@ -117,6 +138,10 @@ public:
 	inline const hm::vec4& getInactiveHeldBGColor() const { return this->m_backgroundInactiveHeldColor; }
 	inline const hm::vec4& getInactiveHoveredBGColor() const { return this->m_backgroundInactiveHoveredColor; }
 
+	inline const hm::vec4& getToggledNormalBGColor() const { return this->m_backgroundToggledNormalColor; }
+	inline const hm::vec4& getToggledHeldBGColor() const { return this->m_backgroundToggledHeldColor; }
+	inline const hm::vec4& getToggledHoveredBGColor() const { return this->m_backgroundToggledHoveredColor; }
+
 	inline const Texture* getNormalBGTexture() const{ return this->m_backgroundNormalTexture; }
 	inline const Texture* getHeldBGTexture() const{ return this->m_backgroundHeldTexture; }
 	inline const Texture* getHoveredBGTexture() const{ return this->m_backgroundHoveredTexture; }
@@ -126,6 +151,7 @@ public:
 	inline const hm::vec4& getHoveredTextColor() const{ return this->m_labelHoveredTextColor; }
 
 	inline void setActive(bool active_change_color, bool active_callback = true) { this->m_active = active_change_color; this->m_active_callback = active_callback; }
+	inline bool getActive() { return this->m_active; }
 };
 
 }

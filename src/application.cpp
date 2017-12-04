@@ -702,6 +702,37 @@ static void button_exchange_orb_arrow(void* arg) {
 	}
 }
 
+static void button_skill(void* arg) {
+	linked::Button_Info* eba = (linked::Button_Info*)arg;
+	int char_id = (int)eba->data;
+	int skill_id = (int)eba->id;
+
+	bool is_toggled = eba->this_button->getIsToggled();
+
+	if (!eba->this_button->getActive()) {
+		for (int i = 0; i < NUM_SKILLS; ++i) {
+			linked::Button* b = gw.allies_skills[char_id * NUM_SKILLS + i]->divs[0]->getButtons()[0];
+			b->setActive(true);
+			b->setOpacity(1.0f);
+			if (b->getIsToggled())
+				b->toggle();
+		}
+	}
+	for (int i = 0; i < NUM_SKILLS; ++i) {
+		if (i == skill_id)
+			continue;
+		linked::Button* b = gw.allies_skills[char_id * NUM_SKILLS + i]->divs[0]->getButtons()[0];
+		if (is_toggled) {
+			b->setActive(true);
+			b->setOpacity(1.0f);
+		} else {
+			b->setActive(false);
+			b->setOpacity(0.2f);
+		}
+	}
+	eba->this_button->toggle();
+}
+
 // Layout initialization functions
 void hide_all_windows() {
 	//gw.bgwindow->setActive(false);
@@ -1120,17 +1151,24 @@ void init_combat_mode()
 
 		float x_off = 0.0f;
 		for (int k = 0; k < NUM_SKILLS; ++k) {
-			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 1), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], skill_img_size, skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(ally_hp_bar_full_color);
 			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 1, 1, 1), k);
+			skill_button->button_info.data = (void*)i;
+			skill_button->button_info.id = k;
+			skill_button->setClickedCallback(button_skill);
 			hm::vec4 skill_button_hovered_bgcolor(0, 1, 1, 0.8f);
 			skill_button->setHoveredBGColor(skill_button_hovered_bgcolor);
 			hm::vec4 skill_button_held_bgcolor(0, 0.8f, 0.9f, 0.7f);
 			skill_button->setHeldBGColor(skill_button_held_bgcolor);
+
+			skill_button->setIsToggle(true);
+			//skill_button->setToggledNormalBGColor(hm::vec4(0, 1, 1, 0.6f));
+
 			skill_div->getButtons().push_back(skill_button);
 			x_off += skill_img_size + x_spacing;
 		}
