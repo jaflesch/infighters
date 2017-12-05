@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-I./include -I./include/freetype -g -I./src -std=c++11 -m64 -w
+CFLAGS=-I./include -I./include/freetype -g -I./src -std=c++11 -m64 -w -fpermissive
 SRCDIR=./src
 BINDIR=./bin/gcc
 LIBDIR=./lib

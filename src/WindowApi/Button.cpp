@@ -153,6 +153,7 @@ namespace linked
 
 	bool Button::isHovered() const
 	{
+		static int x = 0;
 		hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
 
 		hm::vec2 buttonPosition = getScreenPosition();
@@ -160,6 +161,8 @@ namespace linked
 		if (cursorPosition.x >= buttonPosition.x && cursorPosition.x <= buttonPosition.x + m_width &&
 			cursorPosition.y >= buttonPosition.y && cursorPosition.y <= buttonPosition.y + m_height)
 		{
+			printf("teste %d\n", x);
+			x++;
 			return true;
 		}
 #if 0	// Font debug

@@ -1938,14 +1938,6 @@ void input()
 			change_game_mode(MODE_CHAR_INFO);
 		}
 	}
-
-	if (keyboard_state.key_event[VK_UP]) {
-		keyboard_state.key_event[VK_UP] = false;
-
-	}
-	if (keyboard_state.key_event[VK_DOWN]) {
-		keyboard_state.key_event[VK_DOWN] = false;
-	}
 }
 
 // Layout functions
