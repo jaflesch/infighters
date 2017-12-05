@@ -89,6 +89,7 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 			target.number = 0;
 		} break;
 	}
+	return target;
 }
 
 s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state) {

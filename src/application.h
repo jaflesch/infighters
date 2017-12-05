@@ -247,6 +247,7 @@ static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
 static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
 static void layout_set_timer_percentage(r32 percentage);
+static void layout_set_enemy_image_opacity(s32 index, r32 percentage);
 
 // Gameplay structures
 #define NUM_CHARS 12
@@ -283,6 +284,7 @@ struct Orb_Exchange_State {
 };
 
 struct Player {
+	Character_ID char_id[NUM_ALLIES];
 	s32 hp[NUM_ALLIES];
 	s32 max_hp[NUM_ALLIES];
 	
