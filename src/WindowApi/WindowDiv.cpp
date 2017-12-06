@@ -6,7 +6,7 @@ extern Window_Info window_info;
 namespace linked
 {
 	WindowDiv::WindowDiv(
-		const Window& window, 
+		Window& window, 
 		int width, int height,
 		float margin, float padding,
 		hm::vec2 position,
@@ -73,8 +73,10 @@ namespace linked
 			if (b->getBackgroundTexture() != nullptr)
 				ws->bindTextures(b->getBackgroundTexture()->textureID);
 		
+			ws->setOpacity(b->getOpacity());
 			ws->update(v);
 			b->getButtonMesh().render();
+			ws->setOpacity(1.0f);
 		
 			if (b->getBackgroundTexture() != nullptr)
 				ws->unbindTextures();

@@ -702,6 +702,146 @@ static void button_exchange_orb_arrow(void* arg) {
 	}
 }
 
+#define ARCSIN_1 1.57079633
+
+struct Enemy_Target_Animation {
+	bool is_animating;
+	r32 opacity_animation;
+
+	Enemy_Target_Animation() {
+		is_animating = false;
+		opacity_animation = ARCSIN_1;
+	}
+};
+static Enemy_Target_Animation enemy_target_animation[NUM_ENEMIES];
+
+static void reset_targets() {
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		enemy_target_animation[i].opacity_animation = ARCSIN_1;
+		enemy_target_animation[i].is_animating = false;
+		layout_set_enemy_image_opacity(i, 1.0f);
+	}
+}
+
+static void reset_selections() {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int j = 0; j < NUM_SKILLS; ++j) {
+			linked::Button* b = gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0];
+			b->setActive(true);
+			b->setOpacity(1.0f);
+			if (b->getIsToggled())
+				b->toggle();
+		}
+	}
+}
+
+static void combat_state_reset_target(s32 char_id) {
+	combat_state.player.targeting = false;
+	
+	for (int k = 0; k < NUM_ALLIES; ++k) {
+		if (combat_state.player.targets[char_id].ally_target_index[k] != -1) {
+			combat_state.player.targets[char_id].ally_target_index[k] = -1;
+		}
+	}
+	for (int k = 0; k < NUM_ENEMIES; ++k) {
+		if (combat_state.player.targets[char_id].enemy_target_index[k] != -1) {
+			if (combat_state.player.targeting_info.enemy_target_index[k]) {
+				combat_state.player.targets[char_id].enemy_target_image[k]->setActive(false);
+			}
+			combat_state.player.targets[char_id].ally_target_index[k] = -1;
+		}
+	}
+
+}
+
+static void button_skill(void* arg) {
+	linked::Button_Info* eba = (linked::Button_Info*)arg;
+	int char_id = (int)eba->data;
+	int skill_id = (int)eba->id;
+
+	bool is_toggled = eba->this_button->getIsToggled();
+
+	if (is_toggled) {
+		// untoggle?
+		printf("untoggle\n");
+		combat_state_reset_target(char_id);
+		reset_targets();
+	} else {
+		if (combat_state.player.targeting)
+			return;
+		printf("toggle\n");
+	}
+
+	// activate button
+	if (!eba->this_button->getActive()) {
+		for (int i = 0; i < NUM_SKILLS; ++i) {
+			linked::Button* b = gw.allies_skills[char_id * NUM_SKILLS + i]->divs[0]->getButtons()[0];
+			b->setActive(true);
+			b->setOpacity(1.0f);
+			if (b->getIsToggled())
+				b->toggle();
+		}
+	}
+	for (int i = 0; i < NUM_SKILLS; ++i) {
+		if (i == skill_id)
+			continue;
+		linked::Button* b = gw.allies_skills[char_id * NUM_SKILLS + i]->divs[0]->getButtons()[0];
+		if (is_toggled) {
+			b->setActive(true);
+			b->setOpacity(1.0f);
+		} else {
+			b->setActive(false);
+			b->setOpacity(0.2f);
+		}
+	}
+	eba->this_button->toggle();
+
+	Skill_ID skill_used = (Skill_ID)(NUM_SKILLS * combat_state.player.char_id[char_id] + skill_id);
+	Skill_Target target = skill_need_targeting(skill_used, &combat_state);
+	if (target.number > 0 && !is_toggled) {
+		combat_state.player.targeting = true;
+		combat_state.player.targeting_info.skill_used = skill_used;
+		combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
+
+		printf("Need %d", target.number);
+
+		if (target.enemy && !target.ally) {
+			for(int i = 0; i < NUM_ENEMIES; ++i)
+				enemy_target_animation[i].is_animating = true;
+			printf(" enemy");
+		} else if (target.ally && !target.enemy) {
+			printf(" ally");
+		} else {
+			for (int i = 0; i < NUM_ENEMIES; ++i)
+				enemy_target_animation[i].is_animating = true;
+			printf(" enemy or ally");
+		}
+		printf(" target.\n");
+	}
+}
+
+static void target_enemy(void* arg) {
+	linked::Button_Info* eba = (linked::Button_Info*)arg;
+
+	if (!combat_state.player.targeting)
+		return;
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (gw.enemy_target[eba->id][i]->getActive() == true)
+			continue;
+		gw.enemy_target[eba->id][i]->setActive(true);
+		gw.enemy_target[eba->id][i]->divs[0]->setBackgroundTexture(skill_textures[combat_state.player.targeting_info.skill_used]);
+		s32 attacker_index = combat_state.player.targeting_info.attacking_character;
+		combat_state.player.targets[attacker_index].enemy_target_image[eba->id] = gw.enemy_target[eba->id][i];
+		combat_state.player.targets[attacker_index].enemy_target_index[eba->id] = attacker_index;
+		break;
+	}
+
+	combat_state.player.targeting = false;
+
+	reset_targets();
+}
+
 // Layout initialization functions
 void hide_all_windows() {
 	//gw.bgwindow->setActive(false);
@@ -727,6 +867,9 @@ void hide_all_windows() {
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		gw.enemies[i]->setActive(false);
 		gw.enemies_info[i]->setActive(false);
+		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
+			gw.enemy_target[i][k]->setActive(false);
+		}
 	}
 	gw.combat_bottom_info->setActive(false);
 	gw.timer_window->setActive(false);
@@ -1007,15 +1150,60 @@ void init_combat_mode()
 	skill_textures[CHAR_ZERO * NUM_SKILLS + 2] = new Texture("res/skills/zero/requiem_zero.png");
 	skill_textures[CHAR_ZERO * NUM_SKILLS + 3] = new Texture("res/skills/zero/void_barrier.png");
 
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 0] = new Texture("res/skills/qwerty/alt.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 1] = new Texture("res/skills/qwerty/ctrl.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 2] = new Texture("res/skills/qwerty/del.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 3] = new Texture("res/skills/qwerty/esc.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 0] = new Texture("res/skills/one/truth_slash.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 1] = new Texture("res/skills/one/tautology.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 2] = new Texture("res/skills/one/axion_one.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 3] = new Texture("res/skills/one/true_endurance.png");
+
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("res/skills/serial_keyller/brute_force.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("res/skills/serial_keyller/buffer_overflow.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("res/skills/serial_keyller/ddos_attack.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("res/skills/serial_keyller/encryption.png");
+
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("res/skills/serial_keyller/brute_force.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("res/skills/serial_keyller/buffer_overflow.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("res/skills/serial_keyller/ddos_attack.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("res/skills/serial_keyller/encryption.png");
+
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 0] = new Texture("res/skills/ray_tracey/particle_rendering.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 1] = new Texture("res/skills/ray_tracey/diffuse_reflection.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 2] = new Texture("res/skills/ray_tracey/dynamic_frustum.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 3] = new Texture("res/skills/ray_tracey/rasterization.png");
 
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 0] = new Texture("res/skills/astar/q_punch.png");
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 1] = new Texture("res/skills/astar/perceptron.png");
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 2] = new Texture("res/skills/astar/neural_network.png");
 	skill_textures[CHAR_A_STAR * NUM_SKILLS + 3] = new Texture("res/skills/astar/hill_climbing.png");
+
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 0] = new Texture("res/skills/deadlock/preemption.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 1] = new Texture("res/skills/deadlock/mutex.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 2] = new Texture("res/skills/deadlock/thread_scheduling.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 3] = new Texture("res/skills/deadlock/fork.png");
+
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 0] = new Texture("res/skills/norma/pumping_up.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 1] = new Texture("res/skills/norma/automata_summon.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 2] = new Texture("res/skills/norma/turing_machine.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 3] = new Texture("res/skills/norma/non_determinism.png");
+
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 0] = new Texture("res/skills/hazard/tmr.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 1] = new Texture("res/skills/hazard/redundancy.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 2] = new Texture("res/skills/hazard/rollback.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 3] = new Texture("res/skills/hazard/rollforward.png");
+
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 0] = new Texture("res/skills/qwerty/alt.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 1] = new Texture("res/skills/qwerty/ctrl.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 2] = new Texture("res/skills/qwerty/del.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 3] = new Texture("res/skills/qwerty/esc.png");
+
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 0] = new Texture("res/skills/big_o/best_bound_fist.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 1] = new Texture("res/skills/big_o/dual_simplex.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 2] = new Texture("res/skills/big_o/graph_coloring.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 3] = new Texture("res/skills/big_o/knapsack_hideout.png");
+
+	skill_textures[CHAR_NEW * NUM_SKILLS + 0] = new Texture("res/skills/new/sprint_burst.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 1] = new Texture("res/skills/new/inheritance.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 2] = new Texture("res/skills/new/override.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 3] = new Texture("res/skills/new/polymorphism.png");
 
 	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 0] = new Texture("res/skills/clockboy/clock_pulse.png");
 	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 1] = new Texture("res/skills/clockboy/pipeline.png");
@@ -1120,17 +1308,24 @@ void init_combat_mode()
 
 		float x_off = 0.0f;
 		for (int k = 0; k < NUM_SKILLS; ++k) {
-			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 1), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], skill_img_size, skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(ally_hp_bar_full_color);
 			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 1, 1, 1), k);
+			skill_button->button_info.data = (void*)i;
+			skill_button->button_info.id = k;
+			skill_button->setClickedCallback(button_skill);
 			hm::vec4 skill_button_hovered_bgcolor(0, 1, 1, 0.8f);
 			skill_button->setHoveredBGColor(skill_button_hovered_bgcolor);
 			hm::vec4 skill_button_held_bgcolor(0, 0.8f, 0.9f, 0.7f);
 			skill_button->setHeldBGColor(skill_button_held_bgcolor);
+
+			skill_button->setIsToggle(true);
+			//skill_button->setToggledNormalBGColor(hm::vec4(0, 1, 1, 0.6f));
+
 			skill_div->getButtons().push_back(skill_button);
 			x_off += skill_img_size + x_spacing;
 		}
@@ -1163,6 +1358,8 @@ void init_combat_mode()
 		enemy_image_div->setBackgroundTexture(char_textures[i]);
 		gw.enemies[i]->divs.push_back(enemy_image_div);
 		linked::Button* dummy_enemy_button = new linked::Button(*enemy_image_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		dummy_enemy_button->button_info.id = i;
+		dummy_enemy_button->setClickedCallback(target_enemy);
 		enemy_image_div->getButtons().push_back(dummy_enemy_button);
 
 		start_pos.x -= (x_spacing + size_info);
@@ -1183,6 +1380,20 @@ void init_combat_mode()
 		dummy->getLabels().push_back(hplabel);
 
 		start_pos.x = 1400.0f;
+
+		hm::vec2 target_pos = start_pos;
+		r32 target_icon_size = 40.0f;
+		r32 target_spacing = 10.0f;
+		target_pos.x -= (x_spacing + size_info + target_icon_size + target_spacing);
+		s32 max_ = MAX(NUM_ALLIES, NUM_ENEMIES);
+		for (int k = 0; k < max_ ; ++k) {
+			linked::Window* target_window = new linked::Window(target_icon_size, target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, target_icon_size, target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			target_window->divs.push_back(target_div);
+			target_pos.x -= 10.0f + target_icon_size;
+			gw.enemy_target[i][k] = target_window;
+		}
+
 		start_pos.y += size_img + y_spacing;
 	}
 
@@ -1477,13 +1688,29 @@ void init_combat_mode()
 void init_combat_state() {
 	combat_state.player_turn = true;	//@todo randomize
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		// @todo enemy selection?
+		int index = char_sel_state.enemy_selections[i];
+		combat_state.enemy.char_id[i] = (Character_ID)index;
 		combat_state.enemy.max_hp[i] = 100;
 		combat_state.enemy.hp[i] = 100;
 	}
 	for (int i = 0; i < NUM_ALLIES; ++i) {
+		int index = char_sel_state.selections[i];
+		combat_state.player.char_id[i] = (Character_ID)index;
 		combat_state.player.max_hp[i] = 100;
 		combat_state.player.hp[i] = 100;
+		combat_state.player.targeting = false;
+		combat_state.player.targets[i].skill_used = SKILL_NONE;
+		for(int k = 0; k < NUM_ALLIES; ++k)
+			combat_state.player.targets[i].ally_target_index[k] = -1;
+		for (int k = 0; k < NUM_ALLIES; ++k)
+			combat_state.player.targets[i].enemy_target_index[k] = -1;
 	}
+	combat_state.player.targeting_info.skill_used = SKILL_NONE;
+	for (int k = 0; k < NUM_ENEMIES; ++k)
+		combat_state.player.targeting_info.enemy_target_index[k] = -1;
+	for (int k = 0; k < NUM_ALLIES; ++k)
+		combat_state.player.targeting_info.ally_target_index[k] = -1;
 }
 
 #define TEST 1
@@ -1503,12 +1730,13 @@ void init_application()
 	bgdiv->setBackgroundTexture(bgtexture);
 	gw.bgwindow = bgwindow;
 
-	init_combat_state();
+	char_sel_state.enemy_selections[0] = CHAR_BIG_O;
+	char_sel_state.enemy_selections[1] = CHAR_A_STAR;
+	char_sel_state.enemy_selections[2] = CHAR_ZERO;
 
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
-	int x = 0;
 
 #if TEST
 	combat_state.orbs_amount[ORB_HARD] = 2;
@@ -1541,6 +1769,7 @@ void init_application()
 
 // Gameplay functions
 void end_turn() {
+	reset_selections();
 	if (!combat_state.player_turn) {
 		int orb_generated = rand() % (ORB_NUMBER - 1);
 		printf("generated orb %d\n", orb_generated);
@@ -1642,6 +1871,17 @@ void update_game_mode(double frametime)
 			}
 			layout_set_timer_percentage(turn_time / TURN_DURATION);
 
+			// enemy targeting
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				const r32 animation_speed = 0.05f;
+				if (enemy_target_animation[i].is_animating) {
+					r32 value = (sinf(enemy_target_animation[i].opacity_animation) + 1.0f) / 4.0f + 0.5f;
+
+					layout_set_enemy_image_opacity(i, value);
+					enemy_target_animation[i].opacity_animation += animation_speed;
+				}
+			}
+
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
 			for (int i = 0; i < NUM_ALLIES; ++i) {
@@ -1727,9 +1967,10 @@ void change_game_mode(Game_Mode mode)
 			gw.char_info_window_bot->setActive(true);
 		}break;
 		case MODE_COMBAT: {
+			init_combat_state();
 			for (int i = 0; i < NUM_ALLIES; ++i) {
 				int index = char_sel_state.selections[i];
-				Texture* t = char_textures[char_sel_state.selections[i]];
+				Texture* t = char_textures[index];
 				gw.allies[i]->divs[0]->setBackgroundTexture(t);
 
 				gw.allies[i]->setActive(true);
@@ -1742,6 +1983,9 @@ void change_game_mode(Game_Mode mode)
 				}
 			}
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				int index = char_sel_state.enemy_selections[i];
+				Texture* t = char_textures[index];
+				gw.enemies[i]->divs[0]->setBackgroundTexture(t);
 				gw.enemies[i]->setActive(true);
 				gw.enemies_info[i]->setActive(true);
 			}
@@ -1785,14 +2029,6 @@ void input()
 			printf("last hovered %d\n", char_sel_state.last_hovered);
 			change_game_mode(MODE_CHAR_INFO);
 		}
-	}
-
-	if (keyboard_state.key_event[VK_UP]) {
-		keyboard_state.key_event[VK_UP] = false;
-
-	}
-	if (keyboard_state.key_event[VK_DOWN]) {
-		keyboard_state.key_event[VK_DOWN] = false;
 	}
 }
 
@@ -2014,4 +2250,9 @@ static void layout_set_timer_percentage(r32 percentage)
 {
 	int new_w = (int)((double)window_info.width * percentage);
 	gw.timer_window->setWidth(new_w);
+}
+
+static void layout_set_enemy_image_opacity(s32 index, r32 percentage) {
+	gw.enemies[index]->divs[0]->setOpacity(percentage);
+	gw.enemies[index]->divs[0]->setBackgroundColor(hm::vec4(0, 1, 1, percentage));
 }

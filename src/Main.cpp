@@ -12,6 +12,8 @@
 #include <time.h>
 #include "font_render/os.h"
 #include "font_render/render_engine.h"
+#include <vector>
+#include "WindowApi/Window.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 struct Timer
@@ -245,6 +247,8 @@ s32 main(int argc, char** argv)
 //	glXSwapIntervalEXT(window_info.display, glxdrawable, 1);
 
 	int fps = 0;
+	XGrabPointer(window_info.display, window_info.win, 1, PointerMotionMask | ButtonPressMask | ButtonReleaseMask, GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+	XAllowEvents(window_info.display, AsyncBoth, CurrentTime);
 	while(true)
 	{
 		//XNextEvent(window_info.display, &xev);
@@ -252,7 +256,7 @@ s32 main(int argc, char** argv)
 		// On this website it lists all the event masks
 		// tronche.com/gui/x/xlib/events/mask.html/
 		//
-		if(XCheckWindowEvent(window_info.display, window_info.win, ExposureMask | ButtonPressMask | KeyPressMask | FocusChangeMask | ResizeRedirectMask , &xev))
+		while(XCheckWindowEvent(window_info.display, window_info.win, ExposureMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | FocusChangeMask | ResizeRedirectMask | PointerMotionMask | ButtonMotionMask, &xev))
 		{
 			// /usr/include/X11/X.h line 181 has #define of all types of events
 			if(xev.type == KeyPress){
@@ -278,6 +282,30 @@ s32 main(int argc, char** argv)
 					c-=1;
 				}
 			}
+			if(xev.type == MotionNotify){
+				XMotionEvent* xmotev = (XMotionEvent*)&xev;
+				mouse_state.x = xmotev->x;
+				mouse_state.y = xmotev->y;
+				//printf("Motion %d %d\n", xmotev->x, xmotev->y);
+			}
+			if(xev.type == ButtonPress){
+				XButtonEvent* xbuttev = (XButtonEvent*)&xev;
+				printf("Press %d %d\n", xbuttev->x, xbuttev->y);
+				mouse_state.is_captured = true;
+				mouse_state.x_left = xbuttev->x;
+				mouse_state.y_left = xbuttev->y;
+				for(u32 i = 0; i < linked::Window::openedWindows.size(); ++i)
+					linked::Window::openedWindows[i]->mouseCallback(0,1,0);
+				linked::Button::mouseCallback(0,1,0);
+			}
+			if(xev.type == ButtonRelease){
+				XButtonEvent* xbuttev = (XButtonEvent*)&xev;
+				printf("UnPress %d %d\n", xbuttev->x, xbuttev->y);
+				mouse_state.is_captured = false;
+				for(u32 i = 0; i < linked::Window::openedWindows.size(); ++i)
+					linked::Window::openedWindows[i]->mouseCallback(0,0,0);
+				linked::Button::mouseCallback(0,0,0);
+			}
 		}
 		glClear(GL_COLOR_BUFFER_BIT);
 		if(fps >= 60){
@@ -285,6 +313,7 @@ s32 main(int argc, char** argv)
 			//print("fps\n");
 		}
 		usleep(1500);
+
 		fps+=1;
 		application_state_update(1.0/60.0);
 		swap_buffers(&window_info);

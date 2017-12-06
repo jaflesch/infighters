@@ -11,7 +11,7 @@ namespace linked
 	int Button::mouseStatus;
 	bool Button::clicked;
 
-	Button::Button(const WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id)
+	Button::Button(WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id)
 		:
 		m_div(div),
 		m_label(label),
@@ -19,11 +19,16 @@ namespace linked
 		m_width(width), m_height(height),
 		clickedCallback(nullptr)
 	{
+		m_window_base = div.getWindowPtr();
 		opacity = 1.0f;
 		m_active = true;
 		m_active_callback = true;
 		m_render = true;
+		m_is_toggle = false;
+		m_toggled = false;
+
 		button_info.id = id;
+		button_info.this_button = this;
 		if(label){
 			hm::vec2 final_pos = m_position + label->getPosition();
 			label->setPosition(final_pos);
@@ -40,6 +45,11 @@ namespace linked
 		m_backgroundHoveredColor = backgroundColor;
 		m_backgroundHeldColor = backgroundColor;
 
+		m_backgroundToggledColor = backgroundColor;
+		m_backgroundToggledNormalColor = backgroundColor;
+		m_backgroundToggledHoveredColor = backgroundColor;
+		m_backgroundToggledHeldColor = backgroundColor;
+
 		m_backgroundInactiveColor = backgroundColor;
 		m_backgroundInactiveHeldColor = backgroundColor;
 		m_backgroundInactiveHoveredColor = backgroundColor;
@@ -52,7 +62,7 @@ namespace linked
 		m_labelHeldTextColor = m_labelTextColor;
 	}
 
-	Button::Button(const WindowDiv& div, int width, int height)
+	Button::Button(WindowDiv& div, int width, int height)
 		: Button(div, nullptr, hm::vec2(0, 0), width, height, hm::vec4(0, 0, 0, 1), 0){}
 
 	Button::~Button()
@@ -94,8 +104,12 @@ namespace linked
 		//if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 0)
 		if(isHovered() && mouseStatus == 0)
 		{
-			if (m_active)
-				m_backgroundColor = m_backgroundHoveredColor;
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledHoveredColor;
+				else
+					m_backgroundColor = m_backgroundHoveredColor;
+			}
 			else
 				m_backgroundColor = m_backgroundInactiveHoveredColor;
 			m_backgroundTexture = m_backgroundHoveredTexture;
@@ -106,9 +120,12 @@ namespace linked
 		//else if (isHovered() && m_div.getWindow().isFocused() && mouseStatus == 1)
 		else if(isHovered() && mouseStatus == 1)
 		{
-			if (m_active)
-				m_backgroundColor = m_backgroundHeldColor;
-			else
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledHeldColor;
+				else
+					m_backgroundColor = m_backgroundHeldColor;
+			} else
 				m_backgroundColor = m_backgroundInactiveHeldColor;
 			m_backgroundTexture = m_backgroundHeldTexture;
 			if (m_label)
@@ -117,9 +134,12 @@ namespace linked
 		// Not hovered
 		else
 		{
-			if(m_active)
-				m_backgroundColor = m_backgroundNormalColor;
-			else
+			if (m_active) {
+				if (m_is_toggle && m_toggled)
+					m_backgroundColor = m_backgroundToggledNormalColor;
+				else
+					m_backgroundColor = m_backgroundNormalColor;
+			} else
 				m_backgroundColor = m_backgroundInactiveNormalColor;
 			m_backgroundTexture = m_backgroundNormalTexture;
 			if(m_label)
@@ -134,6 +154,7 @@ namespace linked
 
 	bool Button::isHovered() const
 	{
+		static int x = 0;
 		hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
 
 		hm::vec2 buttonPosition = getScreenPosition();
@@ -141,6 +162,8 @@ namespace linked
 		if (cursorPosition.x >= buttonPosition.x && cursorPosition.x <= buttonPosition.x + m_width &&
 			cursorPosition.y >= buttonPosition.y && cursorPosition.y <= buttonPosition.y + m_height)
 		{
+			printf("teste %d\n", x);
+			x++;
 			return true;
 		}
 #if 0	// Font debug
