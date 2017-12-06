@@ -714,12 +714,31 @@ struct Enemy_Target_Animation {
 	}
 };
 static Enemy_Target_Animation enemy_target_animation[NUM_ENEMIES];
+struct Ally_Target_Animation {
+	bool is_animating;
+	r32 opacity_animation;
+	Ally_Target_Animation() {
+		is_animating = false;
+		opacity_animation = ARCSIN_1;
+	}
+};
+static Enemy_Target_Animation allies_target_animation[NUM_ALLIES];
 
-static void reset_targets() {
+static void reset_targets_animation() {
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		enemy_target_animation[i].opacity_animation = ARCSIN_1;
 		enemy_target_animation[i].is_animating = false;
 		layout_set_enemy_image_opacity(i, 1.0f);
+	}
+}
+
+static void reset_targets() {
+	combat_state.player.targeting = false;
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
+			gw.enemy_target[i][k]->setActive(false);
+			//combat_state.player.targets[i].a
+		}
 	}
 }
 
@@ -751,10 +770,12 @@ static void combat_state_reset_target(s32 char_id) {
 			combat_state.player.targets[char_id].ally_target_index[k] = -1;
 		}
 	}
-
 }
 
 static void button_skill(void* arg) {
+	if (!combat_state.player_turn)
+		return;
+
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
 	int char_id = (int)eba->data;
 	int skill_id = (int)eba->id;
@@ -765,7 +786,7 @@ static void button_skill(void* arg) {
 		// untoggle?
 		printf("untoggle\n");
 		combat_state_reset_target(char_id);
-		reset_targets();
+		reset_targets_animation();
 	} else {
 		if (combat_state.player.targeting)
 			return;
@@ -810,10 +831,14 @@ static void button_skill(void* arg) {
 				enemy_target_animation[i].is_animating = true;
 			printf(" enemy");
 		} else if (target.ally && !target.enemy) {
+			for (int i = 0; i < NUM_ALLIES; ++i)
+				allies_target_animation[i].is_animating = true;
 			printf(" ally");
 		} else {
 			for (int i = 0; i < NUM_ENEMIES; ++i)
 				enemy_target_animation[i].is_animating = true;
+			for (int i = 0; i < NUM_ALLIES; ++i)
+				allies_target_animation[i].is_animating = true;
 			printf(" enemy or ally");
 		}
 		printf(" target.\n");
@@ -839,7 +864,7 @@ static void target_enemy(void* arg) {
 
 	combat_state.player.targeting = false;
 
-	reset_targets();
+	reset_targets_animation();
 }
 
 // Layout initialization functions
@@ -1769,8 +1794,17 @@ void init_application()
 
 // Gameplay functions
 void end_turn() {
+	// apply skills
+
+
+	// reset targets after
 	reset_selections();
-	if (!combat_state.player_turn) {
+	reset_targets();
+	reset_targets_animation();
+
+	// generate orbs if is player turn
+	combat_state.player_turn = !combat_state.player_turn;
+	if (combat_state.player_turn) {
 		int orb_generated = rand() % (ORB_NUMBER - 1);
 		printf("generated orb %d\n", orb_generated);
 		combat_state.orbs_amount[orb_generated] += 1;
@@ -1780,24 +1814,8 @@ void end_turn() {
 		layout_change_orb_amount((Orb_ID)orb_generated, combat_state.orbs_amount[orb_generated]);
 	}
 	
-	combat_state.player_turn = !combat_state.player_turn;
 	printf("SWITCH TURN\n");
-	hm::vec4 greener_cyan(0, 1, 0.7f, 1);
-	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
-	if (combat_state.player_turn) {
-		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
-		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
-	} else {
-		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
-		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-	}
-	
-	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
+	layout_update_endturn_button();
 }
 
 void update_game_mode(double frametime)
@@ -1881,6 +1899,17 @@ void update_game_mode(double frametime)
 					enemy_target_animation[i].opacity_animation += animation_speed;
 				}
 			}
+			// ally targeting
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				const r32 animation_speed = 0.05f;
+				if (allies_target_animation[i].is_animating) {
+					r32 value = (sinf(allies_target_animation[i].opacity_animation) + 1.0f) / 4.0f + 0.5f;
+
+					layout_set_ally_image_opacity(i, value);
+					allies_target_animation[i].opacity_animation += animation_speed;
+				}
+			}
+
 
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
@@ -2255,4 +2284,27 @@ static void layout_set_timer_percentage(r32 percentage)
 static void layout_set_enemy_image_opacity(s32 index, r32 percentage) {
 	gw.enemies[index]->divs[0]->setOpacity(percentage);
 	gw.enemies[index]->divs[0]->setBackgroundColor(hm::vec4(0, 1, 1, percentage));
+}
+static void layout_set_ally_image_opacity(s32 index, r32 percentage) {
+	gw.allies[index]->divs[0]->setOpacity(percentage);
+	gw.allies[index]->divs[0]->setBackgroundColor(hm::vec4(0, 1, 1, percentage));
+}
+
+static void layout_update_endturn_button() {
+	hm::vec4 greener_cyan(0, 1, 0.7f, 1);
+	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
+	if (combat_state.player_turn) {
+		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
+		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
+	} else {
+		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
+		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+	}
+
+	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
 }

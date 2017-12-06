@@ -248,6 +248,8 @@ static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
 static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
 static void layout_set_timer_percentage(r32 percentage);
 static void layout_set_enemy_image_opacity(s32 index, r32 percentage);
+static void layout_set_ally_image_opacity(s32 index, r32 percentage);
+static void layout_update_endturn_button();
 
 // Gameplay structures
 #define NUM_CHARS 12
