@@ -7,18 +7,20 @@
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<style type="text/css">
 		html, body {
-			background: #f2f2fd;
+			background: #080c21;
 		}
 		.container {
-			background: #fff;
-			box-shadow: 0 0 2px rgba(0,0,0,0.3);
-			margin: 30px auto;
+			background: #101846;
+		    border-left: 7px solid #ffb74c;
+		    border-right: 7px solid #ffb74c;
+			margin: 0 auto;
 			padding: 15px 100px;
+			color: #aaa;
 		}
 		h1, h2, h3 { font-weight: bold; }
 		h2 {
 			display: inline-block;
-			color: #2b2b2b;
+			color: #fff;
 			padding: 0 50px 4px 2px;
 			border-bottom: 2px solid;
 		}
@@ -26,15 +28,34 @@
 		.blue { border-color: #7ddbff; }
 		.green { border-color: #0bf1c6; }
 		.orange { border-color: #ffb74c; }
-
+		hr {
+		    border-top: 1px solid #077;
+    		width: 100px;
+		}
+		#intro strong, #energias strong { 
+			color: #fff;
+			margin-right: 10px; 
+		}
 		.char-box {
 			padding: 10px;
 			border: 1px solid #ddd;
 			margin-bottom: 15px;
+			background: -webkit-linear-gradient(-45deg, #101846, #);
+		    background: -o-linear-gradient(-45deg, #101846, #090910);
+		    background: -moz-linear-gradient(-45deg, #101846, #090910);
+		    background: linear-gradient(-45deg, #101846, #090910);
+		    border: 1px solid #077;
 		}
 		.avatar {
 			display: inline-block;
 			vertical-align: top;
+			width: 200px;
+			height: 200px;
+		    background-color: #0f132d;
+			background-repeat: no-repeat;
+			background-position: top;
+		    background-size: cover;
+		    box-shadow: inset 0 0 0 4px #0bf1c6;
 		}
 		.information {
 			display: inline-block;
@@ -43,6 +64,7 @@
 		}
 		.information h3 {
 			margin-top: 0;
+			color: #fff;
 		}
 		.information h4 {
 			text-transform: uppercase;
@@ -60,24 +82,32 @@
 			background: #000;
 			margin: 0 2px;
 			width: 75px;
-			opacity: 0.7;
+			opacity: 0.3;
 		}
 		.nav-tabs { border: 0; }
 		.nav-tabs>li>a { 
 			padding: 0; 
 			border: 0 !important;
 		}
+		.nav>li>a:focus, .nav>li>a:hover {
+			background-color: #0bf1c6;
+    		border-radius: 0;
+		}
+		.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover { background: transparent;  }
 		.inner-left, .inner-right {
 			display: inline-block;
 			vertical-align: top;
 		}
-		.inner-left { border-right: 4px solid #ccc; }
+		.inner-left { border-right: 4px solid #232b69; }
 		.inner-right {
 		    width: calc(100% - 345px);
 			padding-left: 10px;
 			 
 		}
-		.inner-right h4 { margin: 0 0 15px; }
+		.inner-right h4 { 
+			color: #fff;
+			margin: 0 0 15px; 
+		}
 
 		.pink-orb { 
 			background: #f0f;
@@ -116,7 +146,8 @@
 			margin: 0 1px;
 		}
 		.null-orb { 
-			background: #000;
+			background: transparent;
+			border: 3px solid #fff;
 			width: 20px;
 			height: 20px;
 			display: inline-block;
@@ -144,8 +175,10 @@
 </head>
 <body>
 	<div class="container">
-		<h1 class="text-center">INFighters</h1>
+		<h1 class="text-center" style="color: #fff">INFighters</h1>
 		<section id="intro">
+			<h2 class="green"> Visão Geral </h2>
+			<br/><br/>
 			<p><strong>Jogadores:</strong> 2</p>
 			<p><strong>Estilo:</strong> Online Turn-Based Combat</p>
 			<br/>
@@ -166,30 +199,28 @@
 				<li> O jogo termina quando todos os personagens de um jogador forem derrotados. Este, por sua vez, perde a partida.</li>
 			</ul>
 
+			<br/>
 			<hr/>
 		</section>
 		
 		<br/>
 		<br/>
-		<br/>
 
 		<section id="personagens">
-			<h2 class="pink"> Personagens </h2>
+			<h2 class="orange"> Personagens </h2>
 
 			<!-- Zer0 -->
 			<div id="char-zer0" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/zero.png');"></div>
 				<div class="information">
 					<h3> Zer0 </h3>
 					<p style="margin-bottom: 20px;"> O vilão que nunca tem suas condições atendidas! </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#zer0-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#zer0-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#zer0-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#zer0-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#zer0-1"><img src="assets/moves/zero/01.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-2"><img src="assets/moves/zero/02.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-3"><img src="assets/moves/zero/03.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-4"><img src="assets/moves/zero/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -243,18 +274,16 @@
 
 			<!-- On1 -->
 			<div id="char-on1" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/one.png');background-position-y: -30px;"></div>
 				<div class="information">
 					<h3> On1 </h3>
 					<p style="margin-bottom: 20px;"> O super herói mais otimista possível! </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#on1-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#on1-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#on1-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#on1-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#on1-1"><img src="assets/moves/one/01.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-2"><img src="assets/moves/one/02.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-3"><img src="assets/moves/one/03.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-4"><img src="assets/moves/one/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -308,18 +337,16 @@
 
 			<!-- Serial K3yll3R -->
 			<div id="char-serial" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/serial-keyller.png');background-position-y: -65px;"></div>
 				<div class="information">
 					<h3> Serial K3yll3R </h3>
 					<p style="margin-bottom: 20px;"> Possui um papagaio chamado Cracken. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#serial-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#serial-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#serial-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#serial-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#serial-1"><img src="assets/moves/serial_keyller/01.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-2"><img src="assets/moves/serial_keyller/02.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-3"><img src="assets/moves/serial_keyller/03.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-4"><img src="assets/moves/serial_keyller/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -373,18 +400,16 @@
 
 			<!-- R4y Trac3y -->
 			<div id="char-r4y" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/ray-tracey.png');background-position-y: -30px;"></div>
 				<div class="information">
 					<h3> R4y Tr4c3y </h3>
 					<p style="margin-bottom: 20px;"> Fotogênica, ama câmeras e sempre anda pelas sombras. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#r4y-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#r4y-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#r4y-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#r4y-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#r4y-1"><img src="assets/moves/ray_tracey/01.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-2"><img src="assets/moves/ray_tracey/02.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-3"><img src="assets/moves/ray_tracey/03.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-4"><img src="assets/moves/ray_tracey/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -438,18 +463,16 @@
 
 			<!-- A-St4r -->
 			<div id="char-astar" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/astar.png'); background-position-y: -12px;"></div>
 				<div class="information">
 					<h3> A-St4r </h3>
 					<p style="margin-bottom: 20px;"> Em sua busca sistemática para achar o caminho do estrelato. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#astar-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#astar-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#astar-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#astar-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#astar-1"><img src="assets/moves/astar/01.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-2"><img src="assets/moves/astar/02.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-3"><img src="assets/moves/astar/03.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-4"><img src="assets/moves/astar/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -503,18 +526,16 @@
 
 			<!-- D3ADL0CK -->
 			<div id="char-deadlock" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/deadlock.png');background-position-y: -15px;"></div>
 				<div class="information">
 					<h3> D3ADL0CK </h3>
 					<p style="margin-bottom: 20px;"> Graduado em direito, mestre em processos. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#deadlock-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#deadlock-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#deadlock-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#deadlock-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#deadlock-1"><img src="assets/moves/deadlock/01.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-2"><img src="assets/moves/deadlock/02.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-3"><img src="assets/moves/deadlock/03.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-4"><img src="assets/moves/deadlock/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -569,18 +590,16 @@
 
 			<!-- N0rma -->
 			<div id="char-n0rma" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/norma.png');background-position-y: -95px;"></div>
 				<div class="information">
 					<h3> N0rma </h3>
 					<p style="margin-bottom: 20px;"> Uma máquina na arte da luta: simples e eficaz. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#n0rma-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#n0rma-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#n0rma-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#n0rma-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#n0rma-1"><img src="assets/moves/norma/01.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-2"><img src="assets/moves/norma/02.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-3"><img src="assets/moves/norma/03.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-4"><img src="assets/moves/norma/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -634,18 +653,16 @@
 
 			<!-- Haz4rd -->
 			<div id="char-haz4rd" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/hazard.png');background-position-y: -25px;"></div>
 				<div class="information">
 					<h3> Haz4rd </h3>
 					<p style="margin-bottom: 20px;"> Codinome catástrofe. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#haz4rd-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#haz4rd-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#haz4rd-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#haz4rd-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#haz4rd-1"><img src="assets/moves/hazard/01.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-2"><img src="assets/moves/hazard/02.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-3"><img src="assets/moves/hazard/03.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-4"><img src="assets/moves/hazard/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -699,18 +716,16 @@
 
 			<!-- Qwerty -->
 			<div id="char-qwerty" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/qwerty.png');background-position-y: -65px;"></div>
 				<div class="information">
 					<h3> Qwerty </h3>
 					<p style="margin-bottom: 20px;"> I/OLO </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#qwerty-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#qwerty-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#qwerty-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#qwerty-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#qwerty-1"><img src="assets/moves/qwerty/01.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-2"><img src="assets/moves/qwerty/02.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-3"><img src="assets/moves/qwerty/03.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-4"><img src="assets/moves/qwerty/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -764,18 +779,16 @@
 
 			<!-- =Big-O= -->
 			<div id="char-bigo" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/big-o.png');"></div>
 				<div class="information">
 					<h3> =Big-O= </h3>
 					<p style="margin-bottom: 20px;"> Temperamental, complexo de se relacionar. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#bigo-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#bigo-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#bigo-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#bigo-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#bigo-1"><img src="assets/moves/big_o/01.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-2"><img src="assets/moves/big_o/02.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-3"><img src="assets/moves/big_o/03.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-4"><img src="assets/moves/big_o/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -831,18 +844,16 @@
 
 			<!-- New() -->
 			<div id="char-new" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/new.png');background-position-y: -95px;"></div>
 				<div class="information">
 					<h3> New() </h3>
 					<p style="margin-bottom: 20px;"> Elegante, cheia de classe. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#new-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#new-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#new-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#new-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#new-1"><img src="assets/moves/new/01.png"></a></li>
+							<li><a data-toggle="tab" href="#new-2"><img src="assets/moves/new/02.png"></a></li>
+							<li><a data-toggle="tab" href="#new-3"><img src="assets/moves/new/03.png"></a></li>
+							<li><a data-toggle="tab" href="#new-4"><img src="assets/moves/new/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -896,18 +907,16 @@
 
 			<!-- Cl0ckb0y -->
 			<div id="char-new" class="char-box">
-				<div class="avatar">
-					<img src="assets/chars/zer0.png">
-				</div>
+				<div class="avatar" style="background-image: url('assets/chars/clockboy.png');background-position-y: -40px;"></div>
 				<div class="information">
 					<h3> Cl0ckb0y </h3>
 					<p style="margin-bottom: 20px;"> Nunca se atrasou para o ENEM. </p>
 					<div class="inner-left">
 						<ul class="nav nav-tabs moves">
-							<li class="active"><a data-toggle="tab" href="#clockboy-1"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#clockboy-2"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#clockboy-3"><img src="assets/moves/zer0/01.png"></a></li>
-							<li><a data-toggle="tab" href="#clockboy-4"><img src="assets/moves/zer0/01.png"></a></li>
+							<li class="active"><a data-toggle="tab" href="#clockboy-1"><img src="assets/moves/clockboy/01.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-2"><img src="assets/moves/clockboy/02.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-3"><img src="assets/moves/clockboy/03.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-4"><img src="assets/moves/clockboy/04.png"></a></li>
 						</ul>
 					</div>
 					<div class="inner-right">
@@ -959,8 +968,8 @@
 				</div>
 			</div>
 		</section>
-		<hr/>
 		<br/>
+		<hr/>
 		<br/>
 		<br/>
 
@@ -984,44 +993,34 @@
 				</li>
 			</ul>
 		</section>
+		<br/>
 		<hr/>
-		<br/>
-		<br/>
-		<br/>
-
-		<section id="termos">
-			<h2 class="orange"> Terminologias </h2>
-		</section>
-		<hr/>
-		<br/>
 		<br/>
 		<br/>
 
 		<section id="assets">
-			<h2 class="green"> Assets </h2>
+			<h2 class="pink"> Créditos </h2>
 
-			<h3 style="font-size: 20px;"> UI / UX </h3>
+			<h3 style="font-size: 20px;color:#fff;"> Tipografia </h3>
 			<ul>
-				<li><strong>Inspiração: </strong> Synthwave 80's Visuals e Metro Design </li>
-				<li><strong>Paleta de Cores:</strong></li>
-			</ul>
-			<div class="paleta">
-			to do..
-			</div>
-
-			<h3 style="font-size: 20px;"> Tipografia </h3>
-			<ul>
-				<li> to do... </li>
+				<li> Oswald </li>
+				<li> Open Sans </li>
 			</ul>
 
-			<h3 style="font-size: 20px;"> Imagens </h3>
+			<h3 style="font-size: 20px;color:#fff;"> Imagens </h3>
 			<ul>
-				<li> Linearts base obtidos de mangás </li>
-				<li> Edição posterior de traçado </li>
-				<li> Pintura digitalizada </li>
+				<li> Eiichiro Oda </li>
+				<li> Hiro Mashima </li>
+				<li> Hiroya Oku </li>
+				<li> Kazue Kato </li>
+				<li> Masashi Kishimoto </li>
+				<li> Takashi Takeuchi </li>
+				<li> Yusuke Murata </li>
+				devgear https://devgear.deviantart.com/art/Trinity-Blood-Inks-527650565
+
 			</ul>
 
-			<h3 style="font-size: 20px;"> Músicas </h3>
+			<h3 style="font-size: 20px;color:#fff;"> Músicas </h3>
 			<ul>
 				<li>
 					<span style="display: inline-block; width: 250px;"> 
@@ -1061,50 +1060,10 @@
 				</li>
 			</ul>
 		</section>
+		<br/>
 		<hr/>
 		<br/>
-		<br/>
-		<br/>
 		
-		<section id="releases">
-			<h2 class="green"> Releases </h2>
-
-			<h3 style="font-size: 20px;"> 06/10/17 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>
-
-			<h3 style="font-size: 20px;"> 27/10/17 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>
-
-			<h3 style="font-size: 20px;"> 10/11/17 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>
-
-			<h3 style="font-size: 20px;"> 08/12/17 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>
-
-			<h3 style="font-size: 20px;"> 05/01/18 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>
-
-			<h3 style="font-size: 20px;"> 19/01/18 </h3>
-			<ul>
-				<li>- </li>
-				<li>-</li>
-			</ul>			
-		</section>
 	</div>
 </body>
 </html>
