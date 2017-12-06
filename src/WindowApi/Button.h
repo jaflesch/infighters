@@ -12,6 +12,7 @@ namespace linked
 class WindowDiv;
 class Label;
 class Button;
+class Window;
 
 struct Button_Info {
 	int id;
@@ -22,8 +23,8 @@ struct Button_Info {
 class Button
 {
 public:
-	Button(const WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id);
-	Button(const WindowDiv& div, int width, int height);
+	Button(WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id);
+	Button(WindowDiv& div, int width, int height);
 	~Button();
 	void render();
 	void update();
@@ -33,7 +34,8 @@ public:
 	static void mouseCallback(int button, int action, int mods);
 	Button_Info button_info;
 private:
-	const WindowDiv& m_div;
+	WindowDiv& m_div;
+	Window* m_window_base;
 	int m_width, m_height;
 	bool m_active;
 	bool m_active_callback;
@@ -76,6 +78,7 @@ private:
 	
 	void(*clickedCallback)(void* arg);
 public:
+	Window* getWindow() { return m_window_base; }
 	Label* getLabel() { return m_label; }
 	Mesh& getButtonMesh()const{ return *(m_buttonMesh); }
 	int getWidth()const{ return this->m_width; }

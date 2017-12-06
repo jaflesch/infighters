@@ -6,7 +6,7 @@ extern Window_Info window_info;
 namespace linked
 {
 	WindowDiv::WindowDiv(
-		const Window& window, 
+		Window& window, 
 		int width, int height,
 		float margin, float padding,
 		hm::vec2 position,

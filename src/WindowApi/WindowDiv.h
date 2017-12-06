@@ -21,7 +21,7 @@ class WindowDiv
 {
 public:
 	// Methods
-	WindowDiv(const Window& window, int width, int height, float margin, float padding,
+	WindowDiv(Window& window, int width, int height, float margin, float padding,
 		hm::vec2 position, hm::vec4 backGroundColor, unsigned int hints);
 	~WindowDiv();
 	void render();
@@ -41,7 +41,8 @@ public:
 	inline void setHeight(int value) { this->m_height = value; divMesh->getQuad()->updateQuad(m_width, value); divMesh->updateQuad(); }
 	inline void setWidthHeight(int width, int height) { this->m_width = width; this->m_height = height; divMesh->getQuad()->updateQuad(width, height); divMesh->updateQuad(); }
 	bool m_render;
-	const Window& getWindow()const{ return this->m_window; }
+	const Window& getWindow()const{ return m_window; }
+	Window* getWindowPtr() { return &m_window; }
 	hm::vec2 getScreenPosition() const;
 	std::vector<Label*>& getLabels(){ return this->labels; }
 	std::vector<Button*>& getButtons(){ return this->buttons; }
@@ -59,7 +60,7 @@ private:
 	hm::vec2 m_windowRelativePosition;
 	hm::vec2 m_position;		// Position in pixel coords
 	hm::vec4 m_backGroundColor;
-	const Window& m_window;
+	Window& m_window;
 
 	Mesh* divMesh;
 	Texture* m_backgroundTexture;

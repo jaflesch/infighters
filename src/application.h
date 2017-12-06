@@ -267,6 +267,8 @@ struct Char_Selection_State {
 	int selections[NUM_ALLIES];
 	linked::WindowDiv* play_button_div;
 	Character_ID last_hovered;
+
+	int enemy_selections[NUM_ENEMIES];
 };
 
 struct Orb_Exchange_State {
@@ -283,10 +285,23 @@ struct Orb_Exchange_State {
 	linked::WindowDiv* info_div;
 };
 
+struct Target {
+	Character_ID attacking_character;
+	Skill_ID skill_used;
+	s32 ally_target_index[NUM_ALLIES];	 // -1 if none
+	s32 enemy_target_index[NUM_ENEMIES]; // -1 if none
+	linked::Window* ally_target_image[NUM_ALLIES];
+	linked::Window* enemy_target_image[NUM_ENEMIES];
+};
+
 struct Player {
 	Character_ID char_id[NUM_ALLIES];
 	s32 hp[NUM_ALLIES];
 	s32 max_hp[NUM_ALLIES];
+
+	bool targeting;
+	Target targeting_info;
+	Target targets[NUM_ALLIES];
 	
 	u32 reduction[NUM_ALLIES];			// Skill_Defense or'd together
 	u32 reduction_type[NUM_ALLIES];		// Skill_Type or'd together
@@ -354,6 +369,9 @@ struct Game_Windows {
 	linked::WindowDiv* allies_indicator[NUM_ALLIES];
 	linked::WindowDiv* enemies_indicator[NUM_ENEMIES];
 	linked::Window* exchange_orbs;
+
+	// combat target
+	linked::Window* enemy_target[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
 };
 
 // Gameplay functions

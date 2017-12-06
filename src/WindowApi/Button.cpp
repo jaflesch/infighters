@@ -11,7 +11,7 @@ namespace linked
 	int Button::mouseStatus;
 	bool Button::clicked;
 
-	Button::Button(const WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id)
+	Button::Button(WindowDiv& div, Label* label, hm::vec2 position, int width, int height, hm::vec4 backgroundColor, int id)
 		:
 		m_div(div),
 		m_label(label),
@@ -19,6 +19,7 @@ namespace linked
 		m_width(width), m_height(height),
 		clickedCallback(nullptr)
 	{
+		m_window_base = div.getWindowPtr();
 		opacity = 1.0f;
 		m_active = true;
 		m_active_callback = true;
@@ -61,7 +62,7 @@ namespace linked
 		m_labelHeldTextColor = m_labelTextColor;
 	}
 
-	Button::Button(const WindowDiv& div, int width, int height)
+	Button::Button(WindowDiv& div, int width, int height)
 		: Button(div, nullptr, hm::vec2(0, 0), width, height, hm::vec4(0, 0, 0, 1), 0){}
 
 	Button::~Button()
