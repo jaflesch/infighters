@@ -22,6 +22,7 @@ typedef double r64;
 #endif
 
 #if defined(_WIN64) || defined(_WIN32)
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <windowsx.h>
 

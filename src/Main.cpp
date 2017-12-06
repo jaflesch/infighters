@@ -59,6 +59,7 @@ extern Font_ID fonts[32];
 
 void application_state_init()
 {
+
 	linked::Window::linkedWindowInit();
 
 	engine::render_engine_init();
