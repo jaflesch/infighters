@@ -730,6 +730,11 @@ static void reset_targets_animation() {
 		enemy_target_animation[i].is_animating = false;
 		layout_set_enemy_image_opacity(i, 1.0f);
 	}
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		allies_target_animation[i].opacity_animation = ARCSIN_1;
+		allies_target_animation[i].is_animating = false;
+		layout_set_ally_image_opacity(i, 1.0f);
+	}
 }
 
 static void reset_targets() {
@@ -737,7 +742,11 @@ static void reset_targets() {
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
 			gw.enemy_target[i][k]->setActive(false);
-			//combat_state.player.targets[i].a
+		}
+	}
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int k = 0; k < NUM_ALLIES; ++k) {
+			gw.ally_target[i][k]->setActive(false);
 		}
 	}
 }
@@ -754,23 +763,27 @@ static void reset_selections() {
 	}
 }
 
-static void combat_state_reset_target(s32 char_id) {
+static void combat_state_reset_target(s32 char_id, Skill_ID skill_used) {
 	combat_state.player.targeting = false;
 	
 	for (int k = 0; k < NUM_ALLIES; ++k) {
 		if (combat_state.player.targets[char_id].ally_target_index[k] != -1) {
+			combat_state.player.targets[char_id].ally_target_image[k]->setActive(false);
 			combat_state.player.targets[char_id].ally_target_index[k] = -1;
 		}
+		combat_state.player.targets[char_id].skill_used = SKILL_NONE;
+		combat_state.player.targets[char_id].attacking_character = CHAR_NONE;
 	}
 	for (int k = 0; k < NUM_ENEMIES; ++k) {
 		if (combat_state.player.targets[char_id].enemy_target_index[k] != -1) {
-			if (combat_state.player.targeting_info.enemy_target_index[k]) {
-				combat_state.player.targets[char_id].enemy_target_image[k]->setActive(false);
-			}
+			combat_state.player.targets[char_id].enemy_target_image[k]->setActive(false);
 			combat_state.player.targets[char_id].ally_target_index[k] = -1;
 		}
 	}
 }
+
+static void target_enemy(void* arg);
+static void target_ally(void* arg);
 
 static void button_skill(void* arg) {
 	if (!combat_state.player_turn)
@@ -779,13 +792,14 @@ static void button_skill(void* arg) {
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
 	int char_id = (int)eba->data;
 	int skill_id = (int)eba->id;
+	Skill_ID skill_used = (Skill_ID)(NUM_SKILLS * combat_state.player.char_id[char_id] + skill_id);
 
 	bool is_toggled = eba->this_button->getIsToggled();
 
 	if (is_toggled) {
 		// untoggle?
 		printf("untoggle\n");
-		combat_state_reset_target(char_id);
+		combat_state_reset_target(char_id, skill_used);
 		reset_targets_animation();
 	} else {
 		if (combat_state.player.targeting)
@@ -817,7 +831,7 @@ static void button_skill(void* arg) {
 	}
 	eba->this_button->toggle();
 
-	Skill_ID skill_used = (Skill_ID)(NUM_SKILLS * combat_state.player.char_id[char_id] + skill_id);
+	
 	Skill_Target target = skill_need_targeting(skill_used, &combat_state);
 	if (target.number > 0 && !is_toggled) {
 		combat_state.player.targeting = true;
@@ -826,22 +840,40 @@ static void button_skill(void* arg) {
 
 		printf("Need %d", target.number);
 
-		if (target.enemy && !target.ally) {
+		if (target.enemy) {
 			for(int i = 0; i < NUM_ENEMIES; ++i)
 				enemy_target_animation[i].is_animating = true;
 			printf(" enemy");
-		} else if (target.ally && !target.enemy) {
+		} 
+		if (target.ally) {
 			for (int i = 0; i < NUM_ALLIES; ++i)
 				allies_target_animation[i].is_animating = true;
 			printf(" ally");
-		} else {
-			for (int i = 0; i < NUM_ENEMIES; ++i)
-				enemy_target_animation[i].is_animating = true;
-			for (int i = 0; i < NUM_ALLIES; ++i)
-				allies_target_animation[i].is_animating = true;
-			printf(" enemy or ally");
 		}
 		printf(" target.\n");
+	} else if (target.number == 0 && target.all) {
+		if (target.enemy) {
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				combat_state.player.targeting = true;
+				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
+				combat_state.player.targeting_info.skill_used = skill_used;
+				linked::Button_Info info;
+				info.id = i;
+				info.this_button = gw.enemies[i]->divs[0]->getButtons()[0];
+				target_enemy(&info);
+			}
+		} 
+		if (target.ally) {
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				combat_state.player.targeting = true;
+				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
+				combat_state.player.targeting_info.skill_used = skill_used;
+				linked::Button_Info info;
+				info.id = i;
+				info.this_button = gw.allies[i]->divs[0]->getButtons()[0];
+				target_ally(&info);
+			}
+		}
 	}
 }
 
@@ -859,6 +891,34 @@ static void target_enemy(void* arg) {
 		s32 attacker_index = combat_state.player.targeting_info.attacking_character;
 		combat_state.player.targets[attacker_index].enemy_target_image[eba->id] = gw.enemy_target[eba->id][i];
 		combat_state.player.targets[attacker_index].enemy_target_index[eba->id] = attacker_index;
+
+		combat_state.player.targets[attacker_index].skill_used = combat_state.player.targeting_info.skill_used;
+		combat_state.player.targets[attacker_index].attacking_character = combat_state.player.targeting_info.attacking_character;
+		break;
+	}
+
+	combat_state.player.targeting = false;
+
+	reset_targets_animation();
+}
+
+static void target_ally(void* arg) {
+	linked::Button_Info* eba = (linked::Button_Info*)arg;
+
+	if (!combat_state.player.targeting)
+		return;
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (gw.ally_target[eba->id][i]->getActive() == true)
+			continue;
+		gw.ally_target[eba->id][i]->setActive(true);
+		gw.ally_target[eba->id][i]->divs[0]->setBackgroundTexture(skill_textures[combat_state.player.targeting_info.skill_used]);
+		s32 attacker_index = combat_state.player.targeting_info.attacking_character;
+		combat_state.player.targets[attacker_index].ally_target_image[eba->id] = gw.ally_target[eba->id][i];
+		combat_state.player.targets[attacker_index].ally_target_index[eba->id] = attacker_index;
+
+		combat_state.player.targets[attacker_index].skill_used = combat_state.player.targeting_info.skill_used;
+		combat_state.player.targets[attacker_index].attacking_character = combat_state.player.targeting_info.attacking_character;
 		break;
 	}
 
@@ -887,6 +947,9 @@ void hide_all_windows() {
 		gw.allies_info[i]->setActive(false);
 		for (int k = 0; k < NUM_SKILLS; ++k) {
 			gw.allies_skills[i * NUM_SKILLS + k]->setActive(false);
+		}
+		for (int k = 0; k < NUM_ALLIES; ++k) {
+			gw.ally_target[i][k]->setActive(false);
 		}
 	}
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
@@ -1323,6 +1386,8 @@ void init_combat_mode()
 		linked::WindowDiv* allies_div = new linked::WindowDiv(*gw.allies[i], size_img, size_img, 0, 0, hm::vec2(0, 0), char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies[i]->divs.push_back(allies_div);
 		linked::Button* dummy_ally_button = new linked::Button(*allies_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		dummy_ally_button->button_info.id = i;
+		dummy_ally_button->setClickedCallback(target_ally);
 		allies_div->getButtons().push_back(dummy_ally_button);
 
 		start_pos.x += size_img + x_spacing;
@@ -1367,6 +1432,20 @@ void init_combat_mode()
 		dummy->getLabels().push_back(hplabel);
 
 		start_pos.x = 60;
+
+		hm::vec2 target_pos = start_pos;
+		r32 target_icon_size = 40.0f;
+		r32 target_spacing = 10.0f;
+		target_pos.x += (size_img + x_spacing + size_info + target_spacing);
+
+		for (int k = 0; k < NUM_ALLIES; ++k) {
+			linked::Window* target_window = new linked::Window(target_icon_size, target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, target_icon_size, target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			target_window->divs.push_back(target_div);
+			target_pos.x += 10.0f + target_icon_size;
+			gw.ally_target[i][k] = target_window;
+		}
+
 		start_pos.y += size_img + y_spacing;
 	}
 
@@ -1734,8 +1813,11 @@ void init_combat_state() {
 	combat_state.player.targeting_info.skill_used = SKILL_NONE;
 	for (int k = 0; k < NUM_ENEMIES; ++k)
 		combat_state.player.targeting_info.enemy_target_index[k] = -1;
-	for (int k = 0; k < NUM_ALLIES; ++k)
+	for (int k = 0; k < NUM_ALLIES; ++k) {
 		combat_state.player.targeting_info.ally_target_index[k] = -1;
+		combat_state.player.targets[k].skill_used = SKILL_NONE;
+		combat_state.player.targets[k].attacking_character = CHAR_NONE;
+	}
 }
 
 #define TEST 1
@@ -1795,7 +1877,7 @@ void init_application()
 // Gameplay functions
 void end_turn() {
 	// apply skills
-
+	
 
 	// reset targets after
 	reset_selections();

@@ -22,43 +22,53 @@ struct Skill_Target {
 	s32 number;
 	bool ally;
 	bool enemy;
+	bool all;
 };
 
 Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 	Skill_Target target = { 0 };
 	target.number = 0;
 	target.enemy = true;
+	target.all = false;
 	switch (id) {
 		case SKILL_FALSE_RUSH: {
 			// if requiem is still active, affect all enemies (AoE)
 			if (skill_state.requiem_duration > 0) {
 				target.number = 0;
+				target.all = true;
 			} else {
 				target.number = 1;
 			}
 		}break;
-		case SKILL_CONTRADICTION: target.number = 1; break;
+		case SKILL_CONTRADICTION: {
+			if (skill_state.requiem_duration > 0) {
+				target.number = 0;
+				target.all = true;
+			} else {
+				target.number = 1;
+			}
+		}break;
 		case SKILL_REQUIEM_ZERO:  target.number = 0; break;
 		case SKILL_TRUTH_SLASH:   target.number = 1; break;
 		case SKILL_TAUTOLOGY:     target.number = 1; break;
 		case SKILL_AXIOM_ONE:     target.number = 0; break;
 		case SKILL_BRUTE_FORCE:   target.number = 1; break;
 		case SKILL_BUFFER_OVERFLOW:    target.number = 1; break;
-		case SKILL_DDOS_ATTACK:   target.number = 0; break;
+		case SKILL_DDOS_ATTACK:   target.number = 0; target.all = true; break;
 		case SKILL_PARTICLE_RENDERING: target.number = 1; break;
-		case SKILL_DIFFUSE_REFLECTION: target.number = 0; break;
-		case SKILL_DYNAMIC_FRUSTUM_ATTACK: target.number = 0; break;
+		case SKILL_DIFFUSE_REFLECTION: target.number = 0; target.enemy = false; target.ally = true; target.all = true; break;
+		case SKILL_DYNAMIC_FRUSTUM_ATTACK: target.number = 0; target.all = true; break;
 		case SKILL_Q_PUNCH:       target.number = 1; break;
 		case SKILL_PERCEPTRON:    target.number = 1; break;
-		case SKILL_NEURAL_NETWORK: target.number = 0; break;
+		case SKILL_NEURAL_NETWORK: target.number = 0; target.all = true; break;
 		case SKILL_PREEMPTION:    target.number = 1; break;
-		case SKILL_MUTEX:         target.number = 0; break;
+		case SKILL_MUTEX:         target.number = 0; target.all = true; break;
 		case SKILL_THREAD_SCHEDULING: target.number = 0; break;
 		case SKILL_PUMPING_UP:    target.number = 1; break;
 		case SKILL_AUTOMATA_SUMMON: target.number = 0; break;
-		case SKILL_TURING_MACHINE: target.number = 0; break;
-		case SKILL_TMR:           target.number = 0; break;
-		case SKILL_REDUNDANCY:    target.number = 0; break;
+		case SKILL_TURING_MACHINE: target.number = 0; target.all = true; break;
+		case SKILL_TMR:           target.number = 0; target.all = true; break;
+		case SKILL_REDUNDANCY:    target.number = 0; target.all = true; target.ally = true; target.enemy = false; break;
 		case SKILL_ROLLBACK:      target.number = 1; target.ally = true; target.enemy = false; break;
 		case SKILL_ALT:           target.number = 0; break;
 		case SKILL_CTRL:          target.number = 1; break;

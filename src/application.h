@@ -374,6 +374,7 @@ struct Game_Windows {
 
 	// combat target
 	linked::Window* enemy_target[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
+	linked::Window* ally_target[NUM_ALLIES][NUM_ALLIES];
 };
 
 // Gameplay functions
