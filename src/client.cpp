@@ -26,7 +26,6 @@ client_info* client_searching() {
 	struct sockaddr_in clientService;
 
 	int recvbuflen = DEFAULT_BUFLEN;
-	char *sendbuf = "Client: sending data test";
 	char recvbuf[DEFAULT_BUFLEN] = "";
 
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -47,13 +46,9 @@ client_info* client_searching() {
 	clientService.sin_port = htons(MATCHING_PORT);
 
 	// Connect to server.
-	iResult = connect(ConnectSocket, (SOCKADDR*)&clientService, sizeof(clientService));
-	if (iResult == SOCKET_ERROR) {
-		wprintf(L"connect failed with error: %d\n", WSAGetLastError());
-		closesocket(ConnectSocket);
-		WSACleanup();
-		return NULL;
-	}
+	do {
+		iResult = connect(ConnectSocket, (SOCKADDR*)&clientService, sizeof(clientService));
+	} while (iResult == SOCKET_ERROR);
 
 	// Receive Opponents IP
 	client_info * player = (client_info*)malloc(sizeof(client_info));
@@ -89,6 +84,156 @@ client_info* client_searching() {
 
 	WSACleanup();
 	return player;
+}
+
+SOCKET* connect(client_info * player) {
+	int iResult;
+	WSADATA wsaData;
+	
+	SOCKET * ConnectSocket = (SOCKET*)malloc(sizeof(SOCKET));
+	*ConnectSocket = INVALID_SOCKET;
+	struct sockaddr_in clientService;
+	
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != NO_ERROR) {
+		wprintf(L"WSAStartup failed with error: %d\n", iResult);
+		return NULL;
+	}
+
+	*ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (*ConnectSocket == INVALID_SOCKET) {
+		wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
+		WSACleanup();
+		return NULL;
+	}
+
+	clientService.sin_family = AF_INET;
+	inet_pton(AF_INET, player->opponent_ip, &(clientService.sin_addr.s_addr));			// ip inimigo
+	clientService.sin_port = htons(GAME_PORT);
+
+	if (player->first) {
+		SOCKET ListenSocket = INVALID_SOCKET;
+		SOCKET * Invalid = (SOCKET*)malloc(sizeof(SOCKET));
+		*Invalid = INVALID_SOCKET;
+		
+		struct addrinfo *result = NULL;
+		struct addrinfo hints;
+		
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
+
+		// Resolve the server address and port
+		iResult = getaddrinfo(NULL, GAME_PORT_L, &hints, &result);
+		if (iResult != 0) {
+			printf("getaddrinfo failed with error: %d\n", iResult);
+			WSACleanup();
+			return Invalid;
+		}
+
+		// Create a SOCKET for connecting
+		ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+		if (ListenSocket == INVALID_SOCKET) {
+			printf("socket failed with error: %ld\n", WSAGetLastError());
+			freeaddrinfo(result);
+			WSACleanup();
+			return Invalid;
+		}
+
+		// Setup the TCP listening socket
+		iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+		if (iResult == SOCKET_ERROR) {
+			printf("bind failed with error: %d\n", WSAGetLastError());
+			freeaddrinfo(result);
+			closesocket(ListenSocket);
+			WSACleanup();
+			return Invalid;
+		}
+
+		freeaddrinfo(result);
+
+		iResult = listen(ListenSocket, SOMAXCONN);
+		if (iResult == SOCKET_ERROR) {
+			printf("listen failed with error: %d\n", WSAGetLastError());
+			closesocket(ListenSocket);
+			WSACleanup();
+			return Invalid;
+		}
+		
+		bool player_connected = false;
+
+		do {
+			*ConnectSocket = accept(ListenSocket, NULL, NULL);
+			if (*ConnectSocket == INVALID_SOCKET) {
+				printf("accept failed with error: %d\n", WSAGetLastError());
+				closesocket(ListenSocket);
+				WSACleanup();
+				return Invalid;
+			}
+			else {
+				player_connected = true;
+				printf("Player Connected\n\n");
+			}
+		} while (!player_connected);
+	}
+	else {
+		// Connect to server.
+		do {
+			iResult = connect(*ConnectSocket, (SOCKADDR*)&clientService, sizeof(clientService));
+			printf("Player Connected\n\n");
+		} while (iResult == SOCKET_ERROR);				
+	}
+
+	return ConnectSocket;
+}
+
+int send_struct(client_info * player, SOCKET* ConnectSocket, teste* t) {
+	int recvbuflen = DEFAULT_BUFLEN;
+	char recvbuf[DEFAULT_BUFLEN] = "";
+
+	int iResult;
+
+	if (player->first) {
+		send(*ConnectSocket, t->name, sizeof(t->name), 0);
+
+		iResult = 0;
+		do {
+			iResult += recv(*ConnectSocket, t->name, sizeof(t->name), 0);
+			if (iResult > 0)
+				;//printf("Bytes received: %d\n", iResult);
+			else if (iResult == 0) {
+				printf("Connection closed\n");
+				return 0;
+			}
+			else {
+				printf("recv failed: %d\n", WSAGetLastError());
+				return 0;
+			}
+		} while (iResult < sizeof(t->name));
+	}
+	else {
+		iResult = 0;
+		do {
+			iResult += recv(*ConnectSocket, t->name, sizeof(t->name), 0);
+			if (iResult > 0)
+				;//printf("Bytes received: %d\n", iResult);
+			else if (iResult == 0) {
+				printf("Connection closed\n");
+				return 0;
+			}
+			else {
+				printf("recv failed: %d\n", WSAGetLastError());
+				return 0;
+			}
+		} while (iResult < sizeof(t->name));
+
+		send(*ConnectSocket, t->name, sizeof(t->name), 0);
+	}
+	printf("Recebido: %s\n\n", t->name);
+
+	return 1;
 }
 
 /*

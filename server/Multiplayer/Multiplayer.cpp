@@ -12,7 +12,7 @@
 #define IP_MACHING_SERVER "127.0.0.1"
 #define MATCHING_PORT 44443
 #define MATCHING_PORT_L "44443"
-#define DEFAULT_PORT 44444
+#define GAME_PORT 44444
 
 //#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 //#else
@@ -177,6 +177,8 @@ DWORD WINAPI matchmaking_server(LPVOID lpParam)
 		WSACleanup();
 		return 1;
 	}
+
+	printf("Listenning\n\n");
 	
 	while (ClientSocket = accept(ListenSocket, NULL, NULL)) {
 		if (ClientSocket == INVALID_SOCKET) {

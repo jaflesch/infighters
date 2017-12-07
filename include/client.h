@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_ 
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
@@ -9,11 +10,13 @@
 #include <stdio.h>
 #include <tchar.h>
 
+
 #define DEFAULT_BUFLEN 512
 #define IP_MACHING_SERVER "127.0.0.1"			// ip do server q faz o matching
 #define MATCHING_PORT 44443						// porta da conexao pro matching
 #define MATCHING_PORT_L "44443"			
-#define DEFAULT_PORT 44444						// porta do jogo
+#define GAME_PORT 44444							// porta do jogo
+#define GAME_PORT_L "44444"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -33,4 +36,11 @@ struct client_info
 	bool first;
 };
 
+struct teste
+{
+	char name[DEFAULT_BUFLEN];
+};
+
 client_info* client_searching();
+SOCKET* connect(client_info * player);
+int send_struct(client_info * player, SOCKET* ConnectSocket, teste* t);

@@ -3,6 +3,7 @@
 #include "chat.h"
 #include "font_render/os.h"
 #include "font_render/font_rendering.h"
+#include "client.h"
 
 #define ARROW_UP 1
 #define ARROW_DOWN 0
@@ -532,6 +533,9 @@ hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 hm::vec4 color_red(1, 0, 0, 1);
 hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
 hm::vec4 cyan(0.0f, 1.0f, 1.0f, 1.0f);
+
+static SOCKET * connection;
+static client_info * player;
 
 // Button Callbacks
 static void button_select_character(void* arg) {
@@ -1790,7 +1794,31 @@ void init_combat_mode()
 }
 
 void init_combat_state() {
-	combat_state.player_turn = true;	//@todo randomize
+#if 0
+	player = client_searching();
+	connection = connect(player);
+
+	combat_state.player_turn = player->first;
+#else 
+	combat_state.player_turn = true;
+#endif
+	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
+	if (combat_state.player_turn) {
+		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
+		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
+	}
+	else {
+		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
+		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+	}
+
+	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));	
+		
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		// @todo enemy selection?
 		int index = char_sel_state.enemy_selections[i];
@@ -1876,10 +1904,18 @@ void init_application()
 
 // Gameplay functions
 void end_turn() {
+
 	// apply skills
 	
 
 	// reset targets after
+#if 0
+	struct teste t;
+	strcpy(t.name, "struct a ser definida");
+	send_struct(player, connection, &t);
+#endif
+	turn_time = TURN_DURATION;
+
 	reset_selections();
 	reset_targets();
 	reset_targets_animation();
@@ -2053,6 +2089,9 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_group->m_render = is_hovering_skill;
+
+			//if (!combat_state.player_turn)
+			//	end_turn();
 		}break;
 	}
 }

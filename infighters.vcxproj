@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\chat.cpp" />
+    <ClCompile Include="src\client.cpp" />
     <ClCompile Include="src\font_render\font_rendering.cpp" />
     <ClCompile Include="src\font_render\os.cpp" />
     <ClCompile Include="src\font_render\render_engine.cpp" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
+    <ClInclude Include="include\client.h" />
     <ClInclude Include="src\application.h" />
     <ClInclude Include="src\chat.h" />
     <ClInclude Include="src\font_render\font_rendering.h" />
