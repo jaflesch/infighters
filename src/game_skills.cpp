@@ -228,10 +228,10 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	Skill_State* skill_state = 0;
 	void(*deal_damage_to_target)(int, int, Skill_Damage, Skill_ID, Combat_State*) = 0;// (void(*)(int, int, Skill_Damage, Skill_ID, Combat_State*))0;
 	if (on_enemy) {
-		skill_state = &skill_state_enemy;
+		skill_state = &skill_state_ally;
 		deal_damage_to_target = deal_damage_to_target_enemy;
 	} else {
-		skill_state = &skill_state_ally;
+		skill_state = &skill_state_enemy;
 		deal_damage_to_target = deal_damage_to_target_ally;
 	}
 

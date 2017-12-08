@@ -232,7 +232,8 @@ enum Skill_ID {
 };
 
 enum Game_Mode {
-	MODE_INTRO,
+	MODE_NONE = -1,
+	MODE_INTRO = 0,
 	MODE_CHAR_SELECT,
 	MODE_CHAR_INFO,
 	MODE_COMBAT,
@@ -259,7 +260,7 @@ static void layout_update_endturn_button();
 #define NUM_ALLIES 3
 #define NUM_ENEMIES 3
 #define TURN_DURATION 60.0
-#define FAST 1
+#define FAST 0
 
 struct GameState {
 	Game_Mode mode;
@@ -348,6 +349,9 @@ struct Combat_State {
 struct Game_Windows {
 	// background window
 	linked::Window* bgwindow;
+
+	// intro window
+	linked::Window* intro_logo;
 
 	// character selection
 	linked::Window* left_char_window;

@@ -859,7 +859,7 @@ static void button_skill(void* arg) {
 
 	bool is_toggled = eba->this_button->getIsToggled();
 
-	if (!is_toggled) {
+	if (!is_toggled && eba->this_button->getActive() && !combat_state.player.targeting) {
 		if (!has_enough_orbs(skill_used)) {
 			return;
 		} else {
@@ -1024,9 +1024,15 @@ static void target_ally(void* arg) {
 	reset_targets_animation();
 }
 
+static void button_play_game(void* arg) {
+	change_game_mode(MODE_CHAR_SELECT);
+}
+
 // Layout initialization functions
 void hide_all_windows() {
 	//gw.bgwindow->setActive(false);
+
+	gw.intro_logo->setActive(false);
 
 	// character selection
 	gw.left_char_window->setActive(false);
@@ -1060,6 +1066,28 @@ void hide_all_windows() {
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
 	gw.exchange_orbs->setActive(false);
+}
+
+void init_intro_mode() {
+	Texture* logo = new Texture("./res/logo_clean.png");
+	Texture* playbutton_normal = new Texture("./res/textures/playbutton_normal.png");
+	Texture* playbutton_hover = new Texture("./res/textures/playbutton_hover.png");
+	
+	linked::Window* logo_window = new linked::Window(logo->width, logo->height, hm::vec2(window_info.width / 2 - logo->width / 2, window_info.height / 2 - logo->height / 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
+	linked::WindowDiv* logo_div = new linked::WindowDiv(*logo_window, logo->width, logo->height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	logo_div->setBackgroundTexture(logo);
+	logo_window->divs.push_back(logo_div);
+	gw.intro_logo = logo_window;
+
+	linked::Label* play_label = new linked::Label(*logo_div, (u8*)"PLAY", sizeof("PLAY"), hm::vec2(90.0f, 15.0f), hm::vec4(1,1,1,1), FONT_OSWALD_REGULAR_24, 0, 0);
+	linked::Button* play_button = new linked::Button(*logo_div, play_label, hm::vec2(logo->width / 2 - 230 / 2, logo->height - 140.0f), 230, 60, hm::vec4(0.91, 0.23f, 0.88, 1), 0);
+	play_button->setAllBGTexture(playbutton_hover);
+	play_button->setNormalBGTexture(playbutton_normal);
+	play_button->setHoveredTextColor(hm::vec4(1, 1, 1, 1));
+	play_button->setNormalTextColor(hm::vec4(245.0f / 255.0f, 28.0f / 255.0f, 194.0f / 255.0f, 1.0f));
+	play_button->setHoveredTextColor(hm::vec4(1.0f, 0.91f, 0.95f, 1.0f));
+	play_button->setClickedCallback(button_play_game);
+	logo_div->getButtons().push_back(play_button);
 }
 
 void init_char_selection_mode()
@@ -1887,7 +1915,7 @@ void init_combat_mode()
 }
 
 void init_combat_state() {
-#if 0
+#if MULTIPLAYER
 	player = client_searching();
 	connection = connect(player);
 
@@ -1927,14 +1955,13 @@ void init_combat_state() {
 	}
 }
 
-#define TEST 1
 void init_application()
 {
 	using namespace linked;
 
 	// Initialize game mode
-	ggs.mode = MODE_INTRO;
-	ggs.last_mode = MODE_INTRO;
+	ggs.mode = MODE_NONE;
+	ggs.last_mode = MODE_NONE;
 
 	AudioController::introAudio.setVolume(10);
 	AudioController::charselectAudio.setVolume(5);
@@ -1942,8 +1969,6 @@ void init_application()
 	AudioController::cancelAudio.setVolume(20);
 	AudioController::navigationAudio.setVolume(30);
 	AudioController::combat1Audio.setVolume(10);
-
-	AudioController::introAudio.play();
 
 	// background @temporary
 	linked::Window* bgwindow = new linked::Window(window_info.width, window_info.height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
@@ -1957,14 +1982,15 @@ void init_application()
 	char_sel_state.enemy_selections[1] = CHAR_A_STAR;
 	char_sel_state.enemy_selections[2] = CHAR_ZERO;
 
+	init_intro_mode();
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
 
-#if TEST
+#if 1
 	combat_state.orbs_amount[ORB_HARD] = 2;
 	combat_state.orbs_amount[ORB_SOFT] = 3;
-	combat_state.orbs_amount[ORB_VR]   = 4;
+	combat_state.orbs_amount[ORB_VR] = 4;
 	combat_state.orbs_amount[ORB_BIOS] = 5;
 	combat_state.total_orbs = 5 + 2 + 3 + 4;
 	layout_change_orb_amount(ORB_HARD, 2);
@@ -1981,13 +2007,15 @@ void init_application()
 	g_chat = &chat;
 
 	hide_all_windows();
-	change_game_mode(MODE_CHAR_SELECT);
+	change_game_mode(MODE_INTRO);
 
 	// opengl
 	glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
+
+	AudioController::introAudio.play();
 }
 
 static void apply_skills_and_send() {
@@ -2028,7 +2056,7 @@ void end_turn() {
 	apply_skills_and_send();
 
 	// reset targets after
-#if 0
+#if MULTIPLAYER
 	struct teste t;
 	strcpy(t.name, "struct a ser definida");
 	send_struct(player, connection, &t);
@@ -2095,7 +2123,7 @@ void update_game_mode(double frametime)
 			for (int i = 0; i < NUM_SKILLS; ++i) {
 				int index = i + char_sel_state.last_hovered * NUM_SKILLS;
 				// first 4(NUM_SKILLS) are buttons
-				gw.char_info_window->divs[i]->getButtons()[0]->setNormalBGTexture(skill_textures[index]);
+				gw.char_info_window->divs[i]->getButtons()[0]->setAllBGTexture(skill_textures[index]);
 				if (gw.char_info_window->divs[i]->isButtonHovered()) {
 					gw.skill_group_div->m_render = true;
 					gw.char_info_skill_cost->setActive(true);
@@ -2214,9 +2242,10 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_group->m_render = is_hovering_skill;
-
-			//if (!combat_state.player_turn)
-			//	end_turn();
+#if MULTIPLAYER
+			if (!combat_state.player_turn)
+				end_turn();
+#endif
 		}break;
 	}
 }
@@ -2231,6 +2260,12 @@ void change_game_mode(Game_Mode mode)
 	ggs.mode = mode;
 
 	switch (mode) {
+		case MODE_INTRO: {
+			AudioController::pauseAllMusic();
+			AudioController::introAudio.rewind();
+			AudioController::introAudio.play();
+			gw.intro_logo->setActive(true);
+		}break;
 		case MODE_CHAR_SELECT: {
 			if (ggs.last_mode != MODE_CHAR_INFO) {
 				AudioController::pauseAllMusic();
@@ -2251,6 +2286,7 @@ void change_game_mode(Game_Mode mode)
 		}break;
 		case MODE_COMBAT: {
 			AudioController::pauseAllMusic();
+			AudioController::combat1Audio.rewind();
 			AudioController::combat1Audio.play();
 			init_combat_state();
 			for (int i = 0; i < NUM_ALLIES; ++i) {

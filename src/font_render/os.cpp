@@ -171,7 +171,7 @@ s32 create_window(Window_Info* window_info)
 	window_info->window_handle = CreateWindowExA(
 		window_style_exflags,
 		window_class.lpszClassName,
-		"Squiggly",
+		"Infighters",
 		window_style_flags,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		window_info->width, window_info->height, NULL, NULL, window_info->hinstance, NULL
