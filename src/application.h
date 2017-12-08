@@ -6,6 +6,7 @@
 
 #include "WindowApi/Window.h"
 #include "ResourceLoad/Texture.h"
+#include "Audio/AudioController.h"
 
 struct Camera {
 	mat4 view_matrix;
@@ -104,13 +105,13 @@ enum Skill_Category {
 };
 enum Skill_Condition {
 	SKILL_CONDITION_NONE,
-	SKILL_CONDITION_NORMAL,
-	SKILL_CONDITION_BURN,
-	SKILL_CONDITION_FREEZE,
-	SKILL_CONDITION_POISON,
-	SKILL_CONDITION_PARALYZE,
-	SKILL_CONDITION_SLEEP,
-	SKILL_CONDITION_STUN,
+	SKILL_CONDITION_NORMAL		= FLAG(0),
+	SKILL_CONDITION_BURN		= FLAG(1),
+	SKILL_CONDITION_FREEZE		= FLAG(2),
+	SKILL_CONDITION_POISON		= FLAG(3),
+	SKILL_CONDITION_PARALYZE	= FLAG(4),
+	SKILL_CONDITION_SLEEP		= FLAG(5),
+	SKILL_CONDITION_STUN		= FLAG(6),
 	SKILL_CONDITION_NUMBER,
 };
 enum Skill_Damage {
@@ -120,13 +121,14 @@ enum Skill_Damage {
 	SKILL_DMG_CRUSHING,
 };
 enum Skill_Defense {
-	SKILL_DEF_NONE,
-	SKILL_DEF_REDUCTION,
-	SKILL_DEF_ABSORPTION,
-	SKILL_DEF_RELECTION,
-	SKILL_DEF_INVULNERABILITY,
+	SKILL_DEF_NONE = 0,
+	SKILL_DEF_REDUCTION			= FLAG(0),
+	SKILL_DEF_ABSORPTION		= FLAG(1),
+	SKILL_DEF_RELECTION			= FLAG(2),
+	SKILL_DEF_INVULNERABILITY	= FLAG(3),
 	SKILL_DEF_NUMBER,			// needed for reduction points
 };
+
 enum Skill_Duration {
 	SKILL_DURATION_NONE,
 	SKILL_DURATION_STATIC,
@@ -247,8 +249,8 @@ static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
 static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
 static void layout_set_timer_percentage(r32 percentage);
-static void layout_set_enemy_image_opacity(s32 index, r32 percentage);
-static void layout_set_ally_image_opacity(s32 index, r32 percentage);
+static void layout_set_enemy_image_opacity(s32 index, r32 percentage, hm::vec4 color = hm::vec4(0, 0, 0, 1));
+static void layout_set_ally_image_opacity(s32 index, r32 percentage, hm::vec4 color = hm::vec4(0, 0, 0, 1));
 static void layout_update_endturn_button();
 
 // Gameplay structures

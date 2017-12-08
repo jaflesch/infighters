@@ -17,10 +17,6 @@ linked::Window* chat_window = 0;
 
 Font_ID fonts[32] = {};
 
-//#include "camera.cpp"
-//#include "load_model.cpp"
-#include "game_skills.cpp"
-
 char* char_names[NUM_CHARS] = {
 	"Zer0",
 	"On1",
@@ -509,6 +505,8 @@ Skill_Group skill_groups[NUM_SKILLS * NUM_CHARS] = {
 	{ SKILL_TYPE_PHYSICAL, SKILL_MODE_MELEE, SKILL_CATEGORY_NORMAL, SKILL_CONDITION_NONE, SKILL_DMG_NONE, SKILL_DEF_INVULNERABILITY, SKILL_DURATION_STATIC, SKILL_NOT_UNIQUE },
 };
 
+#include "game_skills.cpp"
+
 Texture* char_textures[NUM_CHARS] = {};
 Texture* chars_texture_big[NUM_CHARS] = {};
 Texture* skill_textures[NUM_SKILLS * NUM_CHARS] = {};
@@ -539,6 +537,8 @@ static client_info * player;
 
 // Button Callbacks
 static void button_select_character(void* arg) {
+	AudioController::navigationAudio.play();
+
 	auto divs = (std::vector<linked::WindowDiv*>*)((linked::Button_Info*)arg)->data;
 	int id = ((linked::Button_Info*)arg)->id;
 	bool selected = (*divs)[id * 3 + 1]->m_render;
@@ -572,14 +572,29 @@ static void button_select_character(void* arg) {
 	layout_toggle_char_selection(id, divs);
 }
 
+static void temporary_modify_orbs(Skill_ID skill_used, s32 add);
+static void reset_targets_animation();
+
 static void button_end_turn(void* arg) {
-	if (!combat_state.player_turn) return;
+
+	if (combat_state.player.targeting) {
+		Skill_ID skill_used = combat_state.player.targeting_info.skill_used;
+		temporary_modify_orbs(skill_used, 1);
+		reset_targets_animation();
+	}
+
+	if (!combat_state.player_turn) {
+		AudioController::cancelAudio.play();
+		return;
+	}
+	AudioController::confirmAudio.play();
 	turn_time = TURN_DURATION;
 	end_turn();
 }
 
 static void button_combat_start_mode(void* arg)
 {
+	AudioController::confirmAudio.play();
 	change_game_mode(MODE_COMBAT);
 }
 
@@ -611,6 +626,7 @@ static void button_exchange_orb(void* arg) {
 }
 
 static void button_exchange_orbs_close(void* arg) {
+	AudioController::cancelAudio.play();
 	combat_state.exchange_orbs_state.active = false;
 	gw.exchange_orbs->setActive(false);
 }
@@ -730,14 +746,18 @@ static Enemy_Target_Animation allies_target_animation[NUM_ALLIES];
 
 static void reset_targets_animation() {
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		if (combat_state.enemy.hp[i] <= 0)
+			continue;
 		enemy_target_animation[i].opacity_animation = ARCSIN_1;
 		enemy_target_animation[i].is_animating = false;
-		layout_set_enemy_image_opacity(i, 1.0f);
+		layout_set_enemy_image_opacity(i, 1.0f, hm::vec4(0, 1, 1, 1));
 	}
 	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (combat_state.player.hp[i] <= 0)
+			continue;
 		allies_target_animation[i].opacity_animation = ARCSIN_1;
 		allies_target_animation[i].is_animating = false;
-		layout_set_ally_image_opacity(i, 1.0f);
+		layout_set_ally_image_opacity(i, 1.0f, hm::vec4(0, 1, 1, 1));
 	}
 }
 
@@ -786,28 +806,78 @@ static void combat_state_reset_target(s32 char_id, Skill_ID skill_used) {
 	}
 }
 
+static void combat_state_reset_all_targets() {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int k = 0; k < NUM_ENEMIES; ++k) {
+			combat_state.player.targets[i].enemy_target_index[k] = -1;
+		}
+		for (int k = 0; k < NUM_ALLIES; ++k) {
+			combat_state.player.targets[i].ally_target_index[k] = -1;
+		}
+		combat_state.player.targets[i].attacking_character = CHAR_NONE;
+		combat_state.player.targets[i].skill_used = SKILL_NONE;
+	}
+}
+
+static bool has_enough_orbs(Skill_ID skill_used) {
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		if (skill_costs[skill_used][i] > combat_state.orbs_amount[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static void temporary_modify_orbs(Skill_ID skill_used, s32 add) {
+
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		s32 cost = skill_costs[skill_used][i];
+		combat_state.orbs_amount[i] += add * cost;
+		combat_state.total_orbs += add * cost;
+		layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
+
+		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+	}
+}
+
 static void target_enemy(void* arg);
 static void target_ally(void* arg);
 
 static void button_skill(void* arg) {
-	if (!combat_state.player_turn)
+	if (!combat_state.player_turn) {
+		AudioController::cancelAudio.play();
 		return;
+	}
 
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
 	int char_id = (int)eba->data;
 	int skill_id = (int)eba->id;
 	Skill_ID skill_used = (Skill_ID)(NUM_SKILLS * combat_state.player.char_id[char_id] + skill_id);
 
+	if (combat_state.player.hp <= 0)
+		return;
+
 	bool is_toggled = eba->this_button->getIsToggled();
+
+	if (!is_toggled) {
+		if (!has_enough_orbs(skill_used)) {
+			return;
+		} else {
+			temporary_modify_orbs(skill_used, -1);
+		}
+	}
 
 	if (is_toggled) {
 		// untoggle?
 		printf("untoggle\n");
+		temporary_modify_orbs(skill_used, 1);
 		combat_state_reset_target(char_id, skill_used);
 		reset_targets_animation();
 	} else {
-		if (combat_state.player.targeting)
+		if (combat_state.player.targeting) {
+			AudioController::cancelAudio.play();
 			return;
+		}
 		printf("toggle\n");
 	}
 
@@ -834,10 +904,11 @@ static void button_skill(void* arg) {
 		}
 	}
 	eba->this_button->toggle();
+	AudioController::confirmAudio.play();
 
-	
 	Skill_Target target = skill_need_targeting(skill_used, &combat_state);
 	if (target.number > 0 && !is_toggled) {
+
 		combat_state.player.targeting = true;
 		combat_state.player.targeting_info.skill_used = skill_used;
 		combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
@@ -845,19 +916,25 @@ static void button_skill(void* arg) {
 		printf("Need %d", target.number);
 
 		if (target.enemy) {
-			for(int i = 0; i < NUM_ENEMIES; ++i)
+			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				if (combat_state.enemy.hp[i] <= 0) continue;
 				enemy_target_animation[i].is_animating = true;
+			}
 			printf(" enemy");
 		} 
 		if (target.ally) {
-			for (int i = 0; i < NUM_ALLIES; ++i)
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				if (combat_state.player.hp[i] <= 0) continue;
 				allies_target_animation[i].is_animating = true;
+			}
 			printf(" ally");
 		}
 		printf(" target.\n");
-	} else if (target.number == 0 && target.all) {
+	} else if (target.number == 0 && target.all && !is_toggled) {
 		if (target.enemy) {
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
+				if (combat_state.enemy.hp[i] <= 0)
+					continue;
 				combat_state.player.targeting = true;
 				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
 				combat_state.player.targeting_info.skill_used = skill_used;
@@ -869,6 +946,8 @@ static void button_skill(void* arg) {
 		} 
 		if (target.ally) {
 			for (int i = 0; i < NUM_ALLIES; ++i) {
+				if (combat_state.player.hp[i] <= 0)
+					continue;
 				combat_state.player.targeting = true;
 				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
 				combat_state.player.targeting_info.skill_used = skill_used;
@@ -878,11 +957,22 @@ static void button_skill(void* arg) {
 				target_ally(&info);
 			}
 		}
+	} else if (target.number == 0 && target.self && !is_toggled) {
+		combat_state.player.targeting = true;
+		combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
+		combat_state.player.targeting_info.skill_used = skill_used;
+		linked::Button_Info info;
+		info.id = char_id;
+		info.this_button = gw.allies[char_id]->divs[0]->getButtons()[0];
+		target_ally(&info);
 	}
 }
 
 static void target_enemy(void* arg) {
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
+
+	if (combat_state.enemy.hp[eba->id] <= 0)
+		return;
 
 	if (!combat_state.player.targeting)
 		return;
@@ -908,6 +998,9 @@ static void target_enemy(void* arg) {
 
 static void target_ally(void* arg) {
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
+
+	if (combat_state.player.hp[eba->id] <= 0)
+		return;
 
 	if (!combat_state.player.targeting)
 		return;
@@ -1300,7 +1393,7 @@ void init_combat_mode()
 	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 0] = new Texture("res/skills/clockboy/clock_pulse.png");
 	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 1] = new Texture("res/skills/clockboy/pipeline.png");
 	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 2] = new Texture("res/skills/clockboy/overclock.png");
-	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 3] = new Texture("res/skills/clockboy/branch_damage.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 3] = new Texture("res/skills/clockboy/branch_prediction.png");
 
 	orb_textures[ORB_HARD] = new Texture("res/orbs/hard_orb.png");
 	orb_textures[ORB_SOFT] = new Texture("res/orbs/soft_orb.png");
@@ -1802,22 +1895,8 @@ void init_combat_state() {
 #else 
 	combat_state.player_turn = true;
 #endif
-	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
-	if (combat_state.player_turn) {
-		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
-		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
-	}
-	else {
-		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
-		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-	}
 
-	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));	
+	layout_update_endturn_button();
 		
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		// @todo enemy selection?
@@ -1856,6 +1935,15 @@ void init_application()
 	// Initialize game mode
 	ggs.mode = MODE_INTRO;
 	ggs.last_mode = MODE_INTRO;
+
+	AudioController::introAudio.setVolume(10);
+	AudioController::charselectAudio.setVolume(5);
+	AudioController::confirmAudio.setVolume(20);
+	AudioController::cancelAudio.setVolume(20);
+	AudioController::navigationAudio.setVolume(30);
+	AudioController::combat1Audio.setVolume(10);
+
+	AudioController::introAudio.play();
 
 	// background @temporary
 	linked::Window* bgwindow = new linked::Window(window_info.width, window_info.height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
@@ -1902,11 +1990,42 @@ void init_application()
 	glEnable(GL_DEPTH_TEST);
 }
 
+static void apply_skills_and_send() {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (combat_state.player.targets[i].skill_used == SKILL_NONE)
+			continue;
+
+		s32 target = -1;
+		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
+			s32 t = combat_state.player.targets[i].enemy_target_index[k];
+			if (t != -1)
+				target = k;
+		}
+		if (target == -1) {
+			for (int k = 0; k < NUM_ALLIES; ++k) {
+				s32 t = combat_state.player.targets[i].ally_target_index[k];
+				if (t != -1)
+					target = k;
+			}
+		}
+		execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true);
+	}
+	combat_state_reset_all_targets();
+}
+
+static s32 get_num_players_alive() {
+	s32 count = 0;
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (combat_state.player.hp[i] > 0)
+			count++;
+	}
+	return count;
+}
+
 // Gameplay functions
 void end_turn() {
-
 	// apply skills
-	
+	apply_skills_and_send();
 
 	// reset targets after
 #if 0
@@ -1923,13 +2042,19 @@ void end_turn() {
 	// generate orbs if is player turn
 	combat_state.player_turn = !combat_state.player_turn;
 	if (combat_state.player_turn) {
-		int orb_generated = rand() % (ORB_NUMBER - 1);
-		printf("generated orb %d\n", orb_generated);
-		combat_state.orbs_amount[orb_generated] += 1;
+		update_skill_state(&combat_state);
+		s32 num_alive = get_num_players_alive();
+		printf("Generated Orbs: ");
+		for (int i = 0; i < num_alive; ++i) {
+			int orb_generated = rand() % (ORB_NUMBER - 1);
+			combat_state.orbs_amount[orb_generated] += 1;
 
-		combat_state.total_orbs += 1;
-		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
-		layout_change_orb_amount((Orb_ID)orb_generated, combat_state.orbs_amount[orb_generated]);
+			combat_state.total_orbs += 1;
+			layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+			layout_change_orb_amount((Orb_ID)orb_generated, combat_state.orbs_amount[orb_generated]);
+			printf("%d ");
+		}
+		printf("\n");
 	}
 	
 	printf("SWITCH TURN\n");
@@ -2013,7 +2138,7 @@ void update_game_mode(double frametime)
 				if (enemy_target_animation[i].is_animating) {
 					r32 value = (sinf(enemy_target_animation[i].opacity_animation) + 1.0f) / 4.0f + 0.5f;
 
-					layout_set_enemy_image_opacity(i, value);
+					layout_set_enemy_image_opacity(i, value, cyan);
 					enemy_target_animation[i].opacity_animation += animation_speed;
 				}
 			}
@@ -2023,7 +2148,7 @@ void update_game_mode(double frametime)
 				if (allies_target_animation[i].is_animating) {
 					r32 value = (sinf(allies_target_animation[i].opacity_animation) + 1.0f) / 4.0f + 0.5f;
 
-					layout_set_ally_image_opacity(i, value);
+					layout_set_ally_image_opacity(i, value, cyan);
 					allies_target_animation[i].opacity_animation += animation_speed;
 				}
 			}
@@ -2072,7 +2197,7 @@ void update_game_mode(double frametime)
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (gw.enemies[i]->divs[0]->getButtons()[0]->isHovered()) {
 					//printf("Enemy %d hovered!\n", i);
-					int char_index = i; // @TODO this must be the 3 enemies selected
+					int char_index = char_sel_state.enemy_selections[i];
 					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
@@ -2107,16 +2232,26 @@ void change_game_mode(Game_Mode mode)
 
 	switch (mode) {
 		case MODE_CHAR_SELECT: {
+			if (ggs.last_mode != MODE_CHAR_INFO) {
+				AudioController::pauseAllMusic();
+				AudioController::charselectAudio.play();
+			}
 			gw.char_selected_window->setActive(true);
 			gw.left_char_window->setActive(true);
 			gw.char_selection_window->setActive(true);
 		}break;
 		case MODE_CHAR_INFO: {
+			if (ggs.last_mode != MODE_CHAR_SELECT) {
+				AudioController::pauseAllMusic();
+				AudioController::charselectAudio.play();
+			}
 			gw.left_char_window->setActive(true);
 			gw.char_info_window->setActive(true);
 			gw.char_info_window_bot->setActive(true);
 		}break;
 		case MODE_COMBAT: {
+			AudioController::pauseAllMusic();
+			AudioController::combat1Audio.play();
 			init_combat_state();
 			for (int i = 0; i < NUM_ALLIES; ++i) {
 				int index = char_sel_state.selections[i];
@@ -2135,6 +2270,7 @@ void change_game_mode(Game_Mode mode)
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				int index = char_sel_state.enemy_selections[i];
 				Texture* t = char_textures[index];
+
 				gw.enemies[i]->divs[0]->setBackgroundTexture(t);
 				gw.enemies[i]->setActive(true);
 				gw.enemies_info[i]->setActive(true);
@@ -2158,7 +2294,7 @@ void update_and_render(double frametime)
 	input();
 }
 
-s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state);
+s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool on_enemy = true);
 
 void input()
 {
@@ -2179,6 +2315,10 @@ void input()
 			printf("last hovered %d\n", char_sel_state.last_hovered);
 			change_game_mode(MODE_CHAR_INFO);
 		}
+	}
+	if (keyboard_state.key_event[VK_F2]) {
+		keyboard_state.key_event[VK_F2] = false;
+		end_turn();
 	}
 }
 
@@ -2206,12 +2346,13 @@ static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>
 static void layout_enemy_die(u32 enemy_index) {
 	assert(enemy_index <= NUM_ENEMIES);
 	gw.enemies_indicator[enemy_index]->setBackgroundTexture(orb_dead_enemy);
-	gw.enemies[enemy_index]->divs[0]->setOpacity(0.5f);
+	layout_set_enemy_image_opacity(enemy_index, 0.5f, hm::vec4(0,0,0,1));
 }
 
 static void layout_ally_die(u32 ally_index) {
 	assert(ally_index <= NUM_ALLIES);
 	gw.allies_indicator[ally_index]->setBackgroundTexture(orb_dead_ally);
+	layout_set_enemy_image_opacity(ally_index, 0.5f, hm::vec4(0, 0, 0, 1));
 }
 
 static void put_space(int* length, char* buffer) {
@@ -2402,13 +2543,15 @@ static void layout_set_timer_percentage(r32 percentage)
 	gw.timer_window->setWidth(new_w);
 }
 
-static void layout_set_enemy_image_opacity(s32 index, r32 percentage) {
+static void layout_set_enemy_image_opacity(s32 index, r32 percentage, hm::vec4 color) {
 	gw.enemies[index]->divs[0]->setOpacity(percentage);
-	gw.enemies[index]->divs[0]->setBackgroundColor(hm::vec4(0, 1, 1, percentage));
+	color.a = percentage;
+	gw.enemies[index]->divs[0]->setBackgroundColor(color);
 }
-static void layout_set_ally_image_opacity(s32 index, r32 percentage) {
+static void layout_set_ally_image_opacity(s32 index, r32 percentage, hm::vec4 color) {
 	gw.allies[index]->divs[0]->setOpacity(percentage);
-	gw.allies[index]->divs[0]->setBackgroundColor(hm::vec4(0, 1, 1, percentage));
+	color.a = percentage;
+	gw.allies[index]->divs[0]->setBackgroundColor(color);
 }
 
 static void layout_update_endturn_button() {

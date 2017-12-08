@@ -123,11 +123,12 @@ static s32 next_int(const char* str, int* advance) {
 	return str_to_s32(start, length);
 }
 
-s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state);
+s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool on_enemy = true);
 extern Combat_State combat_state;
 
 void execute_instruction(std::string& msg) {
 	// use 1 2
+	// use skill source target
 	const char* str = msg.c_str();
 	int at = 0;
 	if (!str_equal(str, sizeof("use") - 1, "use", sizeof("use") - 1))
@@ -147,7 +148,7 @@ void execute_instruction(std::string& msg) {
 		while (str[at] == ' ') at += 1;
 		int target_index = next_int(str, &at);
 
-		execute_skill((Skill_ID)skill_index, target_index, source_index, &combat_state);
+		execute_skill((Skill_ID)skill_index, target_index, source_index, &combat_state, false);
 	}
 }
 

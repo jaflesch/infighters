@@ -120,8 +120,7 @@ s32 init_opengl(Window_Info* window_info)
 	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, OPENGL_MAJOR_VERSION,
 		WGL_CONTEXT_MINOR_VERSION_ARB, OPENGL_MINOR_VERSION,
-		WGL_CONTEXT_FLAGS_ARB, 0,
-		0
+		WGL_CONTEXT_FLAGS_ARB, 0, 0
 	};
 	HGLRC(WINAPI* wglCreateContextAttribsARB)(HDC hDC, HGLRC hShareContext, int *attribList);
 	wglCreateContextAttribsARB = (HGLRC(WINAPI*)(HDC, HGLRC, int *))wglGetProcAddress("wglCreateContextAttribsARB");
