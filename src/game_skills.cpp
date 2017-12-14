@@ -121,7 +121,8 @@ s32 calculate_ally_damage_reduction(int target_index, int damage, Skill_Damage d
 }
 
 void deal_damage_to_target_enemy(int target_index, int damage, Skill_Damage dmg_type, Skill_ID skill_id, Combat_State* combat_state) {
-	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - damage);
+	s32 dmg = calculate_enemy_damage_reduction(target_index, damage, dmg_type, skill_id, combat_state);
+	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - dmg);
 	layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], combat_state->enemy.hp[target_index]);
 	if (combat_state->enemy.hp[target_index] == 0) {
 		layout_enemy_die(target_index);
@@ -479,10 +480,16 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_ENCRYPTION:
 		case SKILL_TRUE_ENDURANCE:
 		case SKILL_VOID_BARRIER: {
-			
-			combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
-			combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-			combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 1;
+			if (on_enemy) {
+				combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
+				combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
+				combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 1;
+			}
+			else {
+				combat_state->enemy.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
+				combat_state->enemy.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
+				combat_state->enemy.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 2;
+			}
 		} break;
 	}
 	return 0;

@@ -1915,14 +1915,16 @@ void init_combat_mode()
 }
 
 void init_combat_state() {
-#if MULTIPLAYER
-	player = client_searching();
-	connection = connect(player);
-
-	combat_state.player_turn = player->first;
-#else 
-	combat_state.player_turn = true;
-#endif
+	#if MULTIPLAYER
+		player = client_searching();
+		connection = connect(player);
+		exchange_char_selection(connection, player, &char_sel_state);
+		
+		combat_state.player_turn = player->first;
+		turn_time = TURN_DURATION;
+	#else 
+		combat_state.player_turn = true;
+	#endif
 
 	layout_update_endturn_button();
 		
@@ -2020,9 +2022,15 @@ void init_application()
 
 static void apply_skills_and_send() {
 	for (int i = 0; i < NUM_ALLIES; ++i) {
+		#if MULTIPLAYER
+			if (combat_state.player_turn) {
+					send_struct(connection, combat_state.player.targets[i]);
+			}
+		#endif
+
 		if (combat_state.player.targets[i].skill_used == SKILL_NONE)
 			continue;
-
+		
 		s32 target = -1;
 		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
 			s32 t = combat_state.player.targets[i].enemy_target_index[k];
@@ -2036,7 +2044,15 @@ static void apply_skills_and_send() {
 					target = k;
 			}
 		}
-		execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true);
+
+		#if MULTIPLAYER
+			if (combat_state.player_turn)
+				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true);
+			else
+				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false);
+		#else
+			execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true);
+		#endif
 	}
 	combat_state_reset_all_targets();
 }
@@ -2054,13 +2070,8 @@ static s32 get_num_players_alive() {
 void end_turn() {
 	// apply skills
 	apply_skills_and_send();
-
+	printf("\nEND TURN\n");
 	// reset targets after
-#if MULTIPLAYER
-	struct teste t;
-	strcpy(t.name, "struct a ser definida");
-	send_struct(player, connection, &t);
-#endif
 	turn_time = TURN_DURATION;
 
 	reset_selections();
@@ -2242,9 +2253,10 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_group->m_render = is_hovering_skill;
+
 #if MULTIPLAYER
-			if (!combat_state.player_turn)
-				end_turn();
+			if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
+					end_turn();			
 #endif
 		}break;
 	}
