@@ -93,7 +93,7 @@ char* skill_names[NUM_CHARS * NUM_SKILLS] = {
 	"DELETE",
 	"ESC",
 
-	"BEST BOUND FIRST",
+	"BEST BOUND FIST",
 	"DUAL SIMPLEX",
 	"GRAPH COLORING",
 	"KNAPSACK HIDEOUT",
@@ -155,7 +155,7 @@ int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
 	sizeof "DELETE",
 	sizeof "ESC",
 
-	sizeof "BEST BOUND FIRST",
+	sizeof "BEST BOUND FIST",
 	sizeof "DUAL SIMPLEX",
 	sizeof "GRAPH COLORING",
 	sizeof "KNAPSACK HIDEOUT",
@@ -218,19 +218,19 @@ char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
 	"Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5\npontos de defesa ABSORPTION por cada ataque bem sucedido.",
 	"Cria uma barreira redundante para os aliados. Cada personagem\nrecebe 15 pontos de redução de defesa por 3 turnos.",
 	"Cura qualquer status negativo de um aliado.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
 
 	// Qwerty
 	"Qwerty altera sua forma física e ganha redução de dano de 40 pontos\npor 4 turnos.",
 	"Controla um inimigo por dois turnos. DELETE pode ser usado no\nadversário controlado.",
 	"Mata instantaneamente qualquer adversário que recebe este golpe,\ndesde que esteja sob efeito de CTRL.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
 
 	// Big O
 	"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos,\no alvo fica com status BURN. Se o alvo já possui status BURN, este\nsofre 10 de dano crushing adicional.",
 	"Se utilizado em um adversário, gera status BURN por 3 turnos. Se,\nem um aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.",
 	"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
 
 	// New
 	"Ataca um oponente e realiza 25 de dano. New() recebe redução de\ndano de 10 pontos no próximo turno.",
@@ -292,19 +292,19 @@ int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
 	sizeof "Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5\npontos de defesa ABSORPTION por cada ataque bem sucedido.",
 	sizeof "Cria uma barreira redundante para os aliados. Cada personagem\nrecebe 15 pontos de redução de defesa por 3 turnos.",
 	sizeof "Cura qualquer status negativo de um aliado.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
 
 	// Qwerty
 	sizeof "Qwerty altera sua forma física e ganha redução de dano de 40 pontos\npor 4 turnos.",
 	sizeof "Controla um inimigo por dois turnos. DELETE pode ser usado no\nadversário controlado.",
 	sizeof "Mata instantaneamente qualquer adversário que recebe este golpe,\ndesde que esteja sob efeito de CTRL.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
 
 	// Big O
 	sizeof "Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos,\no alvo fica com status BURN. Se o alvo já possui status BURN, este\nsofre 10 de dano crushing adicional.",
 	sizeof "Se utilizado em um adversário, gera status BURN por 3 turnos. Se,\nem um aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.",
 	sizeof "No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
 
 	// New
 	sizeof "Ataca um oponente e realiza 25 de dano. New() recebe redução de\ndano de 10 pontos no próximo turno.",
@@ -1523,7 +1523,7 @@ void init_combat_mode()
 
 		float x_off = 0.0f;
 		for (int k = 0; k < NUM_SKILLS; ++k) {
-			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 5.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 10.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
 			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], skill_img_size, skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
@@ -1555,6 +1555,13 @@ void init_combat_mode()
 		gw.allies_info[i]->divs.push_back(dummy);
 		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
 		dummy->getLabels().push_back(hplabel);
+
+		r32 begin_negative = 0.0f;
+		for (int b = 0; b < 6; ++b) {
+			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
+			linked::Button* negative_status = new linked::Button(*dummy, 0, hm::vec2(begin_negative + b_spacing, -2.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 1, 1), 0);
+			dummy->getButtons().push_back(negative_status);
+		}
 
 		start_pos.x = 60;
 
@@ -1607,6 +1614,13 @@ void init_combat_mode()
 		gw.enemies_info[i]->divs.push_back(dummy);
 		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(/*size_info - sizeof("100/100") * 10.0f*/ 0.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
 		dummy->getLabels().push_back(hplabel);
+
+		r32 begin_negative = size_info - 2 * x_spacing + 2 - hp_bar_height;
+		for (int b = 0; b < 6; ++b) {
+			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
+			linked::Button* negative_status = new linked::Button(*dummy, 0, hm::vec2(begin_negative - b_spacing, 0.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 1, 1), 0);
+			dummy->getButtons().push_back(negative_status);
+		}
 
 		start_pos.x = 1400.0f;
 
@@ -2036,7 +2050,7 @@ static void apply_skills_and_send() {
 					target = k;
 			}
 		}
-		execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true);
+		execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
 	}
 	combat_state_reset_all_targets();
 }
@@ -2052,6 +2066,7 @@ static s32 get_num_players_alive() {
 
 // Gameplay functions
 void end_turn() {
+	int x = 0;
 	// apply skills
 	apply_skills_and_send();
 
@@ -2330,7 +2345,7 @@ void update_and_render(double frametime)
 	input();
 }
 
-s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool on_enemy = true);
+s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool from_enemy = false, bool on_enemy = true);
 
 void input()
 {

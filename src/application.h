@@ -214,7 +214,7 @@ enum Skill_ID {
 	SKILL_DELETE,
 	SKILL_ESC,
 
-	SKILL_BEST_BOUND_FIRST,
+	SKILL_BEST_BOUND_FIST,
 	SKILL_DUAL_SIMPLEX,
 	SKILL_GRAPH_COLORING,
 	SKILL_KNAPSACK_HIDEOUT,
@@ -260,7 +260,7 @@ static void layout_update_endturn_button();
 #define NUM_ALLIES 3
 #define NUM_ENEMIES 3
 #define TURN_DURATION 60.0
-#define FAST 0
+#define FAST 1
 
 struct GameState {
 	Game_Mode mode;

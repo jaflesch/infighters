@@ -152,7 +152,7 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 
 		if (totaltime >= 1.0) {
 			totaltime = 0.0;
-			printf("1 second\n");
+			//printf("1 second\n");
 		}
 
 		TrackMouseEvent(&mouse_event);

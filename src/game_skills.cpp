@@ -6,10 +6,19 @@ struct Skill_State {
 	s32 paricle_rendering_duration;
 	s32 neural_network_duration;
 	s32 tautology_active_target = -1;
+
+	Skill_ID cooldowns[SKILL_NUMBER];
+};
+
+struct Skill_Counter {
+	s32 contradiction_target = -1;
 };
 
 static Skill_State skill_state_ally = { };
 static Skill_State skill_state_enemy = { };
+
+static Skill_Counter skill_counter_ally = { };
+static Skill_Counter skill_counter_enemy = {};
 
 s32 calculate_absorption(s32 initial, s32 absorption, s32* extra_on_hp) {
 	*extra_on_hp = 0;
@@ -172,7 +181,7 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 		case SKILL_REQUIEM_ZERO:  target.number = 0; target.self = true; break;
 		case SKILL_TRUTH_SLASH:   target.number = 1; break;
 		case SKILL_TAUTOLOGY:     target.number = 1; break;
-		case SKILL_AXIOM_ONE:     target.number = 0; break;
+		case SKILL_AXIOM_ONE:     target.number = 0; target.self = true; break;
 		case SKILL_BRUTE_FORCE:   target.number = 1; break;
 		case SKILL_BUFFER_OVERFLOW:    target.number = 1; break;
 		case SKILL_DDOS_ATTACK:   target.number = 0; target.all = true; break;
@@ -186,22 +195,22 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 		case SKILL_MUTEX:         target.number = 0; target.all = true; break;
 		case SKILL_THREAD_SCHEDULING: target.number = 0; break;
 		case SKILL_PUMPING_UP:    target.number = 1; break;
-		case SKILL_AUTOMATA_SUMMON: target.number = 0; break;
+		case SKILL_AUTOMATA_SUMMON: target.number = 0; target.self = true; break;
 		case SKILL_TURING_MACHINE: target.number = 0; target.all = true; break;
 		case SKILL_TMR:           target.number = 0; target.all = true; break;
 		case SKILL_REDUNDANCY:    target.number = 0; target.all = true; target.ally = true; target.enemy = false; break;
 		case SKILL_ROLLBACK:      target.number = 1; target.ally = true; target.enemy = false; break;
-		case SKILL_ALT:           target.number = 0; break;
+		case SKILL_ALT:           target.number = 0; target.self = true; break;
 		case SKILL_CTRL:          target.number = 1; break;
-		case SKILL_DELETE:        target.number = 0; break;	// @check
-		case SKILL_BEST_BOUND_FIRST: target.number = 1; break;
+		case SKILL_DELETE:        target.number = 1; break;	// @check ctrl effect
+		case SKILL_BEST_BOUND_FIST: target.number = 1; break;
 		case SKILL_DUAL_SIMPLEX:  target.number = 1; target.ally = true; break;
 		case SKILL_GRAPH_COLORING: target.number = 0; break;
 		case SKILL_SPRINT_BURST:  target.number = 1; break;
 		case SKILL_INHERITANCE:   target.number = 1; break;
 		case SKILL_OVERRIDE:      target.number = 1; target.ally = true; target.enemy = false; break;
-		case SKILL_CLOCK_PULSE:   target.number = 1; break;
-		case SKILL_PIPELINE:      target.number = 0; break;
+		case SKILL_CLOCK_PULSE:   target.number = 0; target.self = true; break;
+		case SKILL_PIPELINE:      target.number = 0; target.self = true; break;
 		case SKILL_OVERCLOCK:     target.number = 0; break;
 
 			// Invulnerability skills
@@ -224,7 +233,7 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 	return target;
 }
 
-s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool on_enemy) {
+s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool from_enemy, bool on_enemy) {
 	Skill_State* skill_state = 0;
 	void(*deal_damage_to_target)(int, int, Skill_Damage, Skill_ID, Combat_State*) = 0;// (void(*)(int, int, Skill_Damage, Skill_ID, Combat_State*))0;
 	if (on_enemy) {
@@ -235,6 +244,22 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		deal_damage_to_target = deal_damage_to_target_ally;
 	}
 
+	// Counter
+	if (from_enemy) {
+		// if the counter comes from enemy, source_index gotta be checked against skill_counter_enemy
+		if (source_index == skill_counter_enemy.contradiction_target) {
+			// enemy source receives 20 dmg, do nothing and receive status paralyze
+			printf("enemy countered!\n");
+		}
+	} else {
+		// if the counter comes from ally, source_index gotta be checked against skill_counter_ally
+		if (source_index == skill_counter_ally.contradiction_target) {
+			// ally source receives 20 dmg, do nothing and receive status paralyze
+			printf("ally countered!\n");
+		}
+	}
+
+	// Execute
 	switch (id) {
 		// Zero
 		case SKILL_FALSE_RUSH: {
@@ -248,10 +273,15 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_CONTRADICTION: {
-			// @todo
+			// mark enemy but ally is marked when receiving this
+			if (from_enemy) {
+				skill_counter_ally.contradiction_target = target_index;
+			} else {
+				skill_counter_enemy.contradiction_target = target_index;
+			}
 		}break;
 		case SKILL_REQUIEM_ZERO: {
-			skill_state->requiem_duration = 3;
+			skill_state->requiem_duration = 3 + 1;
 		}break;
 
 		// One
@@ -402,7 +432,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		
 		// Big O
-		case SKILL_BEST_BOUND_FIRST: {
+		case SKILL_BEST_BOUND_FIST: {
 			/*
 			Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.
 			Se o alvo já possui status BURN, este sofre 10 de dano crushing adicional.
@@ -532,4 +562,7 @@ void update_skill_state(Combat_State* combat_state) {
 
 	skill_state_ally.tautology_active_target = -1;
 	skill_state_enemy.tautology_active_target = -1;
+
+	skill_counter_ally.contradiction_target = -1;
+	skill_counter_enemy.contradiction_target = -1;
 }
