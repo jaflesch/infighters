@@ -130,7 +130,8 @@ s32 calculate_ally_damage_reduction(int target_index, int damage, Skill_Damage d
 }
 
 void deal_damage_to_target_enemy(int target_index, int damage, Skill_Damage dmg_type, Skill_ID skill_id, Combat_State* combat_state) {
-	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - damage);
+	s32 dmg = calculate_enemy_damage_reduction(target_index, damage, dmg_type, skill_id, combat_state);
+	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - dmg);
 	layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], combat_state->enemy.hp[target_index]);
 	if (combat_state->enemy.hp[target_index] == 0) {
 		layout_enemy_die(target_index);
@@ -233,6 +234,78 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 	return target;
 }
 
+// This holds the state of the status in the layout this struct does not have
+// and cannot have any effect on the game state
+struct Status_Layout {
+	Skill_Condition ally_status[NUM_ALLIES][MAX_STATUS];
+	Skill_Condition enemy_status[NUM_ENEMIES][MAX_STATUS];
+
+	Texture* status_images[SKILL_CONDITION_NUMBER];
+};
+Status_Layout g_layout_status = {};
+
+void apply_status_to_enemy(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
+	combat_state->enemy.status[target_index] |= status;
+	combat_state->enemy.status_duration[target_index][status] = duration;
+	for (int i = 0; i < MAX_STATUS; ++i) {
+		if (g_layout_status.enemy_status[target_index][i] == SKILL_CONDITION_NONE) {
+			g_layout_status.enemy_status[target_index][i] = status;
+			layout_apply_status_enemy(target_index, i, g_layout_status.status_images[status]);
+			break;
+		}
+	}
+}
+
+void remove_status_from_enemy(s32 target_index, Skill_Condition status, Combat_State* combat_state) {
+	bool cascade_back = false;
+	for (int i = 0; i < MAX_STATUS; ++i) {
+		if (cascade_back && g_layout_status.enemy_status[target_index][i]) {
+			assert(i >= 1);
+			g_layout_status.enemy_status[target_index][i - 1] = g_layout_status.enemy_status[target_index][i];
+			layout_apply_status_enemy(target_index, i - 1, g_layout_status.status_images[g_layout_status.enemy_status[target_index][i]]);
+			layout_apply_status_enemy(target_index, i, 0);	
+		} else if (cascade_back) {
+			g_layout_status.enemy_status[target_index][i - 1] = SKILL_CONDITION_NONE;
+			break;
+		}
+		if (g_layout_status.enemy_status[target_index][i] == status) {
+			g_layout_status.enemy_status[target_index][i] = SKILL_CONDITION_NONE;
+			layout_apply_status_enemy(target_index, i, 0);
+			cascade_back = true;
+		}
+	}
+}
+
+void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
+	for (int i = 0; i < MAX_STATUS; ++i) {
+		if (g_layout_status.ally_status[target_index][i] == SKILL_CONDITION_NONE) {
+			g_layout_status.ally_status[target_index][i] = status;
+			layout_apply_status_ally(target_index, i, g_layout_status.status_images[status]);
+			break;
+		}
+	}
+}
+
+void remove_status_from_ally(s32 target_index, Skill_Condition status, Combat_State* combat_state) {
+	bool cascade_back = false;
+	for (int i = 0; i < MAX_STATUS; ++i) {
+		if (cascade_back && g_layout_status.ally_status[target_index][i]) {
+			assert(i >= 1);
+			g_layout_status.ally_status[target_index][i - 1] = g_layout_status.ally_status[target_index][i];
+			layout_apply_status_ally(target_index, i - 1, g_layout_status.status_images[g_layout_status.ally_status[target_index][i]]);
+			layout_apply_status_ally(target_index, i, 0);
+		} else if (cascade_back) {
+			g_layout_status.ally_status[target_index][i - 1] = SKILL_CONDITION_NONE;
+			break;
+		}
+		if (g_layout_status.ally_status[target_index][i] == status) {
+			g_layout_status.ally_status[target_index][i] = SKILL_CONDITION_NONE;
+			layout_apply_status_ally(target_index, i, 0);
+			cascade_back = true;
+		}
+	}
+}
+
 s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool from_enemy, bool on_enemy) {
 	Skill_State* skill_state = 0;
 	void(*deal_damage_to_target)(int, int, Skill_Damage, Skill_ID, Combat_State*) = 0;// (void(*)(int, int, Skill_Damage, Skill_ID, Combat_State*))0;
@@ -250,6 +323,9 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_enemy.contradiction_target) {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
 			printf("enemy countered!\n");
+			deal_damage_to_target_enemy(source_index, 20, skill_groups[id].damage, id, combat_state);	// @check for infinite loop? infinite counters
+			// @todo apply paralyze
+			return 0;
 		}
 	} else {
 		// if the counter comes from ally, source_index gotta be checked against skill_counter_ally
@@ -509,10 +585,16 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_ENCRYPTION:
 		case SKILL_TRUE_ENDURANCE:
 		case SKILL_VOID_BARRIER: {
-			
-			combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
-			combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-			combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 1;
+			if (on_enemy) {
+				combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
+				combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
+				combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 1;
+			}
+			else {
+				combat_state->enemy.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
+				combat_state->enemy.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
+				combat_state->enemy.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 2;
+			}
 		} break;
 	}
 	return 0;

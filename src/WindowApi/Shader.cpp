@@ -5,8 +5,6 @@
 
 Shader::Shader(std::string filename, Camera* camera)
 {
-	auto a = glGenBuffers;
-	//GLuint(__stdcall *glCreateShader2)(GLenum) = (GLuint(__stdcall*)(GLenum))wglGetProcAddress("glCreateShader");
 	GLuint ShaderProgram = glCreateProgram();
 	ShaderProgram = loadShader(filename.c_str(), ShaderProgram);
 	shader = ShaderProgram;
@@ -59,7 +57,7 @@ GLuint Shader::loadShader(const char* filename, GLuint shaderProgram)
 		VertexShaderStream.close();
 	}
 	else{
-		std::cerr << "Erro ao tentar abrir o arquivo " << filename << std::endl;
+		std::cout << "Erro ao tentar abrir o arquivo " << filename << std::endl;
 		return NULL;
 	}
 	//std::cout << VertexShaderCode << std::endl << VertexShaderCode.length();

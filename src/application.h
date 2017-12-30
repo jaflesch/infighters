@@ -104,7 +104,7 @@ enum Skill_Category {
 	SKILL_CATEGORY_STATUS,
 };
 enum Skill_Condition {
-	SKILL_CONDITION_NONE,
+	SKILL_CONDITION_NONE        = 0,
 	SKILL_CONDITION_NORMAL		= FLAG(0),
 	SKILL_CONDITION_BURN		= FLAG(1),
 	SKILL_CONDITION_FREEZE		= FLAG(2),
@@ -253,13 +253,17 @@ static void layout_set_timer_percentage(r32 percentage);
 static void layout_set_enemy_image_opacity(s32 index, r32 percentage, hm::vec4 color = hm::vec4(0, 0, 0, 1));
 static void layout_set_ally_image_opacity(s32 index, r32 percentage, hm::vec4 color = hm::vec4(0, 0, 0, 1));
 static void layout_update_endturn_button();
+static void layout_apply_status_ally(s32 index, s32 stat_index, Texture* status_image);
+static void layout_apply_status_enemy(s32 index, s32 stat_index, Texture* status_image);
+
 
 // Gameplay structures
 #define NUM_CHARS 12
 #define NUM_SKILLS 4
 #define NUM_ALLIES 3
 #define NUM_ENEMIES 3
-#define TURN_DURATION 60.0
+#define MAX_STATUS 6
+#define TURN_DURATION 6000.0
 #define FAST 1
 
 struct GameState {
@@ -349,6 +353,8 @@ struct Combat_State {
 struct Game_Windows {
 	// background window
 	linked::Window* bgwindow;
+	Texture* bg_logo;
+	Texture* bg_normal;
 
 	// intro window
 	linked::Window* intro_logo;

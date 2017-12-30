@@ -132,6 +132,23 @@ public:
 	inline void setHeldText(hm::vec4 color){ this->m_labelHeldTextColor = color; }
 	inline void setHoveredTextColor(hm::vec4 color){ this->m_labelHoveredTextColor = color; }
 
+	inline void setAllBGColor(hm::vec4 color) {
+		m_backgroundColor = color;
+		m_backgroundNormalColor = color;
+		m_backgroundHoveredColor = color;
+		m_backgroundHeldColor = color;
+
+		m_backgroundToggledColor = color;
+		m_backgroundToggledNormalColor = color;
+		m_backgroundToggledHoveredColor = color;
+		m_backgroundToggledHeldColor = color;
+
+		m_backgroundInactiveColor = color;
+		m_backgroundInactiveHeldColor = color;
+		m_backgroundInactiveHoveredColor = color;
+		m_backgroundInactiveNormalColor = color;
+	}
+
 	// getters for bg
 	inline const hm::vec4& getNormalBGColor() const{ return this->m_backgroundNormalColor; }
 	inline const hm::vec4& getHeldBGColor() const{ return this->m_backgroundHeldColor; }

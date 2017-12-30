@@ -1069,13 +1069,13 @@ void hide_all_windows() {
 }
 
 void init_intro_mode() {
-	Texture* logo = new Texture("./res/logo_clean.png");
-	Texture* playbutton_normal = new Texture("./res/textures/playbutton_normal.png");
-	Texture* playbutton_hover = new Texture("./res/textures/playbutton_hover.png");
+	Texture* logo = new Texture("../../../res/logo_clean.png");
+	Texture* playbutton_normal = new Texture("../../../res/textures/playbutton_normal.png");
+	Texture* playbutton_hover = new Texture("../../../res/textures/playbutton_hover.png");
 	
 	linked::Window* logo_window = new linked::Window(logo->width, logo->height, hm::vec2(window_info.width / 2 - logo->width / 2, window_info.height / 2 - logo->height / 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
-	linked::WindowDiv* logo_div = new linked::WindowDiv(*logo_window, logo->width, logo->height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	logo_div->setBackgroundTexture(logo);
+	linked::WindowDiv* logo_div = new linked::WindowDiv(*logo_window, logo->width, logo->height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	//logo_div->setBackgroundTexture(logo);
 	logo_window->divs.push_back(logo_div);
 	gw.intro_logo = logo_window;
 
@@ -1125,7 +1125,7 @@ void init_char_selection_mode()
 	char_selected_window->divs.push_back(s_div3);
 
 	linked::WindowDiv* info_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(600.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* space_texture = new Texture("res/textures/spacebar.png");
+	Texture* space_texture = new Texture("../../../res/textures/spacebar.png");
 	info_div->setBackgroundTexture(space_texture);
 	char_selected_window->divs.push_back(info_div);
 
@@ -1135,7 +1135,7 @@ void init_char_selection_mode()
 	info_label_div->getLabels().push_back(info_label);
 
 	linked::WindowDiv* confirm_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(740.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* enter_texture = new Texture("res/textures/enter.png");
+	Texture* enter_texture = new Texture("../../../res/textures/enter.png");
 	confirm_div->setBackgroundTexture(enter_texture);
 	char_selected_window->divs.push_back(confirm_div);
 
@@ -1145,7 +1145,7 @@ void init_char_selection_mode()
 	confirm_label_div->getLabels().push_back(confirm_label);
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* esc_texture = new Texture("res/textures/esc.png");
+	Texture* esc_texture = new Texture("../../../res/textures/esc.png");
 	back_div->setBackgroundTexture(esc_texture);
 	char_selected_window->divs.push_back(back_div);
 
@@ -1173,18 +1173,18 @@ void init_char_selection_mode()
 
 	Texture* chars_texture[NUM_CHARS] = {};
 	
-	chars_texture[0] =  new Texture("res/textures/zero.png");
-	chars_texture[1] =  new Texture("res/textures/one.png");
-	chars_texture[2] =  new Texture("res/textures/serial.png");
-	chars_texture[3] =  new Texture("res/textures/ray.png");
-	chars_texture[4] =  new Texture("res/textures/astar.png");
-	chars_texture[5] =  new Texture("res/textures/deadlock.png");
-	chars_texture[6] =  new Texture("res/textures/norma.png");
-	chars_texture[7] =  new Texture("res/textures/hazard.png");
-	chars_texture[8] =  new Texture("res/textures/qwerty.png");
-	chars_texture[9] =  new Texture("res/textures/bigo.png");
-	chars_texture[10] = new Texture("res/textures/new.png");
-	chars_texture[11] = new Texture("res/textures/clockboy.png");
+	chars_texture[0] =  new Texture("../../../res/textures/zero.png");
+	chars_texture[1] =  new Texture("../../../res/textures/one.png");
+	chars_texture[2] =  new Texture("../../../res/textures/serial.png");
+	chars_texture[3] =  new Texture("../../../res/textures/ray.png");
+	chars_texture[4] =  new Texture("../../../res/textures/astar.png");
+	chars_texture[5] =  new Texture("../../../res/textures/deadlock.png");
+	chars_texture[6] =  new Texture("../../../res/textures/norma.png");
+	chars_texture[7] =  new Texture("../../../res/textures/hazard.png");
+	chars_texture[8] =  new Texture("../../../res/textures/qwerty.png");
+	chars_texture[9] =  new Texture("../../../res/textures/bigo.png");
+	chars_texture[10] = new Texture("../../../res/textures/new.png");
+	chars_texture[11] = new Texture("../../../res/textures/clockboy.png");
 	
 #if FAST
 	chars_texture_big[0] = chars_texture[0];
@@ -1200,18 +1200,18 @@ void init_char_selection_mode()
 	chars_texture_big[10] = chars_texture[10];
 	chars_texture_big[11] = chars_texture[11];
 #else
-	chars_texture_big[0] = new Texture("res/char_big/zero.png");
-	chars_texture_big[1] = new Texture("res/char_big/one.png");
-	chars_texture_big[2] = new Texture("res/char_big/serial-keiller.png");
-	chars_texture_big[3] = new Texture("res/char_big/ray-tracey.png");
-	chars_texture_big[4] = new Texture("res/char_big/astar.png");
-	chars_texture_big[5] = new Texture("res/char_big/deadlock.png");
-	chars_texture_big[6] = new Texture("res/char_big/norma.png");
-	chars_texture_big[7] = new Texture("res/char_big/hazard.png");
-	chars_texture_big[8] = new Texture("res/char_big/qwerty.png");
-	chars_texture_big[9] = new Texture("res/char_big/big-o.png");
-	chars_texture_big[10] = new Texture("res/char_big/new.png");
-	chars_texture_big[11] = new Texture("res/char_big/clockboy.png");
+	chars_texture_big[0] = new Texture("../../../res/char_big/zero.png");
+	chars_texture_big[1] = new Texture("../../../res/char_big/one.png");
+	chars_texture_big[2] = new Texture("../../../res/char_big/serial-keiller.png");
+	chars_texture_big[3] = new Texture("../../../res/char_big/ray-tracey.png");
+	chars_texture_big[4] = new Texture("../../../res/char_big/astar.png");
+	chars_texture_big[5] = new Texture("../../../res/char_big/deadlock.png");
+	chars_texture_big[6] = new Texture("../../../res/char_big/norma.png");
+	chars_texture_big[7] = new Texture("../../../res/char_big/hazard.png");
+	chars_texture_big[8] = new Texture("../../../res/char_big/qwerty.png");
+	chars_texture_big[9] = new Texture("../../../res/char_big/big-o.png");
+	chars_texture_big[10] = new Texture("../../../res/char_big/new.png");
+	chars_texture_big[11] = new Texture("../../../res/char_big/clockboy.png");
 #endif
 
 	linked::WindowDiv* char_divs[NUM_CHARS] = {};
@@ -1269,7 +1269,7 @@ void init_char_information_mode()
 	gw.char_info_window_bot = char_info_window_bot;
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_info_window_bot, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* esc_texture = new Texture("res/textures/esc.png");
+	Texture* esc_texture = new Texture("../../../res/textures/esc.png");
 	back_div->setBackgroundTexture(esc_texture);
 	char_info_window_bot->divs.push_back(back_div);
 
@@ -1337,97 +1337,97 @@ void init_combat_mode()
 {
 	// initialize unknown skill texture
 	for (int i = 0; i < NUM_CHARS * 4; i += 4) {
-		skill_textures[i + 0] = new Texture("res/skills/unk_skill1.png");
-		skill_textures[i + 1] = new Texture("res/skills/unk_skill2.png");
-		skill_textures[i + 2] = new Texture("res/skills/unk_skill3.png");
-		skill_textures[i + 3] = new Texture("res/skills/unk_skill4.png");
+		skill_textures[i + 0] = new Texture("../../../res/skills/unk_skill1.png");
+		skill_textures[i + 1] = new Texture("../../../res/skills/unk_skill2.png");
+		skill_textures[i + 2] = new Texture("../../../res/skills/unk_skill3.png");
+		skill_textures[i + 3] = new Texture("../../../res/skills/unk_skill4.png");
 	}
 
 	// Initialize Character square textures
-	char_textures[CHAR_ZERO]            = new Texture("res/char_square/zero_sq.png");
-	char_textures[CHAR_ONE]             = new Texture("res/char_square/one_sq.png");
-	char_textures[CHAR_SERIAL_KEYLLER]  = new Texture("res/char_square/serial_sq.png");
-	char_textures[CHAR_RAY_TRACEY]      = new Texture("res/char_square/ray_sq.png");
-	char_textures[CHAR_A_STAR]          = new Texture("res/char_square/astar_sq.png");
-	char_textures[CHAR_DEADLOCK]        = new Texture("res/char_square/deadlock_sq.png");
-	char_textures[CHAR_NORMA]           = new Texture("res/char_square/norma_sq.png");
-	char_textures[CHAR_HAZARD]          = new Texture("res/char_square/hazard_sq.png");
-	char_textures[CHAR_QWERTY]          = new Texture("res/char_square/qwerty_sq.png");
-	char_textures[CHAR_BIG_O]           = new Texture("res/char_square/bigo_sq.png");
-	char_textures[CHAR_NEW]             = new Texture("res/char_square/new_sq.png");
-	char_textures[CHAR_CLOCKBOY]        = new Texture("res/char_square/clockboy_sq.png");
+	char_textures[CHAR_ZERO]            = new Texture("../../../res/char_square/zero_sq.png");
+	char_textures[CHAR_ONE]             = new Texture("../../../res/char_square/one_sq.png");
+	char_textures[CHAR_SERIAL_KEYLLER]  = new Texture("../../../res/char_square/serial_sq.png");
+	char_textures[CHAR_RAY_TRACEY]      = new Texture("../../../res/char_square/ray_sq.png");
+	char_textures[CHAR_A_STAR]          = new Texture("../../../res/char_square/astar_sq.png");
+	char_textures[CHAR_DEADLOCK]        = new Texture("../../../res/char_square/deadlock_sq.png");
+	char_textures[CHAR_NORMA]           = new Texture("../../../res/char_square/norma_sq.png");
+	char_textures[CHAR_HAZARD]          = new Texture("../../../res/char_square/hazard_sq.png");
+	char_textures[CHAR_QWERTY]          = new Texture("../../../res/char_square/qwerty_sq.png");
+	char_textures[CHAR_BIG_O]           = new Texture("../../../res/char_square/bigo_sq.png");
+	char_textures[CHAR_NEW]             = new Texture("../../../res/char_square/new_sq.png");
+	char_textures[CHAR_CLOCKBOY]        = new Texture("../../../res/char_square/clockboy_sq.png");
 
 	// Initialize Skill textures
-	skill_textures[CHAR_ZERO * NUM_SKILLS + 0] = new Texture("res/skills/zero/false_rush.png");
-	skill_textures[CHAR_ZERO * NUM_SKILLS + 1] = new Texture("res/skills/zero/contradiction.png");
-	skill_textures[CHAR_ZERO * NUM_SKILLS + 2] = new Texture("res/skills/zero/requiem_zero.png");
-	skill_textures[CHAR_ZERO * NUM_SKILLS + 3] = new Texture("res/skills/zero/void_barrier.png");
+	skill_textures[CHAR_ZERO * NUM_SKILLS + 0] = new Texture("../../../res/skills/zero/false_rush.png");
+	skill_textures[CHAR_ZERO * NUM_SKILLS + 1] = new Texture("../../../res/skills/zero/contradiction.png");
+	skill_textures[CHAR_ZERO * NUM_SKILLS + 2] = new Texture("../../../res/skills/zero/requiem_zero.png");
+	skill_textures[CHAR_ZERO * NUM_SKILLS + 3] = new Texture("../../../res/skills/zero/void_barrier.png");
 
-	skill_textures[CHAR_ONE * NUM_SKILLS + 0] = new Texture("res/skills/one/truth_slash.png");
-	skill_textures[CHAR_ONE * NUM_SKILLS + 1] = new Texture("res/skills/one/tautology.png");
-	skill_textures[CHAR_ONE * NUM_SKILLS + 2] = new Texture("res/skills/one/axion_one.png");
-	skill_textures[CHAR_ONE * NUM_SKILLS + 3] = new Texture("res/skills/one/true_endurance.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 0] = new Texture("../../../res/skills/one/truth_slash.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 1] = new Texture("../../../res/skills/one/tautology.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 2] = new Texture("../../../res/skills/one/axion_one.png");
+	skill_textures[CHAR_ONE * NUM_SKILLS + 3] = new Texture("../../../res/skills/one/true_endurance.png");
 
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("res/skills/serial_keyller/brute_force.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("res/skills/serial_keyller/buffer_overflow.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("res/skills/serial_keyller/ddos_attack.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("res/skills/serial_keyller/encryption.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("../../../res/skills/serial_keyller/brute_force.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("../../../res/skills/serial_keyller/buffer_overflow.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("../../../res/skills/serial_keyller/ddos_attack.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("../../../res/skills/serial_keyller/encryption.png");
 
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("res/skills/serial_keyller/brute_force.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("res/skills/serial_keyller/buffer_overflow.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("res/skills/serial_keyller/ddos_attack.png");
-	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("res/skills/serial_keyller/encryption.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 0] = new Texture("../../../res/skills/serial_keyller/brute_force.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 1] = new Texture("../../../res/skills/serial_keyller/buffer_overflow.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 2] = new Texture("../../../res/skills/serial_keyller/ddos_attack.png");
+	skill_textures[CHAR_SERIAL_KEYLLER * NUM_SKILLS + 3] = new Texture("../../../res/skills/serial_keyller/encryption.png");
 
-	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 0] = new Texture("res/skills/ray_tracey/particle_rendering.png");
-	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 1] = new Texture("res/skills/ray_tracey/diffuse_reflection.png");
-	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 2] = new Texture("res/skills/ray_tracey/dynamic_frustum.png");
-	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 3] = new Texture("res/skills/ray_tracey/rasterization.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 0] = new Texture("../../../res/skills/ray_tracey/particle_rendering.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 1] = new Texture("../../../res/skills/ray_tracey/diffuse_reflection.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 2] = new Texture("../../../res/skills/ray_tracey/dynamic_frustum.png");
+	skill_textures[CHAR_RAY_TRACEY * NUM_SKILLS + 3] = new Texture("../../../res/skills/ray_tracey/rasterization.png");
 
-	skill_textures[CHAR_A_STAR * NUM_SKILLS + 0] = new Texture("res/skills/astar/q_punch.png");
-	skill_textures[CHAR_A_STAR * NUM_SKILLS + 1] = new Texture("res/skills/astar/perceptron.png");
-	skill_textures[CHAR_A_STAR * NUM_SKILLS + 2] = new Texture("res/skills/astar/neural_network.png");
-	skill_textures[CHAR_A_STAR * NUM_SKILLS + 3] = new Texture("res/skills/astar/hill_climbing.png");
+	skill_textures[CHAR_A_STAR * NUM_SKILLS + 0] = new Texture("../../../res/skills/astar/q_punch.png");
+	skill_textures[CHAR_A_STAR * NUM_SKILLS + 1] = new Texture("../../../res/skills/astar/perceptron.png");
+	skill_textures[CHAR_A_STAR * NUM_SKILLS + 2] = new Texture("../../../res/skills/astar/neural_network.png");
+	skill_textures[CHAR_A_STAR * NUM_SKILLS + 3] = new Texture("../../../res/skills/astar/hill_climbing.png");
 
-	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 0] = new Texture("res/skills/deadlock/preemption.png");
-	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 1] = new Texture("res/skills/deadlock/mutex.png");
-	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 2] = new Texture("res/skills/deadlock/thread_scheduling.png");
-	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 3] = new Texture("res/skills/deadlock/fork.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 0] = new Texture("../../../res/skills/deadlock/preemption.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 1] = new Texture("../../../res/skills/deadlock/mutex.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 2] = new Texture("../../../res/skills/deadlock/thread_scheduling.png");
+	skill_textures[CHAR_DEADLOCK * NUM_SKILLS + 3] = new Texture("../../../res/skills/deadlock/fork.png");
 
-	skill_textures[CHAR_NORMA * NUM_SKILLS + 0] = new Texture("res/skills/norma/pumping_up.png");
-	skill_textures[CHAR_NORMA * NUM_SKILLS + 1] = new Texture("res/skills/norma/automata_summon.png");
-	skill_textures[CHAR_NORMA * NUM_SKILLS + 2] = new Texture("res/skills/norma/turing_machine.png");
-	skill_textures[CHAR_NORMA * NUM_SKILLS + 3] = new Texture("res/skills/norma/non_determinism.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 0] = new Texture("../../../res/skills/norma/pumping_up.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 1] = new Texture("../../../res/skills/norma/automata_summon.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 2] = new Texture("../../../res/skills/norma/turing_machine.png");
+	skill_textures[CHAR_NORMA * NUM_SKILLS + 3] = new Texture("../../../res/skills/norma/non_determinism.png");
 
-	skill_textures[CHAR_HAZARD * NUM_SKILLS + 0] = new Texture("res/skills/hazard/tmr.png");
-	skill_textures[CHAR_HAZARD * NUM_SKILLS + 1] = new Texture("res/skills/hazard/redundancy.png");
-	skill_textures[CHAR_HAZARD * NUM_SKILLS + 2] = new Texture("res/skills/hazard/rollback.png");
-	skill_textures[CHAR_HAZARD * NUM_SKILLS + 3] = new Texture("res/skills/hazard/rollforward.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 0] = new Texture("../../../res/skills/hazard/tmr.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 1] = new Texture("../../../res/skills/hazard/redundancy.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 2] = new Texture("../../../res/skills/hazard/rollback.png");
+	skill_textures[CHAR_HAZARD * NUM_SKILLS + 3] = new Texture("../../../res/skills/hazard/rollforward.png");
 
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 0] = new Texture("res/skills/qwerty/alt.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 1] = new Texture("res/skills/qwerty/ctrl.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 2] = new Texture("res/skills/qwerty/del.png");
-	skill_textures[CHAR_QWERTY * NUM_SKILLS + 3] = new Texture("res/skills/qwerty/esc.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 0] = new Texture("../../../res/skills/qwerty/alt.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 1] = new Texture("../../../res/skills/qwerty/ctrl.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 2] = new Texture("../../../res/skills/qwerty/del.png");
+	skill_textures[CHAR_QWERTY * NUM_SKILLS + 3] = new Texture("../../../res/skills/qwerty/esc.png");
 
-	skill_textures[CHAR_BIG_O * NUM_SKILLS + 0] = new Texture("res/skills/big_o/best_bound_fist.png");
-	skill_textures[CHAR_BIG_O * NUM_SKILLS + 1] = new Texture("res/skills/big_o/dual_simplex.png");
-	skill_textures[CHAR_BIG_O * NUM_SKILLS + 2] = new Texture("res/skills/big_o/graph_coloring.png");
-	skill_textures[CHAR_BIG_O * NUM_SKILLS + 3] = new Texture("res/skills/big_o/knapsack_hideout.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 0] = new Texture("../../../res/skills/big_o/best_bound_fist.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 1] = new Texture("../../../res/skills/big_o/dual_simplex.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 2] = new Texture("../../../res/skills/big_o/graph_coloring.png");
+	skill_textures[CHAR_BIG_O * NUM_SKILLS + 3] = new Texture("../../../res/skills/big_o/knapsack_hideout.png");
 
-	skill_textures[CHAR_NEW * NUM_SKILLS + 0] = new Texture("res/skills/new/sprint_burst.png");
-	skill_textures[CHAR_NEW * NUM_SKILLS + 1] = new Texture("res/skills/new/inheritance.png");
-	skill_textures[CHAR_NEW * NUM_SKILLS + 2] = new Texture("res/skills/new/override.png");
-	skill_textures[CHAR_NEW * NUM_SKILLS + 3] = new Texture("res/skills/new/polymorphism.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 0] = new Texture("../../../res/skills/new/sprint_burst.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 1] = new Texture("../../../res/skills/new/inheritance.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 2] = new Texture("../../../res/skills/new/override.png");
+	skill_textures[CHAR_NEW * NUM_SKILLS + 3] = new Texture("../../../res/skills/new/polymorphism.png");
 
-	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 0] = new Texture("res/skills/clockboy/clock_pulse.png");
-	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 1] = new Texture("res/skills/clockboy/pipeline.png");
-	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 2] = new Texture("res/skills/clockboy/overclock.png");
-	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 3] = new Texture("res/skills/clockboy/branch_prediction.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 0] = new Texture("../../../res/skills/clockboy/clock_pulse.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 1] = new Texture("../../../res/skills/clockboy/pipeline.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 2] = new Texture("../../../res/skills/clockboy/overclock.png");
+	skill_textures[CHAR_CLOCKBOY * NUM_SKILLS + 3] = new Texture("../../../res/skills/clockboy/branch_prediction.png");
 
-	orb_textures[ORB_HARD] = new Texture("res/orbs/hard_orb.png");
-	orb_textures[ORB_SOFT] = new Texture("res/orbs/soft_orb.png");
-	orb_textures[ORB_VR]   = new Texture("res/orbs/vr_orb.png");
-	orb_textures[ORB_BIOS] = new Texture("res/orbs/bios_orb.png");
-	orb_textures[ORB_NULL] = new Texture("res/orbs/null_orb.png");
+	orb_textures[ORB_HARD] = new Texture("../../../res/orbs/hard_orb.png");
+	orb_textures[ORB_SOFT] = new Texture("../../../res/orbs/soft_orb.png");
+	orb_textures[ORB_VR]   = new Texture("../../../res/orbs/vr_orb.png");
+	orb_textures[ORB_BIOS] = new Texture("../../../res/orbs/bios_orb.png");
+	orb_textures[ORB_NULL] = new Texture("../../../res/orbs/null_orb.png");
 
 	hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
 	hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
@@ -1449,10 +1449,10 @@ void init_combat_mode()
 		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy Name", sizeof "Enemy Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_32, 0, 0);
 		enemy_name_div->getLabels().push_back(enemy_label);
 
-		orb_alive_ally = new Texture("res/orbs/alive_orb.png");
-		orb_dead_ally = new Texture("res/orbs/dead_orb.png");;
-		orb_alive_enemy = new Texture("res/orbs/enemy_alive_orb.png");;
-		orb_dead_enemy = new Texture("res/orbs/enemy_dead_orb.png");;
+		orb_alive_ally = new Texture("../../../res/orbs/alive_orb.png");
+		orb_dead_ally = new Texture("../../../res/orbs/dead_orb.png");;
+		orb_alive_enemy = new Texture("../../../res/orbs/enemy_alive_orb.png");;
+		orb_dead_enemy = new Texture("../../../res/orbs/enemy_dead_orb.png");;
 		float poff_x = 0.0f;
 		for (int i = 0; i < NUM_ALLIES; ++i) {
 			linked::WindowDiv* player_indicator = new linked::WindowDiv(*player_name, 32, 32, 0, 0, hm::vec2(250 + poff_x, 0), hm::vec4(1, 0, 0, 1), linked::DIV_CENTER_Y | linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -1551,16 +1551,16 @@ void init_combat_mode()
 		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), ally_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies_info[i]->divs.push_back(hpfilled);
 
-		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-		gw.allies_info[i]->divs.push_back(dummy);
-		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
-		dummy->getLabels().push_back(hplabel);
+		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.allies_info[i]->divs.push_back(status_info);
+		linked::Label* hplabel = new linked::Label(*status_info, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
+		status_info->getLabels().push_back(hplabel);
 
 		r32 begin_negative = 0.0f;
-		for (int b = 0; b < 6; ++b) {
+		for (int b = 0; b < MAX_STATUS; ++b) {
 			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
-			linked::Button* negative_status = new linked::Button(*dummy, 0, hm::vec2(begin_negative + b_spacing, -2.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 1, 1), 0);
-			dummy->getButtons().push_back(negative_status);
+			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative + b_spacing, -2.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
+			status_info->getButtons().push_back(negative_status);
 		}
 
 		start_pos.x = 60;
@@ -1610,16 +1610,16 @@ void init_combat_mode()
 		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(hpfilled);
 		
-		linked::WindowDiv* dummy = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-		gw.enemies_info[i]->divs.push_back(dummy);
-		linked::Label* hplabel = new linked::Label(*dummy, (u8*)"100/100", sizeof("100/100"), hm::vec2(/*size_info - sizeof("100/100") * 10.0f*/ 0.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
-		dummy->getLabels().push_back(hplabel);
+		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		gw.enemies_info[i]->divs.push_back(status_info);
+		linked::Label* hplabel = new linked::Label(*status_info, (u8*)"100/100", sizeof("100/100"), hm::vec2(/*size_info - sizeof("100/100") * 10.0f*/ 0.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
+		status_info->getLabels().push_back(hplabel);
 
 		r32 begin_negative = size_info - 2 * x_spacing + 2 - hp_bar_height;
-		for (int b = 0; b < 6; ++b) {
+		for (int b = 0; b < MAX_STATUS; ++b) {
 			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
-			linked::Button* negative_status = new linked::Button(*dummy, 0, hm::vec2(begin_negative - b_spacing, 0.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 1, 1), 0);
-			dummy->getButtons().push_back(negative_status);
+			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative - b_spacing, 0.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
+			status_info->getButtons().push_back(negative_status);
 		}
 
 		start_pos.x = 1400.0f;
@@ -1649,7 +1649,7 @@ void init_combat_mode()
 		combat_bottom_info->divs.push_back(orbs_div);
 
 		linked::Button* multiple_orb_button = new linked::Button(*orbs_div, 0, hm::vec2(0, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		Texture* multiple_orbs_texture = new Texture("res/orbs/all_orbs.png");
+		Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
 		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		orbs_div->getButtons().push_back(multiple_orb_button);
 
@@ -1670,7 +1670,7 @@ void init_combat_mode()
 		orbs_div->getButtons().push_back(bios_orb_button);
 
 		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		Texture* xchg_orb_texture = new Texture("res/orbs/exchange_orb.png");
+		Texture* xchg_orb_texture = new Texture("../../../res/orbs/exchange_orb.png");
 		exchange_orb_button->setAllBGTexture(xchg_orb_texture);
 		hm::vec4 exchange_orb_button_hovered_bgcolor(0, 1, 1, 0.7f);
 		exchange_orb_button->setHoveredBGColor(exchange_orb_button_hovered_bgcolor);
@@ -1810,7 +1810,7 @@ void init_combat_mode()
 		float orbs_height = 36.0f;
 
 		linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		Texture* multiple_orbs_texture = new Texture("res/orbs/all_orbs.png");
+		Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
 		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		info_div->getButtons().push_back(multiple_orb_button);
 
@@ -1848,8 +1848,8 @@ void init_combat_mode()
 		linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
 		info_div->getLabels().push_back(bios_orb_label);		
 
-		Texture* arrow_up = new Texture("res/orbs/arrow_up.png");
-		Texture* arrow_down = new Texture("res/orbs/arrow_down.png");
+		Texture* arrow_up = new Texture("../../../res/orbs/arrow_up.png");
+		Texture* arrow_down = new Texture("../../../res/orbs/arrow_down.png");
 		float arrow_up_size = 24.0f;
 		hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
 		hm::vec4 arrow_normal_color = greener_cyan;
@@ -1920,23 +1920,35 @@ void init_combat_mode()
 		bios_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(bios_orb_arrow_down);
 
-		Texture* reset_button_texture = new Texture("./res/orbs/reset.png");
+		Texture* reset_button_texture = new Texture("../../../res/orbs/reset.png");
 		linked::Button* reset_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 5 + 22, 72 + 12), 32, 32, hm::vec4(0, 1, 0.7f, 0), 10);
 		reset_button->setAllBGTexture(reset_button_texture);
 		reset_button->setHoveredBGColor(hm::vec4(0, 0.7f, 0.5f, 0));
 		info_div->getButtons().push_back(reset_button);
 	}
+	{
+		// Status stuff
+		Texture* default_status = new Texture("../../../res/status/status_default.png");
+		g_layout_status.status_images[SKILL_CONDITION_BURN] = new Texture("../../../res/status/status_burn.png");
+		g_layout_status.status_images[SKILL_CONDITION_FREEZE] = new Texture("../../../res/status/status_freeze.png");
+		g_layout_status.status_images[SKILL_CONDITION_POISON] = new Texture("../../../res/status/status_poison.png");
+		g_layout_status.status_images[SKILL_CONDITION_PARALYZE] = new Texture("../../../res/status/status_paralyze.png");
+		g_layout_status.status_images[SKILL_CONDITION_SLEEP] = new Texture("../../../res/status/status_sleep.png");
+		g_layout_status.status_images[SKILL_CONDITION_STUN] = new Texture("../../../res/status/status_stun.png");
+	}
 }
 
 void init_combat_state() {
-#if MULTIPLAYER
-	player = client_searching();
-	connection = connect(player);
-
-	combat_state.player_turn = player->first;
-#else 
-	combat_state.player_turn = true;
-#endif
+	#if MULTIPLAYER
+		player = client_searching();
+		connection = connect(player);
+		exchange_char_selection(connection, player, &char_sel_state);
+		
+		combat_state.player_turn = player->first;
+		turn_time = TURN_DURATION;
+	#else 
+		combat_state.player_turn = true;
+	#endif
 
 	layout_update_endturn_button();
 		
@@ -1988,8 +2000,9 @@ void init_application()
 	linked::Window* bgwindow = new linked::Window(window_info.width, window_info.height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
 	linked::WindowDiv* bgdiv = new linked::WindowDiv(*bgwindow, window_info.width, window_info.height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 1), DIV_ANCHOR_LEFT | DIV_ANCHOR_TOP);
 	bgwindow->divs.push_back(bgdiv);
-	Texture* bgtexture = new Texture("res/textures/bg2.jpg");
-	bgdiv->setBackgroundTexture(bgtexture);
+	gw.bg_logo = new Texture("../../../res/textures/bg.png");
+	gw.bg_normal = new Texture("../../../res/textures/bg2.jpg");
+	bgdiv->setBackgroundTexture(gw.bg_logo);
 	gw.bgwindow = bgwindow;
 
 	char_sel_state.enemy_selections[0] = CHAR_BIG_O;
@@ -2034,9 +2047,15 @@ void init_application()
 
 static void apply_skills_and_send() {
 	for (int i = 0; i < NUM_ALLIES; ++i) {
+		#if MULTIPLAYER
+			if (combat_state.player_turn) {
+					send_struct(connection, combat_state.player.targets[i]);
+			}
+		#endif
+
 		if (combat_state.player.targets[i].skill_used == SKILL_NONE)
 			continue;
-
+		
 		s32 target = -1;
 		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
 			s32 t = combat_state.player.targets[i].enemy_target_index[k];
@@ -2050,7 +2069,15 @@ static void apply_skills_and_send() {
 					target = k;
 			}
 		}
-		execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
+
+		#if MULTIPLAYER
+			if (combat_state.player_turn)
+				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
+			else
+				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true, false);
+		#else
+			execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
+		#endif
 	}
 	combat_state_reset_all_targets();
 }
@@ -2066,16 +2093,10 @@ static s32 get_num_players_alive() {
 
 // Gameplay functions
 void end_turn() {
-	int x = 0;
 	// apply skills
 	apply_skills_and_send();
-
+	printf("\nEND TURN\n");
 	// reset targets after
-#if MULTIPLAYER
-	struct teste t;
-	strcpy(t.name, "struct a ser definida");
-	send_struct(player, connection, &t);
-#endif
 	turn_time = TURN_DURATION;
 
 	reset_selections();
@@ -2257,9 +2278,10 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_group->m_render = is_hovering_skill;
+
 #if MULTIPLAYER
-			if (!combat_state.player_turn)
-				end_turn();
+			if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
+					end_turn();			
 #endif
 		}break;
 	}
@@ -2280,6 +2302,7 @@ void change_game_mode(Game_Mode mode)
 			AudioController::introAudio.rewind();
 			AudioController::introAudio.play();
 			gw.intro_logo->setActive(true);
+			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_logo);
 		}break;
 		case MODE_CHAR_SELECT: {
 			if (ggs.last_mode != MODE_CHAR_INFO) {
@@ -2289,6 +2312,7 @@ void change_game_mode(Game_Mode mode)
 			gw.char_selected_window->setActive(true);
 			gw.left_char_window->setActive(true);
 			gw.char_selection_window->setActive(true);
+			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_normal);
 		}break;
 		case MODE_CHAR_INFO: {
 			if (ggs.last_mode != MODE_CHAR_SELECT) {
@@ -2298,11 +2322,13 @@ void change_game_mode(Game_Mode mode)
 			gw.left_char_window->setActive(true);
 			gw.char_info_window->setActive(true);
 			gw.char_info_window_bot->setActive(true);
+			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_normal);
 		}break;
 		case MODE_COMBAT: {
 			AudioController::pauseAllMusic();
 			AudioController::combat1Audio.rewind();
 			AudioController::combat1Audio.play();
+			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_normal);
 			init_combat_state();
 			for (int i = 0; i < NUM_ALLIES; ++i) {
 				int index = char_sel_state.selections[i];
@@ -2371,6 +2397,56 @@ void input()
 		keyboard_state.key_event[VK_F2] = false;
 		end_turn();
 	}
+
+	if (keyboard_state.key_event['P']) {
+		keyboard_state.key_event['P'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_PARALYZE, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
+		}
+	}
+	if (keyboard_state.key_event['B']) {
+		keyboard_state.key_event['B'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_BURN, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_BURN, 1, &combat_state);
+		}
+	}
+	if (keyboard_state.key_event['F']) {
+		keyboard_state.key_event['F'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_FREEZE, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_FREEZE, 1, &combat_state);
+		}
+	}
+	if (keyboard_state.key_event['I']) {
+		keyboard_state.key_event['I'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_POISON, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_POISON, 1, &combat_state);
+		}
+	}
+	if (keyboard_state.key_event['S']) {
+		keyboard_state.key_event['S'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_SLEEP, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_SLEEP, 1, &combat_state);
+		}
+	}
+	if (keyboard_state.key_event['T']) {
+		keyboard_state.key_event['T'] = false;
+		if (keyboard_state.key[VK_SHIFT]) {
+			remove_status_from_enemy(0, SKILL_CONDITION_STUN, &combat_state);
+		} else {
+			apply_status_to_enemy(0, SKILL_CONDITION_STUN, 1, &combat_state);
+		}
+	}
+	int x = 0;
 }
 
 // Layout functions
@@ -2622,4 +2698,20 @@ static void layout_update_endturn_button() {
 	}
 
 	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
+}
+
+static void layout_apply_status_ally(s32 target_index, s32 stat_index, Texture* status_image) {
+	gw.allies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 1));
+	gw.allies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGTexture(status_image);
+	if (!status_image) {
+		gw.allies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 0));
+	}
+}
+
+static void layout_apply_status_enemy(s32 target_index, s32 stat_index, Texture* status_image) {
+	gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 1));
+	gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGTexture(status_image);
+	if (!status_image) {
+		gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 0));
+	}
 }

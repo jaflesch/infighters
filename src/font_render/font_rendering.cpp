@@ -61,11 +61,11 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 	}
 	error = FT_New_Face(library, filepath, 0, &font->face);
 	if (error == FT_Err_Unknown_File_Format) {
-		print("Error loading font file format\n");
+		print("Error loading font file format %s\n", filepath);
 		return -1;
 	}
 	else if (error) {
-		print("Error loading font\n");
+		print("Error loading font %s\n", filepath);
 		return -1;
 	}
 

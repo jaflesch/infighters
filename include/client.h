@@ -9,6 +9,7 @@
 #include <string>
 #include <stdio.h>
 #include <tchar.h>
+#include "application.h"
 
 
 #define DEFAULT_BUFLEN 512
@@ -17,6 +18,7 @@
 #define MATCHING_PORT_L "44443"			
 #define GAME_PORT 44444							// porta do jogo
 #define GAME_PORT_L "44444"
+#define MULTIPLAYER 0
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -43,4 +45,6 @@ struct teste
 
 client_info* client_searching();
 SOCKET* connect(client_info * player);
-int send_struct(client_info * player, SOCKET* ConnectSocket, teste* t);
+int exchange_char_selection(SOCKET* ConnectSocket, client_info * player, Char_Selection_State * characters);
+int send_struct(SOCKET* ConnectSocket, Target target);
+int receive_struct(SOCKET* ConnectSocket, Target * targets);

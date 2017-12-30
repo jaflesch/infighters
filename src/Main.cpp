@@ -54,8 +54,8 @@ extern Chat* g_chat;
 
 extern Font_ID fonts[32];
 
-#define DEFAULT_FONT "./res/fonts/Oswald-Regular.ttf"
-#define OSWALD_LIGHT "./res/fonts/Oswald-Light.ttf"
+#define DEFAULT_FONT "../../../res/fonts/Oswald-Regular.ttf"
+#define OSWALD_LIGHT "../../../res/fonts/Oswald-Light.ttf"
 
 void application_state_init()
 {
