@@ -5,12 +5,14 @@
 
 class Quad;
 class IndexedModel;
+class Border;
 
 class Mesh
 {
 public:
 	Mesh(Quad* quad);
 	Mesh(Quad* quad, bool dynamicDraw);
+	Mesh(Border* border);
 	~Mesh();
 	void render();
 	float reflectivity;
@@ -20,6 +22,7 @@ public:
 
 	// returns NULL if quad does not exist
 	Quad* getQuad();
+	Border* getBorder();
 
 	GLuint getVertexArrayID();
 	GLuint getVertexBufferID();
@@ -33,6 +36,7 @@ public:
 	void updateQuad();
 private:
 	Quad* quad;
+	Border* border;
 	IndexedModel* indexedModel;
 	GLuint VertexArrayID;
 	GLuint VertexBufferID;

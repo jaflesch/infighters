@@ -29,12 +29,13 @@ private:
 	hm::mat4 m_model;
 	float m_opacity;
 
-	int useTexture;
 public:
+	int useTexture;
 	inline void setOpacity(float opacity) { this->m_opacity = opacity; }
 	inline hm::mat4& getProjection(){ return this->m_projection; }
 	inline hm::mat4& getModel() { return this->m_model; }
 	inline hm::vec4& getBackgroundColor() { return this->m_backgroundColor; }
 	inline void setTextColor(const hm::vec4& color){ this->m_backgroundColor = color; }
+	inline GLuint getUniformTextColor() { return uniformTextColor; }
 };
 

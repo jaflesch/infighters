@@ -107,6 +107,8 @@ void Quad::updateQuad(int width, int height)
 
 void Quad::calcAtlas()
 {
+	if (numRows == 0)
+		return;
 	int column = (int)index % (int)numRows;
 	offset.x = (float)column / (float)numRows;
 	int row = (int)index / (int)numRows;
@@ -148,4 +150,83 @@ float Quad::getIndex()
 IndexedModel* Quad::getIndexedModel()
 {
 	return model;
+}
+
+void Border::genVAO()
+{
+	glGenVertexArrays(4, VertexArrayID);
+}
+
+void Border::genVBOS()
+{
+	// Vertex Data
+	glGenBuffers(4, VertexBufferID);
+	for (int i = 0; i < 4; ++i) {
+		glBindVertexArray(VertexArrayID[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, VertexBufferID[i]);
+		glBufferData(GL_ARRAY_BUFFER, models[i]->positions.size() * sizeof(float) * 3, &models[i]->positions[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glDisableVertexAttribArray(0);
+	}
+}
+
+void Border::genIndexBuffer()
+{
+	glGenBuffers(4, IndexBufferID);
+	for (int i = 0; i < 4; ++i) {
+		glBindVertexArray(VertexArrayID[i]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferID[i]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, models[i]->indices.size() * sizeof(unsigned int), &models[i]->indices[0], GL_STATIC_DRAW);
+	}
+}
+
+Border::Border(hm::vec3 center, float width, float height, float left_size, float right_size, float top_size, float bottom_size)
+{
+	for (int i = 0; i < 4; ++i) {
+		models[i] = new IndexedModel();
+	}
+
+	left_color = hm::vec4(1, 1, 1, 1);
+	right_color = hm::vec4(1, 1, 1, 1);
+	top_color = hm::vec4(1, 1, 1, 1);
+	bottom_color = hm::vec4(1, 1, 1, 1);
+
+	float half_width = width / 2.0f;
+	float half_height = height / 2.0f;
+
+	// topL topR botL botR
+
+	models[0]->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y + half_height + top_size, 0.0f));
+	models[0]->getPositions()->push_back(vec3(center.x - half_width, center.y + half_height, 0.0f));
+	models[0]->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y - half_height - bottom_size, 0.0f));
+	models[0]->getPositions()->push_back(vec3(center.x - half_width, center.y - half_height, 0.0f));
+
+	models[1]->getPositions()->push_back(vec3(center.x + half_width, center.y + half_height, 0));
+	models[1]->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y + half_height + top_size, 0));
+	models[1]->getPositions()->push_back(vec3(center.x + half_width, center.y - half_height, 0));
+	models[1]->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y - half_height - bottom_size, 0));
+
+	models[2]->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y + half_height + top_size, 0));
+	models[2]->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y + half_height + top_size, 0));
+	models[2]->getPositions()->push_back(vec3(center.x - half_width, center.y + half_height, 0));
+	models[2]->getPositions()->push_back(vec3(center.x + half_width, center.y + half_height, 0));
+
+	models[3]->getPositions()->push_back(vec3(center.x - half_width, center.y - half_height, 0));
+	models[3]->getPositions()->push_back(vec3(center.x + half_width, center.y - half_height, 0));
+	models[3]->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y - half_height - bottom_size, 0));
+	models[3]->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y - half_height - bottom_size, 0));
+
+	for (int i = 0; i < 4; ++i) {
+		models[i]->getIndices()->push_back(0);
+		models[i]->getIndices()->push_back(3);
+		models[i]->getIndices()->push_back(1);
+		models[i]->getIndices()->push_back(0);
+		models[i]->getIndices()->push_back(2);
+		models[i]->getIndices()->push_back(3);
+	}
+
+	genVAO();
+	genVBOS();
+	genIndexBuffer();
 }

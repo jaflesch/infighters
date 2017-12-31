@@ -160,7 +160,7 @@ public: // Getters and Setters
 	inline void setTitleCentered(bool value){ this->m_titleCentered = value; }
 
 	hm::vec2 getWindowBasePosition(float xoffset, float yoffset) const;
-	WindowShader* getWindowShader()const{ return m_windowShader; }
+	WindowShader* getWindowShader() { return m_windowShader; }
 };
 }
 

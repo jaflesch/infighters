@@ -26,8 +26,8 @@ void WindowShader::getUniformLocations()
 
 void WindowShader::update(hm::vec2& translation)
 {
-	float x = translation.x * 2.0f;
-	float y = -(translation.y * 2.0f);
+	float x = roundf(translation.x * 2.0f);
+	float y = roundf(-(translation.y * 2.0f));
 
 	float windowWidth = window_info.width;
 	float windowHeight = window_info.height;

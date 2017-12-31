@@ -246,7 +246,7 @@ static void layout_set_skill_group_from_skill(int skill_index, linked::Label* la
 static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label);
 static void layout_change_orb_amount(Orb_ID id, int amt);
 static void layout_change_exchange_orb_amount(Orb_ID id, int amt);
-static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs);
+static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs, bool selected);
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
 static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
 static void layout_set_timer_percentage(r32 percentage);

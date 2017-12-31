@@ -2,6 +2,7 @@
 //#include "Grid.h"
 #include "Primitive.h"
 #include "IndexedModel.h"
+#include "WindowApi/Window.h"
 
 bool Mesh::wireframe = false;
 bool Mesh::isGUI = false;
@@ -21,10 +22,15 @@ Mesh::Mesh(Quad* quad, bool dynamicDraw)
 
 	genVAO();
 	genVBOS(quad->getIndexedModel());
-	indicesSize = quad->getIndexedModel()->indices.size() * sizeof(float);
+	indicesSize = quad->getIndexedModel()->indices.size() * sizeof(unsigned int);
 	genIndexBuffer(quad->getIndexedModel());
 
 	this->referenceCount = 0;
+}
+
+Mesh::Mesh(Border* border) {
+	this->border = border;
+	this->openglDrawHint = GL_STATIC_DRAW;
 }
 
 Mesh::~Mesh()
@@ -42,6 +48,8 @@ Mesh::~Mesh()
 
 	if (quad != NULL)
 		delete quad;
+	if (border != NULL)
+		delete border;
 	if (indexedModel != nullptr && quad == NULL)
 	{
 		delete indexedModel;
@@ -98,30 +106,52 @@ void Mesh::genIndexBuffer(IndexedModel* iModel)
 
 void Mesh::render()
 {
-	glBindVertexArray(VertexArrayID);
+	if (quad) {
+		glBindVertexArray(VertexArrayID);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
 
-	if (wireframe && !isGUI)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	else
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		if (wireframe && !isGUI)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glDrawElements(GL_TRIANGLES, indicesSize / sizeof(float), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, indicesSize / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
-	glDisableVertexAttribArray(2);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(2);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(0);
+	}
+	else if (border) {
+		for (int i = 0; i < 4; ++i) {
+			
+			hm::vec4 color = border->getColor(i);
+			glUniform4fv(linked::Window::m_windowShader->getUniformTextColor(), 1, &color.x);
+
+			glBindVertexArray(border->VertexArrayID[i]);
+
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(2);
+
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			glDisableVertexAttribArray(2);
+			glDisableVertexAttribArray(1);
+			glDisableVertexAttribArray(0);
+		}
+	}
 }
 
 Quad* Mesh::getQuad()
 {
-	if (quad == NULL)
-		return NULL;
-	else
-		return quad;
+	return quad;
+}
+
+Border* Mesh::getBorder() {
+	return border;
 }
 
 int& Mesh::getReferenceCount()

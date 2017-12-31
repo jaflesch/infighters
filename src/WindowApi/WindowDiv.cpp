@@ -25,6 +25,8 @@ namespace linked
 		handleDivHints(hints);
 		divMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), (float)width, (float)height), true);
 		m_opacity = 1.0f;
+
+		borderMesh = 0;// new Mesh(new Border(hm::vec3(0, 0, 0), width * 2, height * 2, 2.0f, 2.0f, 2.0f, 2.0f));
 	}
 
 	void WindowDiv::render()
@@ -43,27 +45,34 @@ namespace linked
 			ws->clipTL = m_window.getWindowBasePosition(0, 0);
 			ws->clipBR = m_window.getWindowBasePosition((float)m_window.getWidth(), (float)m_window.getHeight());
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+			
 			// Prepare the div and render it
 			ws->setTextColor(m_backGroundColor);
 			if (m_backgroundTexture != nullptr)
 				ws->bindTextures(m_backgroundTexture->textureID);
-		
+			
 			hm::vec2 rp = getRelativePosition();
 			float ww_ = roundf(window_info.width / 2.0f);
 			float wh_ = roundf(window_info.height / 2.0f);
 			rp.x /= ww_;
 			rp.y /= wh_;
-
+			
 			ws->setOpacity(m_opacity);
 			hm::vec2 relative_pos = getRelativePosition();
 			ws->update(relative_pos);
 			divMesh->render();
 			ws->setOpacity(1.0f);
-		
+
+			//if (borderMesh) {
+			//	ws->useTexture = 0;
+			//	borderMesh->render();
+			//}
+
 			if (m_backgroundTexture != nullptr)
 				ws->unbindTextures();
+
 		}
+
 		for (Button* b : buttons)
 		{
 			hm::vec2 v = getRelativePosition();
@@ -78,9 +87,19 @@ namespace linked
 			b->getButtonMesh().render();
 			ws->setOpacity(1.0f);
 		
+			// renderizar botao aqui da um efeito interessante
+
 			if (b->getBackgroundTexture() != nullptr)
 				ws->unbindTextures();
 		}
+
+		hm::vec2 relative_pos = getRelativePosition();
+		ws->update(relative_pos);
+		if (borderMesh) {
+			ws->useTexture = 0;
+			borderMesh->render();
+		}
+
 		if (m_backgroundTexture != nullptr)
 			ws->unbindTextures();
 		ws->deactivateAlphaBlend();
@@ -214,5 +233,8 @@ namespace linked
 		}
 		return false;
 	}
-}
 
+	void WindowDiv::createBorder(float l, float r, float t, float b) {
+		borderMesh = new Mesh(new Border(hm::vec3(0, 0, 0), m_width * 2, m_height * 2, l * 2, r * 2, t * 2, b * 2));
+	}
+}

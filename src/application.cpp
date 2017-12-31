@@ -531,6 +531,11 @@ hm::vec4 greener_cyan(0, 1, 0.7f, 1);
 hm::vec4 color_red(1, 0, 0, 1);
 hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
 hm::vec4 cyan(0.0f, 1.0f, 1.0f, 1.0f);
+hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
+hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
+hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
+hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
+hm::vec4 enemy_color(1, 0.71f, 0.29f, 1.0f);
 
 static SOCKET * connection;
 static client_info * player;
@@ -541,7 +546,8 @@ static void button_select_character(void* arg) {
 
 	auto divs = (std::vector<linked::WindowDiv*>*)((linked::Button_Info*)arg)->data;
 	int id = ((linked::Button_Info*)arg)->id;
-	bool selected = (*divs)[id * 3 + 1]->m_render;
+	bool selected = (*divs)[id]->getButtons()[0]->getIsToggled();
+
 	// update game state
 	if (selected) {
 		char_sel_state.num_selected -= 1;
@@ -564,12 +570,13 @@ static void button_select_character(void* arg) {
 		char_sel_state.selections[2] = id;
 #else
 		// replace the last selected
-		layout_toggle_char_selection(char_sel_state.selections[NUM_ALLIES - 1], divs);
+		layout_toggle_char_selection(char_sel_state.selections[NUM_ALLIES - 1], divs, selected);
+		(*divs)[char_sel_state.selections[NUM_ALLIES - 1]]->getButtons()[0]->toggle();
 		char_sel_state.selections[NUM_ALLIES - 1] = id;
 #endif
 	}
-
-	layout_toggle_char_selection(id, divs);
+	(*divs)[id]->getButtons()[0]->toggle();
+	layout_toggle_char_selection(id, divs, !selected);
 }
 
 static void temporary_modify_orbs(Skill_ID skill_used, s32 add);
@@ -1113,6 +1120,12 @@ void init_char_selection_mode()
 	left_char_window->divs.push_back(left_char_div);
 	char_sel_state.last_hovered = CHAR_NONE;
 	linked::WindowDiv* left_char_name_div = new linked::WindowDiv(*left_char_window, 400, 110, 0, 0, hm::vec2(0, 220), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.65f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_LEFT);
+	linked::Button* arrow_up_char_select = new linked::Button(*left_char_name_div, 0, hm::vec2(30, 20), 24, 24, hm::vec4(1, 0, 0, 1), 0);
+	linked::Button* arrow_down_char_select = new linked::Button(*left_char_name_div, 0, hm::vec2(30, 65), 24, 24, hm::vec4(1, 0, 0, 1), 0);
+	arrow_up_char_select->setAllBGTexture(new Texture("../../../res/orbs/arrow_pink_up.png"));
+	arrow_down_char_select->setAllBGTexture(new Texture("../../../res/orbs/arrow_pink_down.png"));
+	left_char_name_div->getButtons().push_back(arrow_up_char_select);
+	left_char_name_div->getButtons().push_back(arrow_down_char_select);
 	
 	linked::Label* left_char_name_label = new linked::Label(*left_char_name_div, (u8*)"", sizeof "", hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_38, 0, 0);
 	left_char_name_div->getLabels().push_back(left_char_name_label);
@@ -1131,6 +1144,12 @@ void init_char_selection_mode()
 	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	s_div1->createBorder(1, 1, 1, 1);
+	s_div1->setBorderColor(cyan);
+	s_div2->createBorder(1, 1, 1, 1);
+	s_div2->setBorderColor(cyan);
+	s_div3->createBorder(1, 1, 1, 1);
+	s_div3->setBorderColor(cyan);
 	char_selected_window->divs.push_back(s_div1);
 	char_selected_window->divs.push_back(s_div2);
 	char_selected_window->divs.push_back(s_div3);
@@ -1233,18 +1252,8 @@ void init_char_selection_mode()
 			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
 			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		char_selection_window->divs.push_back(char_divs[i]);
-
-		linked::WindowDiv* select_div_l = new linked::WindowDiv(*char_selection_window, 5.0f, char_window_height, 0.0f, 0.0f,
-			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
-			hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-		char_selection_window->divs.push_back(select_div_l);
-		select_div_l->m_render = false;
-
-		linked::WindowDiv* select_div_r = new linked::WindowDiv(*char_selection_window, 5.0f, char_window_height, 0.0f, 0.0f,
-			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x + char_window_width - 5.0f, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
-			hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-		char_selection_window->divs.push_back(select_div_r);
-		select_div_r->m_render = false;		
+		char_divs[i]->createBorder(-5, -5, -5, -5);
+		char_divs[i]->setBorderColor(hm::vec4(0, 1, 1, 0));
 
 		char_div_offset_x += 1.0f;
 		if (i + 1 == NUM_CHARS / 2) {
@@ -1279,6 +1288,19 @@ void init_char_information_mode()
 	linked::Window* char_info_window_bot = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
 	gw.char_info_window_bot = char_info_window_bot;
 
+	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	s_div1->createBorder(1, 1, 1, 1);
+	s_div1->setBorderColor(cyan);
+	s_div2->createBorder(1, 1, 1, 1);
+	s_div2->setBorderColor(cyan);
+	s_div3->createBorder(1, 1, 1, 1);
+	s_div3->setBorderColor(cyan);
+	char_info_window_bot->divs.push_back(s_div1);
+	char_info_window_bot->divs.push_back(s_div2);
+	char_info_window_bot->divs.push_back(s_div3);
+
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_info_window_bot, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	Texture* esc_texture = new Texture("../../../res/textures/esc.png");
 	back_div->setBackgroundTexture(esc_texture);
@@ -1290,12 +1312,15 @@ void init_char_information_mode()
 	back_label_div->getLabels().push_back(back_label);
 	
 
+	float start_offset_x = 85.0f;
+
 	linked::WindowDiv* skills_divs[NUM_SKILLS] = {};
 	float char_div_offset_x = 0.0f;
 	float char_div_offset_y = 0.0f;
+	float skills_spacing = 30.0f;
 	for (int i = 0; i < NUM_SKILLS; ++i) {
 		skills_divs[i] = new linked::WindowDiv(*char_info_window, char_window_width, char_window_height, 0.0f, 0.0f,
-			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
+			hm::vec2(start_offset_x + skills_spacing * char_div_offset_x + char_window_width * char_div_offset_x, skills_spacing * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
 			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		char_info_window->divs.push_back(skills_divs[i]);
 
@@ -1308,18 +1333,18 @@ void init_char_information_mode()
 	}
 
 	// gotta be first
-	linked::WindowDiv* skill_title_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 35.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_title_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(start_offset_x, 140.0f + 55.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window->divs.push_back(skill_title_div);
 	linked::Label* skill_title_label = new linked::Label(*skill_title_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1,1,1,1), FONT_OSWALD_REGULAR_18, 0, 0);
 	skill_title_div->getLabels().push_back(skill_title_label);
 
 	// gotta be second
-	linked::WindowDiv* skill_desc_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(25.0f, 140.0f + 85.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_desc_div = new linked::WindowDiv(*char_info_window, 300, 48, 0, 0, hm::vec2(start_offset_x, 140.0f + 105.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	char_info_window->divs.push_back(skill_desc_div);
 	linked::Label* skill_desc_label = new linked::Label(*skill_desc_div, (u8*)"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_16, 0, 0);
 	skill_desc_div->getLabels().push_back(skill_desc_label);
 
-	linked::Window* skill_cost = new linked::Window(300, 48, hm::vec2(530 + 320, 20 + char_window_width + 20 * 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
+	linked::Window* skill_cost = new linked::Window(300, 48, hm::vec2(530 + 580, 40 + char_window_width + 20 * 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
 	gw.char_info_skill_cost = skill_cost;
 
 	float orb_size = 32.0f;
@@ -1334,7 +1359,7 @@ void init_char_information_mode()
 	linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 4, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_5);
 
-	linked::WindowDiv* skill_group_div = new linked::WindowDiv(*char_info_window, 640, 48, 0, 0, hm::vec2(25.0f, 630.0f - 48.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_group_div = new linked::WindowDiv(*char_info_window, 640, 48, 0, 0, hm::vec2(start_offset_x, 630.0f - 48.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	gw.skill_group_div = skill_group_div;
 	char_info_window->divs.push_back(skill_group_div);
 	linked::Label* skill_group_label = new linked::Label(*skill_group_div, (u8*)/*"VIRTUAL, RANGED, INV, STATIC"*/"", 0, hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_12, 0, 0);
@@ -1439,11 +1464,6 @@ void init_combat_mode()
 	orb_textures[ORB_VR]   = new Texture("../../../res/orbs/vr_orb.png");
 	orb_textures[ORB_BIOS] = new Texture("../../../res/orbs/bios_orb.png");
 	orb_textures[ORB_NULL] = new Texture("../../../res/orbs/null_orb.png");
-
-	hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
-	hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
-	hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
-	hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
 	
 	{
 		// Players Names
@@ -1724,11 +1744,9 @@ void init_combat_mode()
 		gw.combat_bottom_info = combat_bottom_info;
 
 		float skill_desc_height = 40.0f;
-		linked::WindowDiv* skill_image_div_border = new linked::WindowDiv(*combat_bottom_info, 126, 126, 0, 0, hm::vec2(640.0f - 3, skill_desc_height - 3), greener_cyan, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-		combat_bottom_info->divs.push_back(skill_image_div_border);
 		linked::WindowDiv* skill_image_div = new linked::WindowDiv(*combat_bottom_info, 120, 120, 0, 0, hm::vec2(640.0f, skill_desc_height), hm::vec4(0, 1, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		skill_image_div->createBorder(3, 3, 3, 3);
 		combat_bottom_info->divs.push_back(skill_image_div);
-		skill_image_div_border->m_render = false;
 		skill_image_div->m_render = false;
 
 		linked::WindowDiv* skill_title_div = new linked::WindowDiv(*combat_bottom_info, 300, 48, 0, 0, hm::vec2(780.0f, skill_desc_height), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -1776,7 +1794,7 @@ void init_combat_mode()
 		combat_state.skill_costs[4] = skill_cost_div_5;
 
 		combat_state.skill_info_image = skill_image_div;
-		combat_state.skill_info_image_border = skill_image_div_border;
+		//combat_state.skill_info_image_border = skill_image_div_border;
 		combat_state.skill_info_title = skill_title_div;
 		combat_state.skill_info_desc = skill_desc_div;
 		combat_state.skill_info_group = skill_group_div;
@@ -2150,8 +2168,8 @@ void update_game_mode(double frametime)
 				char_sel_state.play_button_div->m_render = false;
 
 			for (int i = 0; i < NUM_CHARS; ++i) {
-				if (gw.char_selection_window->divs[i * 3]->isButtonHovered()) {
-					Texture* char_tex = (Texture*)gw.char_selection_window->divs[i * 3]->getButtons()[0]->getNormalBGTexture();
+				if (gw.char_selection_window->divs[i]->isButtonHovered()) {
+					Texture* char_tex = (Texture*)gw.char_selection_window->divs[i]->getButtons()[0]->getNormalBGTexture();
 					gw.left_char_window->divs[0]->setBackgroundTexture(chars_texture_big[i]);
 					linked::Label* name_label = gw.left_char_window->divs[1]->getLabels()[0];
 					name_label->setText((u8*)char_names[i], char_names_length[i]);
@@ -2188,6 +2206,7 @@ void update_game_mode(double frametime)
 					for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
 						gw.char_info_skill_cost->divs[n]->m_render = false;
 					}
+					int n_ = 0;
 					for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
 						int cost = skill_costs[index][n];
 						while (cost > 0) {
@@ -2195,10 +2214,21 @@ void update_game_mode(double frametime)
 							gw.char_info_skill_cost->divs[orb_index]->m_render = true;
 							gw.char_info_skill_cost->divs[orb_index++]->setBackgroundTexture(orb_textures[n]);
 							cost--;
+							n_++;
 						}
 					}
+					hm::vec2 pos_ = gw.char_info_skill_cost->getPosition();
+					pos_.x = 630.0f - n_ * (32.0f + 5.0f);
+					gw.char_info_skill_cost->setPosition(pos_);
 					break;
 				}
+			}
+			for (int i = 0; i < NUM_ALLIES; ++i) {
+				if (i < char_sel_state.num_selected) {
+					gw.char_info_window_bot->divs[i]->m_render = true;
+					gw.char_info_window_bot->divs[i]->setBackgroundTexture(char_textures[char_sel_state.selections[i]]);
+				} else
+					gw.char_info_window_bot->divs[i]->m_render = false;
 			}
 		}break;
 		case MODE_COMBAT: {
@@ -2240,6 +2270,7 @@ void update_game_mode(double frametime)
 					//printf("Ally %d hovered!\n", i);
 					int char_index = char_sel_state.selections[i];
 					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
+					combat_state.skill_info_image->setBorderColor(hm::vec4(greener_cyan));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
 					is_hovering_char = true;
@@ -2250,6 +2281,7 @@ void update_game_mode(double frametime)
 							//printf("skill %d of ally %d hovered\n", k, i);
 							int skill_index = char_sel_state.selections[i] * NUM_SKILLS + k;
 							combat_state.skill_info_image->setBackgroundTexture(skill_textures[skill_index]);
+							combat_state.skill_info_image->setBorderColor(greener_cyan);
 							combat_state.skill_info_title->getLabels()[0]->setText((u8*)skill_names[skill_index], skill_names_length[skill_index]);
 							combat_state.skill_info_desc->getLabels()[0]->setText((u8*)skill_desc[skill_index], skill_desc_length[skill_index]);
 							layout_set_skill_group_from_skill(skill_index, combat_state.skill_info_group->getLabels()[0]);
@@ -2278,6 +2310,7 @@ void update_game_mode(double frametime)
 					//printf("Enemy %d hovered!\n", i);
 					int char_index = char_sel_state.enemy_selections[i];
 					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
+					combat_state.skill_info_image->setBorderColor(hm::vec4(enemy_color));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
 					is_hovering_char = true;
@@ -2288,7 +2321,6 @@ void update_game_mode(double frametime)
 				for (int i = 0; i < ORB_NUMBER; ++i)
 					combat_state.skill_costs[i]->m_render = false;
 			}
-			combat_state.skill_info_image_border->m_render = is_hovering_skill;
 			combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
@@ -2467,24 +2499,23 @@ void input()
 }
 
 // Layout functions
-static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs)
+static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs, bool selected)
 {
 	// update the selection screen
-	bool notselected = (*divs)[id * 3 + 1]->m_render = !(*divs)[id * 3 + 1]->m_render;
-	(*divs)[id * 3 + 2]->m_render = !(*divs)[id * 3 + 2]->m_render;
 	hm::vec4 selected_color;
 	hm::vec4 selected_bg_color;
-	if (notselected) {
+	if (selected) {
 		selected_bg_color = char_selected_bg_color;
 		selected_color = char_window_hover_color;
-	}
-	else {
+		(*divs)[id]->setBorderColor(cyan);
+	} else {
 		selected_bg_color = char_window_color;
 		selected_color = hm::vec4(0, 0, 0, 1);
+		(*divs)[id]->setBorderColor(hm::vec4(0,0,0,0));
 	}
 
-	(*divs)[id * 3]->getButtons()[0]->setNormalBGColor(selected_color);
-	(*divs)[id * 3]->setBackgroundColor(selected_bg_color);
+	(*divs)[id]->getButtons()[0]->setNormalBGColor(selected_color);
+	(*divs)[id]->setBackgroundColor(selected_bg_color);
 }
 
 static void layout_enemy_die(u32 enemy_index) {
