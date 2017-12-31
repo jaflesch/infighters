@@ -1638,7 +1638,7 @@ void init_combat_mode()
 		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), enem_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(hpempty);
 		
-		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(-x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_RIGHT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(hpfilled);
 		
 		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -1770,15 +1770,15 @@ void init_combat_mode()
 		skill_desc_div->m_render = false;
 
 		float orb_size = 32.0f;
-		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_1);
-		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_2);
-		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_3);
-		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_4);
-		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1100.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_5);
 
 		skill_cost_div_1->m_render = false;
@@ -1958,12 +1958,12 @@ void init_combat_mode()
 	{
 		// Status stuff
 		Texture* default_status = new Texture("../../../res/status/status_default.png");
-		g_layout_status.status_images[SKILL_CONDITION_BURN] = new Texture("../../../res/status/status_burn.png");
-		g_layout_status.status_images[SKILL_CONDITION_FREEZE] = new Texture("../../../res/status/status_freeze.png");
-		g_layout_status.status_images[SKILL_CONDITION_POISON] = new Texture("../../../res/status/status_poison.png");
-		g_layout_status.status_images[SKILL_CONDITION_PARALYZE] = new Texture("../../../res/status/status_paralyze.png");
-		g_layout_status.status_images[SKILL_CONDITION_SLEEP] = new Texture("../../../res/status/status_sleep.png");
-		g_layout_status.status_images[SKILL_CONDITION_STUN] = new Texture("../../../res/status/status_stun.png");
+		g_layout_status.status_images[SKILL_CONDITION_BURN] = new Texture("../../../res/status/burn.png");
+		g_layout_status.status_images[SKILL_CONDITION_FREEZE] = new Texture("../../../res/status/freeze.png");
+		g_layout_status.status_images[SKILL_CONDITION_POISON] = new Texture("../../../res/status/poison.png");
+		g_layout_status.status_images[SKILL_CONDITION_PARALYZE] = new Texture("../../../res/status/paralyze.png");
+		g_layout_status.status_images[SKILL_CONDITION_SLEEP] = new Texture("../../../res/status/sleep.png");
+		g_layout_status.status_images[SKILL_CONDITION_STUN] = new Texture("../../../res/status/stun.png");
 	}
 }
 
@@ -2318,8 +2318,9 @@ void update_game_mode(double frametime)
 				}
 			}
 			if (!is_hovering_skill) {
-				for (int i = 0; i < ORB_NUMBER; ++i)
+				for (int i = 0; i < ORB_NUMBER; ++i) {
 					combat_state.skill_costs[i]->m_render = false;
+				}
 			}
 			combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
