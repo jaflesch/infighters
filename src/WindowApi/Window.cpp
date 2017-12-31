@@ -12,6 +12,7 @@ std::vector<linked::Window*> linked::Window::backgroundWindows;
 FontShader* linked::Window::m_textShader = nullptr;
 WindowShader* linked::Window::m_windowShader = nullptr;
 bool linked::Window::update_background = true;
+int linked::Window::id_gen = 0;
 
 namespace linked {
 
@@ -27,6 +28,8 @@ Window::Window(
 	m_backgroundColor(backgroundColor),
 	m_attached(false)
 {
+	id = Window::id_gen;
+	Window::id_gen += 1;
 	m_windowShader->setTextColor(this->m_backgroundColor);
 	m_windowMesh = new Mesh(new Quad(hm::vec3(0, 0, 0), (float)width, (float)height), true);
 
@@ -280,7 +283,7 @@ void Window::attachMouse()
 				thisIndex = i;
 				break;
 			}
-			if (openedWindows[i]->isHovered())
+			if (openedWindows[i]->isHovered() && openedWindows[i]->m_active)
 				return;
 		}
 

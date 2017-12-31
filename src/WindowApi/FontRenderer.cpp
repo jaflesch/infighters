@@ -180,6 +180,7 @@ TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, floa
 	return result;
 }
 */
+
 TextInfo FontRenderer::RenderText(std::string text, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat)
 {
 	TextInfo info;

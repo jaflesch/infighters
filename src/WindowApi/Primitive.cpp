@@ -154,15 +154,19 @@ IndexedModel* Quad::getIndexedModel()
 
 void Border::genVAO()
 {
-	glGenVertexArrays(4, VertexArrayID);
+	//glGenVertexArrays(4, VertexArrayID);
+	for(int i = 0; i < 4; ++i)
+		glGenVertexArrays(1, &VertexArrayID[i]);
 }
 
 void Border::genVBOS()
 {
 	// Vertex Data
-	glGenBuffers(4, VertexBufferID);
+	//glGenBuffers(4, VertexBufferID);
+
 	for (int i = 0; i < 4; ++i) {
 		glBindVertexArray(VertexArrayID[i]);
+		glGenBuffers(1, &VertexBufferID[i]);
 		glBindBuffer(GL_ARRAY_BUFFER, VertexBufferID[i]);
 		glBufferData(GL_ARRAY_BUFFER, models[i]->positions.size() * sizeof(float) * 3, &models[i]->positions[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
@@ -173,9 +177,10 @@ void Border::genVBOS()
 
 void Border::genIndexBuffer()
 {
-	glGenBuffers(4, IndexBufferID);
+	//glGenBuffers(4, IndexBufferID);
 	for (int i = 0; i < 4; ++i) {
 		glBindVertexArray(VertexArrayID[i]);
+		glGenBuffers(1, &IndexBufferID[i]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferID[i]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, models[i]->indices.size() * sizeof(unsigned int), &models[i]->indices[0], GL_STATIC_DRAW);
 	}

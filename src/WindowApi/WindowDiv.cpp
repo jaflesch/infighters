@@ -93,11 +93,13 @@ namespace linked
 				ws->unbindTextures();
 		}
 
-		hm::vec2 relative_pos = getRelativePosition();
-		ws->update(relative_pos);
-		if (borderMesh) {
-			ws->useTexture = 0;
-			borderMesh->render();
+		if (m_render) {
+			hm::vec2 relative_pos = getRelativePosition();
+			ws->update(relative_pos);
+			if (borderMesh) {
+				ws->useTexture = 0;
+				borderMesh->render();
+			}
 		}
 
 		if (m_backgroundTexture != nullptr)

@@ -101,6 +101,8 @@ private:
 	bool m_attached;					// Mouse related
 	hm::vec2 m_cursorPosWhenAttached;	// -
 	hm::vec2 m_posWhenAttached;		// -
+	static int id_gen;
+	int id;
 
 	bool h_resizeable, h_movable, h_header, h_closeButton,	// hints
 		h_scrollbar, h_border, h_focusable;								// -

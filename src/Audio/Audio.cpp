@@ -8,8 +8,10 @@ Audio::Audio(std::string path, AudioType type, unsigned int volume)
 	
 	if (type == AudioType::SOUND)
 	{
-		if (!this->buffer.loadFromFile(path))
-			throw ("Sound Error. Path: " + path);
+		if (!this->buffer.loadFromFile(path)) {
+
+			printf("Sound Error. Path: %s", path.c_str());
+		}
 
 		this->sound.setBuffer(buffer);
 		this->setVolume(volume);

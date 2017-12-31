@@ -1073,6 +1073,7 @@ void hide_all_windows() {
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
 	gw.exchange_orbs->setActive(false);
+	gw.null_orb_modal->setActive(false);
 }
 
 void init_intro_mode() {
@@ -1801,6 +1802,17 @@ void init_combat_mode()
 	}
 	
 	{
+		// Sacrifice Null orb Modal
+		linked::Window* null_orb_modal = new linked::Window(440, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Sacrifice Orb", sizeof "  Sacrifice Orb",
+			linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
+		null_orb_modal->setBorderColor(greener_cyan);
+		null_orb_modal->setTitleColor(char_window_color);
+		null_orb_modal->setTitleCentered(true);
+		null_orb_modal->setActive(false);
+		gw.null_orb_modal = null_orb_modal;
+	}
+
+	{
 		// Multiple Orb Modal
 		linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
 			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
@@ -2008,6 +2020,9 @@ void init_combat_state() {
 		combat_state.player.targets[k].skill_used = SKILL_NONE;
 		combat_state.player.targets[k].attacking_character = CHAR_NONE;
 	}
+
+	// @Temporary
+	gw.null_orb_modal->setActive(true);
 }
 
 void init_application()

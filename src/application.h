@@ -383,6 +383,7 @@ struct Game_Windows {
 	linked::WindowDiv* allies_indicator[NUM_ALLIES];
 	linked::WindowDiv* enemies_indicator[NUM_ENEMIES];
 	linked::Window* exchange_orbs;
+	linked::Window* null_orb_modal;
 
 	// combat target
 	linked::Window* enemy_target[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];

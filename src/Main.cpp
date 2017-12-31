@@ -57,8 +57,6 @@ extern Font_ID fonts[32];
 #define DEFAULT_FONT "../../../res/fonts/Oswald-Regular.ttf"
 #define OSWALD_LIGHT "../../../res/fonts/Oswald-Light.ttf"
 
-Mesh* mesh = 0;
-
 void application_state_init()
 {
 	linked::Window::linkedWindowInit();
@@ -84,15 +82,6 @@ void application_state_init()
 	fonts[FONT_OSWALD_REGULAR_38] = load_font(OSWALD_LIGHT, 38, false);
 
 	init_application();
-	/*
-	Border* border = new Border(hm::vec3(0, 0, 0), 500, 500, 10, 10, 10, 10);
-	border->setLeftColor(hm::vec4(0, 0, 0, 1));
-	border->setRightColor(hm::vec4(0, 0, 1, 1));
-	border->setTopColor(hm::vec4(0, 1, 0, 1));
-	border->setBottomColor(hm::vec4(1, 0, 0, 1));
-	mesh = new Mesh(border);
-	*/
-
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 	glDisable(GL_CULL_FACE);
 }
@@ -103,16 +92,6 @@ void application_state_update(double frametime)
 	
 	linked::Window::updateWindows();
 	linked::Window::renderWindows();
-	/*
-	linked::Window::m_windowShader->useShader();
-	linked::Window::m_windowShader->activateAlphaBlend();
-	linked::Window::m_windowShader->clipTL = hm::vec2(-1, -1);
-	linked::Window::m_windowShader->clipBR = hm::vec2(window_info.width, window_info.height);
-	linked::Window::m_windowShader->setOpacity(1.0f);
-	linked::Window::m_windowShader->setTextColor(hm::vec4(1,1,1,1));
-	linked::Window::m_windowShader->update(hm::vec2(0, 0));
-	mesh->render();
-	*/
 }
 
 #ifdef _WIN64
