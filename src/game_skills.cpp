@@ -5,13 +5,13 @@ struct Skill_State {
 	s32 ddos_attack_duration;
 	s32 paricle_rendering_duration;
 	s32 neural_network_duration;
-	s32 tautology_active_target = -1;
 
 	Skill_ID cooldowns[SKILL_NUMBER];
 };
 
 struct Skill_Counter {
 	s32 contradiction_target = -1;
+	s32 tautology_target = -1;
 };
 
 static Skill_State skill_state_ally = { };
@@ -47,7 +47,9 @@ s32 calculate_enemy_damage_reduction(int target_index, int damage, Skill_Damage 
 			return -damage;
 		if (reduction & SKILL_DEF_INVULNERABILITY) {
 			u32 type = combat_state->enemy.reduction_type[target_index];
-			Skill_Group sgroup;
+			if (id == SKILL_BRUTE_FORCE) {
+				return 10;
+			}
 			if (type & SKILL_TYPE_PHYSICAL && skill_groups[target_index * NUM_CHARS].type == SKILL_TYPE_PHYSICAL)
 				return 0;
 			if (type & SKILL_TYPE_MENTAL && skill_groups[target_index * NUM_CHARS].type == SKILL_TYPE_MENTAL)
@@ -247,6 +249,8 @@ Status_Layout g_layout_status = {};
 void apply_status_to_enemy(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
 	combat_state->enemy.status[target_index] |= status;
 	combat_state->enemy.status_duration[target_index][status] = duration;
+
+	// Layout
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (g_layout_status.enemy_status[target_index][i] == SKILL_CONDITION_NONE) {
 			g_layout_status.enemy_status[target_index][i] = status;
@@ -257,6 +261,10 @@ void apply_status_to_enemy(s32 target_index, Skill_Condition status, s32 duratio
 }
 
 void remove_status_from_enemy(s32 target_index, Skill_Condition status, Combat_State* combat_state) {
+	combat_state->enemy.status[target_index] &= !status;
+	combat_state->enemy.status_duration[target_index][status] = 0;
+
+	// Layout
 	bool cascade_back = false;
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (cascade_back && g_layout_status.enemy_status[target_index][i]) {
@@ -277,6 +285,10 @@ void remove_status_from_enemy(s32 target_index, Skill_Condition status, Combat_S
 }
 
 void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
+	combat_state->player.status[target_index] |= status;
+	combat_state->player.status_duration[target_index][status] = duration;
+
+	// Layout
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (g_layout_status.ally_status[target_index][i] == SKILL_CONDITION_NONE) {
 			g_layout_status.ally_status[target_index][i] = status;
@@ -287,6 +299,10 @@ void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration
 }
 
 void remove_status_from_ally(s32 target_index, Skill_Condition status, Combat_State* combat_state) {
+	combat_state->player.status[target_index] &= !status;
+	combat_state->player.status_duration[target_index][status] = 0;
+
+	// Layout
 	bool cascade_back = false;
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (cascade_back && g_layout_status.ally_status[target_index][i]) {
@@ -323,15 +339,30 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_enemy.contradiction_target) {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
 			printf("enemy countered!\n");
-			deal_damage_to_target_enemy(source_index, 20, skill_groups[id].damage, id, combat_state);	// @check for infinite loop? infinite counters
-			// @todo apply paralyze
+			const int multiplier = 2;	// needed because it updates at the start of the player turn
+			deal_damage_to_target_enemy(source_index, 20, skill_groups[id].damage, id, combat_state);
+			apply_status_to_enemy(source_index, SKILL_CONDITION_PARALYZE, 1 * multiplier, combat_state);
 			return 0;
+		}
+		if (source_index == skill_counter_enemy.tautology_target) {
+			// sofre 15 de dano crushing
+			printf("enemy countered!\n");
+			deal_damage_to_target_enemy(source_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
 		}
 	} else {
 		// if the counter comes from ally, source_index gotta be checked against skill_counter_ally
 		if (source_index == skill_counter_ally.contradiction_target) {
 			// ally source receives 20 dmg, do nothing and receive status paralyze
 			printf("ally countered!\n");
+			const int multiplier = 2;	// needed because it updates at the start of the player turn
+			deal_damage_to_target_ally(source_index, 20, skill_groups[id].damage, id, combat_state);
+			apply_status_to_ally(source_index, SKILL_CONDITION_PARALYZE, 1 * multiplier, combat_state);
+			return 0;
+		}
+		if (source_index == skill_counter_ally.tautology_target) {
+			// sofre 15 de dano crushing
+			printf("ally countered!\n");
+			deal_damage_to_target_ally(source_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
 		}
 	}
 
@@ -362,33 +393,37 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// One
 		case SKILL_TRUTH_SLASH: {
-			// @todo account for reductions
 			deal_damage_to_target(target_index, 30, SKILL_DMG_NORMAL, id, combat_state);
 		}break;
 		case SKILL_TAUTOLOGY: {
-			// @todo account for reductions
 			deal_damage_to_target(target_index, 15, SKILL_DMG_NORMAL, id, combat_state);
-			skill_state->tautology_active_target = target_index;
+			if (from_enemy) {
+				skill_counter_ally.tautology_target = target_index;
+			} else {
+				skill_counter_enemy.tautology_target = target_index;
+			}
 		}break;
 
 		// Serial Keyller
 		case SKILL_BRUTE_FORCE: {
 			int damage = 20;
-			if (combat_state->enemy.reduction[target_index] == SKILL_DEF_INVULNERABILITY)
-				damage = 10;
-			deal_damage_to_target(target_index, damage, SKILL_DMG_NORMAL, id, combat_state);	// @todo when invul do 10
+			deal_damage_to_target(target_index, damage, SKILL_DMG_NORMAL, id, combat_state);
 		}break;
 		case SKILL_BUFFER_OVERFLOW: {
 			deal_damage_to_target(target_index, 15, SKILL_DMG_PIERCING, id, combat_state);
-			// @todo account for counters?
-			combat_state->enemy.status[target_index] |= SKILL_CONDITION_STUN;
-			combat_state->enemy.status_duration[target_index][SKILL_CONDITION_STUN] = 1;
+			if (from_enemy) {
+				apply_status_to_ally(target_index, SKILL_CONDITION_STUN, 1, combat_state);
+			} else {
+				apply_status_to_enemy(target_index, SKILL_CONDITION_STUN, 1, combat_state);
+			}
 		}break;
 		case SKILL_DDOS_ATTACK: {
-			// @todo account for counters?
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				combat_state->enemy.status[i] |= SKILL_CONDITION_PARALYZE;
-				combat_state->enemy.status_duration[i][SKILL_CONDITION_PARALYZE] = 3;
+				if (from_enemy) {
+					apply_status_to_ally(i, SKILL_CONDITION_PARALYZE, 3, combat_state);
+				} else {
+					apply_status_to_enemy(i, SKILL_CONDITION_PARALYZE, 3, combat_state);
+				}
 			}
 		}break;
 
@@ -600,18 +635,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	return 0;
 }
 
-void update_skill_state(Combat_State* combat_state) {
-	if(skill_state_ally.requiem_duration > 0)
-		skill_state_ally.requiem_duration -= 1;
-	if(skill_state_ally.axiom_one_duration > 0)
-		skill_state_ally.axiom_one_duration -= 1;
-	if (skill_state_ally.ddos_attack_duration > 0)
-		skill_state_ally.ddos_attack_duration -= 1;
-	if (skill_state_ally.paricle_rendering_duration > 0)
-		skill_state_ally.paricle_rendering_duration -= 1;
-	if (skill_state_ally.neural_network_duration > 0)
-		skill_state_ally.neural_network_duration -= 1;
-
+void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 	if (skill_state_enemy.requiem_duration > 0)
 		skill_state_enemy.requiem_duration -= 1;
 	if (skill_state_enemy.axiom_one_duration > 0)
@@ -632,6 +656,23 @@ void update_skill_state(Combat_State* combat_state) {
 			}
 		}
 	}
+
+	skill_counter_enemy.tautology_target = -1;
+	skill_counter_enemy.contradiction_target = -1;
+}
+
+void update_skill_state_end_turn(Combat_State* combat_state) {
+	if (skill_state_ally.requiem_duration > 0)
+		skill_state_ally.requiem_duration -= 1;
+	if (skill_state_ally.axiom_one_duration > 0)
+		skill_state_ally.axiom_one_duration -= 1;
+	if (skill_state_ally.ddos_attack_duration > 0)
+		skill_state_ally.ddos_attack_duration -= 1;
+	if (skill_state_ally.paricle_rendering_duration > 0)
+		skill_state_ally.paricle_rendering_duration -= 1;
+	if (skill_state_ally.neural_network_duration > 0)
+		skill_state_ally.neural_network_duration -= 1;
+
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		for (int k = 0; k < SKILL_DEF_NUMBER; ++k) {
 			if (combat_state->player.reduction_duration[i][k] > 0) {
@@ -641,10 +682,30 @@ void update_skill_state(Combat_State* combat_state) {
 			}
 		}
 	}
-
-	skill_state_ally.tautology_active_target = -1;
-	skill_state_enemy.tautology_active_target = -1;
-
+	skill_counter_ally.tautology_target = -1;
 	skill_counter_ally.contradiction_target = -1;
-	skill_counter_enemy.contradiction_target = -1;
+}
+
+void update_status_end_enemy_turn(Combat_State* combat_state) {
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		for (int j = SKILL_CONDITION_BURN; j < SKILL_CONDITION_NUMBER; j <<= 1) {
+			if (combat_state->enemy.status_duration[i][j] > 0)
+				combat_state->enemy.status_duration[i][j] -= 1;
+			if (combat_state->enemy.status_duration[i][j] == 0) {
+				remove_status_from_enemy(i, (Skill_Condition)j, combat_state);
+			}
+		}
+	}
+}
+
+void update_status_end_turn(Combat_State* combat_state) {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int j = SKILL_CONDITION_BURN; j < SKILL_CONDITION_NUMBER; j <<= 1) {
+			if (combat_state->player.status_duration[i][j] > 0)
+				combat_state->player.status_duration[i][j] -= 1;
+			if (combat_state->player.status_duration[i][j] == 0) {
+				remove_status_from_ally(i, (Skill_Condition)j, combat_state);
+			}
+		}
+	}
 }

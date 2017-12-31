@@ -1084,10 +1084,21 @@ void init_intro_mode() {
 	play_button->setAllBGTexture(playbutton_hover);
 	play_button->setNormalBGTexture(playbutton_normal);
 	play_button->setHoveredTextColor(hm::vec4(1, 1, 1, 1));
-	play_button->setNormalTextColor(hm::vec4(245.0f / 255.0f, 28.0f / 255.0f, 194.0f / 255.0f, 1.0f));
+	play_button->setNormalTextColor(hm::vec4(1.0f, 0.91f, 0.95f, 1.0f));
 	play_button->setHoveredTextColor(hm::vec4(1.0f, 0.91f, 0.95f, 1.0f));
 	play_button->setClickedCallback(button_play_game);
 	logo_div->getButtons().push_back(play_button);
+
+	linked::Button* up_button = new linked::Button(*logo_div, 0, hm::vec2(logo->width / 2 - 230 / 2 + playbutton_normal->width / 2.0f - 12.0f, logo->height - 180.0f), 24, 24, hm::vec4(1, 0, 0, 1), 0);
+	linked::Button* down_button = new linked::Button(*logo_div, 0, hm::vec2(logo->width / 2 - 230 / 2 + playbutton_normal->width / 2.0f - 12.0f, logo->height - 60.0f), 24, 24, hm::vec4(1, 0, 0, 1), 0);
+	Texture* hovered_arrow_up = new Texture("../../../res/orbs/arrow_up_blue.png");
+	Texture* hovered_arrow_down = new Texture("../../../res/orbs/arrow_down_blue.png");
+	up_button->setAllBGTexture(hovered_arrow_up);
+	down_button->setAllBGTexture(hovered_arrow_down);
+	up_button->setNormalBGTexture(new Texture("../../../res/orbs/arrow_pink_up.png"));
+	down_button->setNormalBGTexture(new Texture("../../../res/orbs/arrow_pink_down.png"));
+	logo_div->getButtons().push_back(up_button);
+	logo_div->getButtons().push_back(down_button);
 }
 
 void init_char_selection_mode()
@@ -1713,7 +1724,7 @@ void init_combat_mode()
 		gw.combat_bottom_info = combat_bottom_info;
 
 		float skill_desc_height = 40.0f;
-		linked::WindowDiv* skill_image_div_border = new linked::WindowDiv(*combat_bottom_info, 126, 126, 0, 0, hm::vec2(640.0f - 3, skill_desc_height - 3), hm::vec4(0, 1, 1, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_image_div_border = new linked::WindowDiv(*combat_bottom_info, 126, 126, 0, 0, hm::vec2(640.0f - 3, skill_desc_height - 3), greener_cyan, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_image_div_border);
 		linked::WindowDiv* skill_image_div = new linked::WindowDiv(*combat_bottom_info, 120, 120, 0, 0, hm::vec2(640.0f, skill_desc_height), hm::vec4(0, 1, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_image_div);
@@ -2006,7 +2017,7 @@ void init_application()
 	gw.bgwindow = bgwindow;
 
 	char_sel_state.enemy_selections[0] = CHAR_BIG_O;
-	char_sel_state.enemy_selections[1] = CHAR_A_STAR;
+	char_sel_state.enemy_selections[1] = CHAR_ONE;
 	char_sel_state.enemy_selections[2] = CHAR_ZERO;
 
 	init_intro_mode();
@@ -2106,7 +2117,8 @@ void end_turn() {
 	// generate orbs if is player turn
 	combat_state.player_turn = !combat_state.player_turn;
 	if (combat_state.player_turn) {
-		update_skill_state(&combat_state);
+		update_skill_state_end_enemy_turn(&combat_state);
+		update_status_end_enemy_turn(&combat_state);
 		s32 num_alive = get_num_players_alive();
 		printf("Generated Orbs: ");
 		for (int i = 0; i < num_alive; ++i) {
@@ -2119,6 +2131,9 @@ void end_turn() {
 			printf("%d ");
 		}
 		printf("\n");
+	} else {
+		update_skill_state_end_turn(&combat_state);
+		update_status_end_turn(&combat_state);
 	}
 	
 	printf("SWITCH TURN\n");
@@ -2397,13 +2412,14 @@ void input()
 		keyboard_state.key_event[VK_F2] = false;
 		end_turn();
 	}
-
+#if 0
 	if (keyboard_state.key_event['P']) {
 		keyboard_state.key_event['P'] = false;
 		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_PARALYZE, &combat_state);
+			remove_status_from_ally(0, SKILL_CONDITION_PARALYZE, &combat_state);
 		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
+			//apply_status_to_enemy(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
+			apply_status_to_ally(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
 		}
 	}
 	if (keyboard_state.key_event['B']) {
@@ -2446,6 +2462,7 @@ void input()
 			apply_status_to_enemy(0, SKILL_CONDITION_STUN, 1, &combat_state);
 		}
 	}
+#endif
 	int x = 0;
 }
 
