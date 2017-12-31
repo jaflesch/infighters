@@ -1,3 +1,7 @@
 Axiom One - do the reduction of orbs
 
+Perceptron - add check for Neural Network active
+Neural Network - implement a way to check which enemies were hit
+
+
 

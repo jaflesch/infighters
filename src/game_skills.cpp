@@ -339,9 +339,9 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_enemy.contradiction_target) {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
 			printf("enemy countered!\n");
-			const int multiplier = 2;	// needed because it updates at the start of the player turn
+			const int extra = 1;	// needed because it updates at the start of the player turn
 			deal_damage_to_target_enemy(source_index, 20, skill_groups[id].damage, id, combat_state);
-			apply_status_to_enemy(source_index, SKILL_CONDITION_PARALYZE, 1 * multiplier, combat_state);
+			apply_status_to_enemy(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
 			return 0;
 		}
 		if (source_index == skill_counter_enemy.tautology_target) {
@@ -354,9 +354,9 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_ally.contradiction_target) {
 			// ally source receives 20 dmg, do nothing and receive status paralyze
 			printf("ally countered!\n");
-			const int multiplier = 2;	// needed because it updates at the start of the player turn
+			const int extra = 1;	// needed because it updates at the start of the player turn
 			deal_damage_to_target_ally(source_index, 20, skill_groups[id].damage, id, combat_state);
-			apply_status_to_ally(source_index, SKILL_CONDITION_PARALYZE, 1 * multiplier, combat_state);
+			apply_status_to_ally(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
 			return 0;
 		}
 		if (source_index == skill_counter_ally.tautology_target) {
@@ -432,13 +432,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			deal_damage_to_target(target_index, 15, SKILL_DMG_NORMAL, id, combat_state);
 			combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
 			combat_state->player.reduction_type[target_index] = SKILL_TYPE_PHYSICAL;
-			combat_state->player.reduction_duration[target_index][SKILL_DEF_INVULNERABILITY] = 1;
+			combat_state->player.reduction_duration[target_index][SKILL_DEF_INVULNERABILITY] = 1 + 1;
 		}break;
 		case SKILL_DIFFUSE_REFLECTION: {
 			for (int i = 0; i < NUM_ALLIES; ++i) {
 				combat_state->player.reduction[i] = SKILL_DEF_RELECTION;
 				combat_state->player.reduction_type[i] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-				combat_state->player.reduction_duration[i][SKILL_DEF_RELECTION] = 1;
+				combat_state->player.reduction_duration[i][SKILL_DEF_RELECTION] = 1 + 1;
 			}
 		}break;
 		case SKILL_DYNAMIC_FRUSTUM_ATTACK: {
@@ -461,7 +461,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			deal_damage_to_target(target_index, 25, SKILL_DMG_CRUSHING, id, combat_state);
 		}break;
 		case SKILL_NEURAL_NETWORK: {
-			skill_state->neural_network_duration = 4;
+			skill_state->neural_network_duration = 4 + 1;
 
 			combat_state->player.reduction[source_index] = SKILL_DEF_ABSORPTION;
 			combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
