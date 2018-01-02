@@ -16,7 +16,7 @@ Chat chat;
 linked::Window* chat_window = 0;
 
 Font_ID fonts[32] = {};
-//int x = 0;
+int x = 0;
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",

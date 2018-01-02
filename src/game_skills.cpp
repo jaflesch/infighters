@@ -659,17 +659,35 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			// @ ask wtf is CONTROL
 			// Caso ele tenha alguma habilidade com duração CONTROL, elimina a habilidade e este sofre status SLEEP por 2 turnos.
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
+			if (from_enemy) {
+
+			} else {
+
+			}
 		}break;
 		case SKILL_MUTEX: {
 			// @todo UNIQUE
 			// Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.
+			int random = rand() % (NUM_ENEMIES);
+			if (from_enemy) {
+				// @TODO chance stun to special condition
+				apply_status_to_ally(random, SKILL_CONDITION_STUN, 1, combat_state);
+			} else {
+				apply_status_to_enemy(random, SKILL_CONDITION_STUN, 1, combat_state);
+			}
 		}break;
 		case SKILL_THREAD_SCHEDULING: {
 			if (from_enemy) {
-				int random = rand() % (NUM_ALLIES + 1);
+				// @ gotta sent this via network
+				// random calculated on the sender
+#if MULTIPLAYER
+				int random = target_index;
+#else
+				int random = rand() % (NUM_ALLIES);
+#endif
 				apply_status_to_ally(random, SKILL_CONDITION_PARALYZE, 3, combat_state);
 			} else {
-				int random = rand() % (NUM_ENEMIES + 1);
+				int random = rand() % (NUM_ENEMIES);
 				apply_status_to_enemy(random, SKILL_CONDITION_PARALYZE, 3, combat_state);
 			}
 		}break;
