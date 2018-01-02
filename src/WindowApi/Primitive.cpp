@@ -252,6 +252,22 @@ void Border::genVBOS()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glDisableVertexAttribArray(0);
+
+	// Normals Data
+	glGenBuffers(1, &NormalsBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalsBufferID);
+	glBufferData(GL_ARRAY_BUFFER, model->normals.size() * sizeof(float) * 3, &model->normals[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glDisableVertexAttribArray(1);
+
+	// Texture Data
+	glGenBuffers(1, &TextureBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, TextureBufferID);
+	glBufferData(GL_ARRAY_BUFFER, model->texCoords.size() * sizeof(float) * 2, &model->texCoords[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glDisableVertexAttribArray(2);
 }
 
 void Border::genIndexBuffer()
@@ -291,6 +307,47 @@ Border::Border(hm::vec3 center, float width, float height, float left_size, floa
 	model->getPositions()->push_back(vec3(center.x + half_width, center.y - half_height, 0));
 	model->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y - half_height - bottom_size, 0));
 	model->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y - half_height - bottom_size, 0));
+
+	vec3 normal = vec3(0, 1, 0);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+	model->normals.push_back(normal);
+
+	model->texCoords.push_back(vec2(0, 0));	// 0
+	model->texCoords.push_back(vec2(1, 0));	// 1
+	model->texCoords.push_back(vec2(0, 1));	// 2
+	model->texCoords.push_back(vec2(1, 1));	// 3
+
+	model->texCoords.push_back(vec2(0, 0));	// 0
+	model->texCoords.push_back(vec2(1, 0));	// 1
+	model->texCoords.push_back(vec2(0, 1));	// 2
+	model->texCoords.push_back(vec2(1, 1));	// 3
+
+	model->texCoords.push_back(vec2(0, 0));	// 0
+	model->texCoords.push_back(vec2(1, 0));	// 1
+	model->texCoords.push_back(vec2(0, 1));	// 2
+	model->texCoords.push_back(vec2(1, 1));	// 3
+
+	model->texCoords.push_back(vec2(0, 0));	// 0
+	model->texCoords.push_back(vec2(1, 0));	// 1
+	model->texCoords.push_back(vec2(0, 1));	// 2
+	model->texCoords.push_back(vec2(1, 1));	// 3
 
 	model->indices.push_back(0);
 	model->indices.push_back(3);
