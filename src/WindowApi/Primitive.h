@@ -87,6 +87,8 @@ public:
 
 	GLuint VertexArrayID;
 	GLuint VertexBufferID;
+	GLuint NormalsBufferID;
+	GLuint TextureBufferID;
 	GLuint IndexBufferID;
 
 	IndexedModel* model;	// left right top bottom
