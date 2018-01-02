@@ -16,7 +16,7 @@ Chat chat;
 linked::Window* chat_window = 0;
 
 Font_ID fonts[32] = {};
-int x = 0;
+//int x = 0;
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",
@@ -506,8 +506,6 @@ Skill_Group skill_groups[NUM_SKILLS * NUM_CHARS] = {
 	{ SKILL_TYPE_PHYSICAL, SKILL_MODE_MELEE, SKILL_CATEGORY_NORMAL, SKILL_CONDITION_NONE, SKILL_DMG_NONE, SKILL_DEF_INVULNERABILITY, SKILL_DURATION_STATIC, SKILL_NOT_UNIQUE },
 };
 
-#include "game_skills.cpp"
-
 Texture* char_textures[NUM_CHARS] = {};
 Texture* chars_texture_big[NUM_CHARS] = {};
 Texture* skill_textures[NUM_SKILLS * NUM_CHARS] = {};
@@ -521,6 +519,8 @@ static GameState ggs = {};
 static Char_Selection_State char_sel_state = {};
 extern Combat_State combat_state = {};
 static Game_Windows gw = {};
+
+#include "game_skills.cpp"
 
 static double turn_time = TURN_DURATION;
 
@@ -862,6 +862,11 @@ static void button_skill(void* arg) {
 	int skill_id = (int)eba->id;
 	Skill_ID skill_used = (Skill_ID)(NUM_SKILLS * combat_state.player.char_id[char_id] + skill_id);
 
+	if (skill_used == SKILL_INHERITANCE) {
+		if(skill_state_ally.inheritance_copy != SKILL_NONE)
+			skill_used = skill_state_ally.inheritance_copy; // @temp test
+	}
+
 	if (combat_state.player.hp <= 0)
 		return;
 
@@ -922,6 +927,15 @@ static void button_skill(void* arg) {
 		combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
 
 		printf("Need %d", target.number);
+
+		// Special case, select instantly
+		if (skill_used == SKILL_BEST_BOUND_FIST) {
+			// find the enemy with least hp and target it
+			// linked::Button_Info info;
+			// info.id = enemy_index;
+			// info.this_button = gw.enemies[enemy_index]->divs[0]->getButtons()[0];
+			// target_enemy(&info);
+		}
 
 		if (target.enemy) {
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
@@ -1074,7 +1088,7 @@ void hide_all_windows() {
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
 	gw.exchange_orbs->setActive(false);
-	gw.null_orb_modal->setActive(false);
+	//gw.null_orb_modal->setActive(false);
 }
 
 void init_intro_mode() {
@@ -1803,6 +1817,7 @@ void init_combat_mode()
 	}
 	
 	{
+#if 0
 		// Sacrifice Null orb Modal
 		linked::Window* null_orb_modal = new linked::Window(440, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Sacrifice Orb", sizeof "  Sacrifice Orb",
 			linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
@@ -1811,6 +1826,7 @@ void init_combat_mode()
 		null_orb_modal->setTitleCentered(true);
 		null_orb_modal->setActive(false);
 		gw.null_orb_modal = null_orb_modal;
+#endif
 	}
 
 	{
@@ -1972,7 +1988,7 @@ void init_combat_mode()
 		// Status stuff
 		Texture* default_status = new Texture("../../../res/status/status_default.png");
 		g_layout_status.status_images[SKILL_CONDITION_BURN] = new Texture("../../../res/status/burn.png");
-		g_layout_status.status_images[SKILL_CONDITION_FREEZE] = new Texture("../../../res/status/freeze.png");
+		g_layout_status.status_images[SKILL_CONDITION_FREEZE] = new Texture("../../../res/status/frozen.png");
 		g_layout_status.status_images[SKILL_CONDITION_POISON] = new Texture("../../../res/status/poison.png");
 		g_layout_status.status_images[SKILL_CONDITION_PARALYZE] = new Texture("../../../res/status/paralyze.png");
 		g_layout_status.status_images[SKILL_CONDITION_SLEEP] = new Texture("../../../res/status/sleep.png");
@@ -2023,7 +2039,7 @@ void init_combat_state() {
 	}
 
 	// @Temporary
-	gw.null_orb_modal->setActive(true);
+	//gw.null_orb_modal->setActive(true);
 }
 
 void init_application()
@@ -2102,6 +2118,7 @@ static void apply_skills_and_send() {
 			continue;
 		
 		s32 target = -1;
+		bool target_enemy = true;
 		for (int k = 0; k < MAX(NUM_ALLIES, NUM_ENEMIES); ++k) {
 			s32 t = combat_state.player.targets[i].enemy_target_index[k];
 			if (t != -1)
@@ -2110,8 +2127,10 @@ static void apply_skills_and_send() {
 		if (target == -1) {
 			for (int k = 0; k < NUM_ALLIES; ++k) {
 				s32 t = combat_state.player.targets[i].ally_target_index[k];
-				if (t != -1)
+				if (t != -1) {
 					target = k;
+					target_enemy = false;
+				}
 			}
 		}
 
@@ -2121,7 +2140,7 @@ static void apply_skills_and_send() {
 			else
 				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true, false);
 		#else
-			execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
+			execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, target_enemy);
 		#endif
 	}
 	combat_state_reset_all_targets();
@@ -2134,6 +2153,14 @@ static s32 get_num_players_alive() {
 			count++;
 	}
 	return count;
+}
+
+static void add_orb(Orb_ID orb_type, s32 count) {
+	combat_state.orbs_amount[orb_type] += 1;
+
+	combat_state.total_orbs += 1;
+	layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+	layout_change_orb_amount(orb_type, combat_state.orbs_amount[orb_type]);
 }
 
 // Gameplay functions
@@ -2157,12 +2184,8 @@ void end_turn() {
 		printf("Generated Orbs: ");
 		for (int i = 0; i < num_alive; ++i) {
 			int orb_generated = rand() % (ORB_NUMBER - 1);
-			combat_state.orbs_amount[orb_generated] += 1;
-
-			combat_state.total_orbs += 1;
-			layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
-			layout_change_orb_amount((Orb_ID)orb_generated, combat_state.orbs_amount[orb_generated]);
-			printf("%d ");
+			add_orb((Orb_ID)orb_generated, 1);
+			printf("%d ", orb_generated);
 		}
 		printf("\n");
 	} else {
@@ -2512,7 +2535,6 @@ void input()
 		}
 	}
 #endif
-	int x = 0;
 }
 
 // Layout functions

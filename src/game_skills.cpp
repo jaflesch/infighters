@@ -6,14 +6,23 @@ struct Skill_State {
 	s32 paricle_rendering_duration;
 	s32 neural_network_duration;
 	s32 automata_summon_duration;
+	s32 inheritance_duration;
+	s32 overclock_duration;
+
+	bool graph_coloring = false;
+
+	Skill_ID inheritance_copy = SKILL_NONE;
 
 	Skill_ID cooldowns[SKILL_NUMBER];
 };
 
 struct Skill_Counter {
 	s32 contradiction_target = -1;
+	s32 contradiction_zero_index = -1;
 	s32 tautology_target = -1;
 	s32 automata_summon_norma_index = -1;
+	s32 inheritante_target = -1;
+	s32 inheritance_new_index = -1;
 };
 
 static Skill_State skill_state_ally = { };
@@ -186,6 +195,8 @@ struct Skill_Target {
 static bool is_enemy_targetable_by_skill(Skill_ID skill, s32 enemy_index, Combat_State* combat_state) {
 	if (combat_state->enemy.hp[enemy_index] <= 0) return false;
 	if (combat_state->enemy.reduction[enemy_index] & SKILL_DEF_INVULNERABILITY) {
+		if (skill == SKILL_BRUTE_FORCE)
+			return true;
 		if (skill_groups[skill].type & combat_state->enemy.reduction_type[enemy_index])
 			return false;
 	}
@@ -195,6 +206,8 @@ static bool is_enemy_targetable_by_skill(Skill_ID skill, s32 enemy_index, Combat
 static bool is_ally_targetable_by_skill(Skill_ID skill, s32 ally_index, Combat_State* combat_state) {
 	if (combat_state->player.hp[ally_index] <= 0) return false;
 	if (combat_state->player.reduction[ally_index] & SKILL_DEF_INVULNERABILITY) {
+		if (skill == SKILL_BRUTE_FORCE)
+			return true;
 		if (skill_groups[skill].type & combat_state->player.reduction_type[ally_index])
 			return false;
 	}
@@ -252,13 +265,13 @@ Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
 		case SKILL_DELETE:        target.number = 1; break;	// @check ctrl effect
 		case SKILL_BEST_BOUND_FIST: target.number = 1; break;
 		case SKILL_DUAL_SIMPLEX:  target.number = 1; target.ally = true; break;
-		case SKILL_GRAPH_COLORING: target.number = 0; break;
+		case SKILL_GRAPH_COLORING: target.number = 0; target.self = true; target.enemy = false; break;
 		case SKILL_SPRINT_BURST:  target.number = 1; break;
 		case SKILL_INHERITANCE:   target.number = 1; break;
 		case SKILL_OVERRIDE:      target.number = 1; target.ally = true; target.enemy = false; break;
-		case SKILL_CLOCK_PULSE:   target.number = 0; target.self = true; break;
+		case SKILL_CLOCK_PULSE:   target.number = 1; break;
 		case SKILL_PIPELINE:      target.number = 0; target.self = true; break;
-		case SKILL_OVERCLOCK:     target.number = 0; break;
+		case SKILL_OVERCLOCK:     target.number = 0; target.self = true; break;
 
 			// Invulnerability skills
 		case SKILL_BRANCH_DAMAGE:
@@ -291,6 +304,8 @@ struct Status_Layout {
 Status_Layout g_layout_status = {};
 
 void apply_status_to_enemy(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
+	if (combat_state->enemy.hp[target_index] <= 0)
+		return;
 	combat_state->enemy.status[target_index] |= status;
 	combat_state->enemy.status_duration[target_index][status] = duration;
 
@@ -329,6 +344,8 @@ void remove_status_from_enemy(s32 target_index, Skill_Condition status, Combat_S
 }
 
 void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
+	if (combat_state->player.hp[target_index] <= 0)
+		return;
 	combat_state->player.status[target_index] |= status;
 	combat_state->player.status_duration[target_index][status] = duration;
 
@@ -403,9 +420,9 @@ void gain_invulnerability_ally(s32 ally_index, s32 duration, u32 skill_type, Com
 }
 
 void gain_invulnerability_enemy(s32 enemy_index, s32 duration, u32 skill_type, Combat_State* combat_state) {
-	combat_state->player.reduction[enemy_index] = SKILL_DEF_INVULNERABILITY;
-	combat_state->player.reduction_type[enemy_index] = skill_type;
-	combat_state->player.reduction_duration[enemy_index][SKILL_DEF_INVULNERABILITY] = duration + 1;
+	combat_state->enemy.reduction[enemy_index] = SKILL_DEF_INVULNERABILITY;
+	combat_state->enemy.reduction_type[enemy_index] = skill_type;
+	combat_state->enemy.reduction_duration[enemy_index][SKILL_DEF_INVULNERABILITY] = duration + 1;
 }
 
 void gain_reflection_ally(s32 ally_index, s32 duration, u32 skill_type, Combat_State* combat_state) {
@@ -445,9 +462,9 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	// Counter
 	if (from_enemy) {
 		// if the counter comes from enemy, source_index gotta be checked against skill_counter_enemy
-		if (source_index == skill_counter_enemy.contradiction_target) {
+		if (source_index == skill_counter_enemy.contradiction_target && target_index == skill_counter_enemy.contradiction_zero_index) {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
-			printf("enemy countered!\n");
+			printf("enemy countered by contradiction!\n");
 			const int extra = 1;	// needed because it updates at the start of the player turn
 			deal_damage_to_target_enemy(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
 			apply_status_to_enemy(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
@@ -455,19 +472,29 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}
 		if (source_index == skill_counter_enemy.tautology_target) {
 			// sofre 15 de dano crushing
-			printf("enemy countered!\n");
+			printf("enemy countered by tautology!\n");
 			deal_damage_to_target_enemy(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
 		}
 		if ((needs_targets.all && skill_counter_ally.automata_summon_norma_index != -1)|| skill_counter_ally.automata_summon_norma_index == target_index) {
-			printf("enemy countered!\n");
+			printf("enemy countered by automata summon!\n");
 			apply_status_to_enemy(source_index, SKILL_CONDITION_POISON, 2, combat_state);
 			skill_counter_ally.automata_summon_norma_index = -1;
 		}
+		if (source_index == skill_counter_enemy.inheritante_target) {
+			printf("enemy countered by inheritance");
+			printf("copied skill of id %d\n", id);
+			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
+				skill_state_ally.inheritance_copy = id;
+				skill_state_ally.inheritance_duration = 1;
+				linked::Button* b = gw.allies_skills[skill_counter_enemy.inheritance_new_index * NUM_SKILLS + 1]->divs[0]->getButtons()[0];
+				b->setAllBGTexture(skill_textures[id]);
+			}
+		}
 	} else {
 		// if the counter comes from ally, source_index gotta be checked against skill_counter_ally
-		if (source_index == skill_counter_ally.contradiction_target) {
+		if (source_index == skill_counter_ally.contradiction_target&& target_index == skill_counter_ally.contradiction_zero_index) {
 			// ally source receives 20 dmg, do nothing and receive status paralyze
-			printf("ally countered!\n");
+			printf("ally countered by contradiction!\n");
 			const int extra = 1;	// needed because it updates at the start of the player turn
 			deal_damage_to_target_ally(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
 			apply_status_to_ally(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
@@ -475,13 +502,21 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}
 		if (source_index == skill_counter_ally.tautology_target) {
 			// sofre 15 de dano crushing
-			printf("ally countered!\n");
+			printf("ally countered by tatology!\n");
 			deal_damage_to_target_ally(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
 		}
 		if ((needs_targets.all && skill_counter_enemy.automata_summon_norma_index != -1) || skill_counter_enemy.automata_summon_norma_index == target_index) {
-			printf("enemy countered!\n");
+			printf("ally countered! by automata summon\n");
 			apply_status_to_ally(source_index, SKILL_CONDITION_POISON, 2, combat_state);
 			skill_counter_enemy.automata_summon_norma_index = -1;
+		}
+		if (source_index == skill_counter_ally.inheritante_target) {
+			printf("ally countered by inheritance\n");
+			printf("copied skill of id %d\n", id);
+			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
+				skill_state_enemy.inheritance_copy = id;
+				skill_state_enemy.inheritance_duration = 1;
+			}
 		}
 	}
 
@@ -505,8 +540,10 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			// mark enemy but ally is marked when receiving this
 			if (from_enemy) {
 				skill_counter_ally.contradiction_target = target_index;
+				skill_counter_ally.contradiction_zero_index = source_index;
 			} else {
 				skill_counter_enemy.contradiction_target = target_index;
+				skill_counter_enemy.contradiction_zero_index = source_index;
 			}
 		}break;
 		case SKILL_REQUIEM_ZERO: {
@@ -743,62 +780,127 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.
 			Se o alvo já possui status BURN, este sofre 10 de dano crushing adicional.
 			*/
-			int max = INT_MIN;
-			int index = -1;
-			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				if (combat_state->enemy.hp[i] > max) {
-					max = combat_state->enemy.hp[i];
-					index = i;
+			if (from_enemy) {
+				int max = INT_MIN;
+				int index = -1;
+				for (int i = 0; i < NUM_ALLIES; ++i) {
+					// @todo add a random chance if the hp is equal?
+					if (combat_state->player.hp[i] > max) {
+						max = combat_state->player.hp[i];
+						index = i;
+					}
 				}
-			}
-			deal_damage_to_target(target_index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
-			if(combat_state->enemy.status[index] & SKILL_CONDITION_BURN)
-				deal_damage_to_target(target_index, source_index, 10, SKILL_DMG_CRUSHING, id, combat_state);
+				deal_damage_to_target(index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+				if (combat_state->player.status[index] & SKILL_CONDITION_BURN)
+					deal_damage_to_target(index, source_index, 10, SKILL_DMG_CRUSHING, id, combat_state);
 
-			combat_state->enemy.status[index] |= SKILL_CONDITION_BURN;
-			combat_state->enemy.status_duration[index][SKILL_CONDITION_BURN] = 2;
+				apply_status_to_ally(index, SKILL_CONDITION_BURN, 2, combat_state);
+			} else {
+				int max = INT_MIN;
+				int index = -1;
+				for (int i = 0; i < NUM_ENEMIES; ++i) {
+					// @todo add a random chance if the hp is equal?
+					if (combat_state->enemy.hp[i] > max) {
+						max = combat_state->enemy.hp[i];
+						index = i;
+					}
+				}
+				deal_damage_to_target(index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+				if (combat_state->enemy.status[index] & SKILL_CONDITION_BURN)
+					deal_damage_to_target(index, source_index, 10, SKILL_DMG_CRUSHING, id, combat_state);
+
+				apply_status_to_enemy(index, SKILL_CONDITION_BURN, 2, combat_state);
+			}
+			
 		}break;
 		case SKILL_DUAL_SIMPLEX: {
 			/*
 			Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um 
 			aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.
 			*/
-			// @todo target
+			if (from_enemy) {
+				if (on_enemy) {
+					apply_status_to_ally(target_index, SKILL_CONDITION_BURN, 3, combat_state);
+				} else {
+					s32 newhp = MIN(combat_state->enemy.hp[target_index] + 25, combat_state->enemy.max_hp[target_index]);
+					combat_state->enemy.hp[target_index] = newhp;
+					layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], newhp);
+					apply_status_to_enemy(target_index, SKILL_CONDITION_FREEZE, 2, combat_state);
+				}
+			} else {
+				if (on_enemy) {
+					apply_status_to_enemy(target_index, SKILL_CONDITION_BURN, 3, combat_state);
+				} else {
+					s32 newhp = MIN(combat_state->player.hp[target_index] + 25, combat_state->player.max_hp[target_index]);
+					combat_state->player.hp[target_index] = newhp;
+					layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], newhp);
+					apply_status_to_ally(target_index, SKILL_CONDITION_FREEZE, 2, combat_state);
+				}
+			}
 		}break;
 		case SKILL_GRAPH_COLORING: {
 			// No próximo turno, recebe 4 orbs de energia : uma de cada categoria.
-			// @todo complex
+			if(!from_enemy)
+				skill_state_ally.graph_coloring = true;
 		}break;
 
 		// New
 		case SKILL_SPRINT_BURST: {
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
-			combat_state->player.reduction[source_index] = SKILL_DEF_REDUCTION;
-			combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-			combat_state->player.reduction_points[source_index][SKILL_DEF_REDUCTION] = 10;
-			combat_state->player.reduction_duration[source_index][SKILL_DEF_REDUCTION] = 1;
+			if (from_enemy) {
+				gain_reduction_enemy(10, 1, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
+			} else {
+				gain_reduction_ally(10, 1, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
+			}
 		}break;
 		case SKILL_INHERITANCE: {
-			// @todo HARD SHIT
+			if (from_enemy) {
+				skill_counter_ally.inheritante_target = target_index;
+				skill_counter_ally.inheritance_new_index = source_index;
+			} else {
+				skill_counter_enemy.inheritante_target = target_index;
+				skill_counter_enemy.inheritance_new_index = source_index;
+			}
 		}break;
 		case SKILL_OVERRIDE: {
-			// @todo
+			u32 status = SKILL_CONDITION_NORMAL | SKILL_CONDITION_BURN | SKILL_CONDITION_FREEZE | SKILL_CONDITION_POISON |
+				SKILL_CONDITION_PARALYZE | SKILL_CONDITION_SLEEP | SKILL_CONDITION_STUN;
+			if (from_enemy) {
+				remove_status_from_enemy(target_index, (Skill_Condition)status, combat_state);
+			} else {
+				remove_status_from_ally(target_index, (Skill_Condition)status, combat_state);
+			}
 		}break;
 
 		// Clockboy
 		case SKILL_CLOCK_PULSE: {
-			deal_damage_to_target(target_index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
-			combat_state->enemy.status[target_index] |= SKILL_CONDITION_PARALYZE;
-			combat_state->enemy.status_duration[target_index][SKILL_CONDITION_BURN] = 2;
+			s32 dmg = 20;
+			if (skill_state->overclock_duration > 0) {
+				dmg *= 5;
+			}
+			deal_damage_to_target(target_index, source_index, dmg, SKILL_DMG_NORMAL, id, combat_state);
+			if (from_enemy) {
+				apply_status_to_ally(target_index, SKILL_CONDITION_PARALYZE, 2, combat_state);
+			} else {
+				apply_status_to_enemy(target_index, SKILL_CONDITION_PARALYZE, 2, combat_state);
+			}
 		}break;
 		case SKILL_PIPELINE: {
 			// @todo wierd shit
 		}break;
 		case SKILL_OVERCLOCK: {
-			combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
-			combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-			combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 2;
-			int half_max_hp = combat_state->player.max_hp[source_index] / 2;
+			if (from_enemy) {
+				int half_max_hp = combat_state->enemy.max_hp[source_index] / 2;
+				combat_state->enemy.hp[source_index] = half_max_hp;
+				layout_set_enemy_hp(source_index, combat_state->enemy.max_hp[source_index], half_max_hp);
+				gain_invulnerability_enemy(source_index, 2, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
+			} else {
+				int half_max_hp = combat_state->player.max_hp[source_index] / 2;
+				combat_state->player.hp[source_index] = half_max_hp;
+				layout_set_ally_hp(source_index, combat_state->player.max_hp[source_index], half_max_hp);
+				gain_invulnerability_ally(source_index, 2, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
+			}
+			skill_state->overclock_duration = 2 + 1;
 			// @todo make attacks cause 500% dmg
 		}break;
 
@@ -815,15 +917,10 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_ENCRYPTION:
 		case SKILL_TRUE_ENDURANCE:
 		case SKILL_VOID_BARRIER: {
-			if (on_enemy) {
-				combat_state->player.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
-				combat_state->player.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-				combat_state->player.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 1;
-			}
-			else {
-				combat_state->enemy.reduction[source_index] = SKILL_DEF_INVULNERABILITY;
-				combat_state->enemy.reduction_type[source_index] = SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL;
-				combat_state->enemy.reduction_duration[source_index][SKILL_DEF_INVULNERABILITY] = 2;
+			if (from_enemy) {
+				gain_invulnerability_enemy(source_index, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
+			} else {
+				gain_invulnerability_ally(source_index, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 			}
 		} break;
 	}
@@ -843,6 +940,14 @@ void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 		skill_state_enemy.neural_network_duration -= 1;
 	if (skill_state_enemy.automata_summon_duration > 0)
 		skill_state_enemy.automata_summon_duration -= 1;
+	if (skill_state_enemy.inheritance_duration > 0) {
+		skill_state_enemy.inheritance_duration -= 1;
+		if (skill_state_enemy.inheritance_duration == 0) {
+			skill_state_enemy.inheritance_copy = SKILL_NONE;
+		}
+	}
+	if (skill_state_enemy.overclock_duration > 0)
+		skill_state_enemy.overclock_duration -= 1;
 
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		for (int k = 0; k < SKILL_DEF_NUMBER; ++k) {
@@ -859,6 +964,8 @@ void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 
 	skill_counter_enemy.tautology_target = -1;
 	skill_counter_enemy.contradiction_target = -1;
+	skill_counter_enemy.contradiction_zero_index = -1;
+	skill_counter_enemy.inheritante_target = -1;
 }
 
 void update_skill_state_end_turn(Combat_State* combat_state) {
@@ -874,6 +981,16 @@ void update_skill_state_end_turn(Combat_State* combat_state) {
 		skill_state_ally.neural_network_duration -= 1;
 	if (skill_state_ally.automata_summon_duration > 0)
 		skill_state_ally.automata_summon_duration -= 1;
+	if (skill_state_ally.inheritance_duration > 0) {
+		skill_state_ally.inheritance_duration -= 1;
+		if (skill_state_ally.inheritance_duration == 0) {
+			skill_state_ally.inheritance_copy = SKILL_NONE;
+			linked::Button* b = gw.allies_skills[skill_counter_enemy.inheritance_new_index * NUM_SKILLS + 1]->divs[0]->getButtons()[0];
+			b->setAllBGTexture(skill_textures[SKILL_INHERITANCE]);
+		}
+	}
+	if (skill_state_ally.overclock_duration > 0)
+		skill_state_ally.overclock_duration -= 1;
 
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		for (int k = 0; k < SKILL_DEF_NUMBER; ++k) {
@@ -889,9 +1006,28 @@ void update_skill_state_end_turn(Combat_State* combat_state) {
 	}
 	skill_counter_ally.tautology_target = -1;
 	skill_counter_ally.contradiction_target = -1;
+	skill_counter_ally.contradiction_zero_index = -1;
+	skill_counter_ally.inheritante_target = -1;
 }
 
+static void add_orb(Orb_ID orb_type, s32 count);
+
 void update_status_end_enemy_turn(Combat_State* combat_state) {
+	// Graph coloring here
+	if (skill_state_ally.graph_coloring) {
+		skill_state_ally.graph_coloring = false;
+		/*
+			ORB_HARD = 0,
+			ORB_SOFT = 1,
+			ORB_VR = 2,
+			ORB_BIOS = 3,
+		*/
+		add_orb(ORB_HARD, 1);
+		add_orb(ORB_SOFT, 1);
+		add_orb(ORB_VR, 1);
+		add_orb(ORB_BIOS, 1);
+	}
+
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		for (int j = SKILL_CONDITION_BURN; j < SKILL_CONDITION_NUMBER; j <<= 1) {
 			if (combat_state->enemy.status_duration[i][j] > 0)
