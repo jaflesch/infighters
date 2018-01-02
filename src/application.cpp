@@ -16,6 +16,7 @@ Chat chat;
 linked::Window* chat_window = 0;
 
 Font_ID fonts[32] = {};
+int x = 0;
 
 char* char_names[NUM_CHARS] = {
 	"Zer0",
@@ -924,14 +925,14 @@ static void button_skill(void* arg) {
 
 		if (target.enemy) {
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				if (combat_state.enemy.hp[i] <= 0) continue;
+				if (!is_enemy_targetable_by_skill(skill_used, i, &combat_state)) continue;
 				enemy_target_animation[i].is_animating = true;
 			}
 			printf(" enemy");
 		} 
 		if (target.ally) {
 			for (int i = 0; i < NUM_ALLIES; ++i) {
-				if (combat_state.player.hp[i] <= 0) continue;
+				if (!is_ally_targetable_by_skill(skill_used, i, &combat_state)) continue;
 				allies_target_animation[i].is_animating = true;
 			}
 			printf(" ally");
@@ -940,7 +941,7 @@ static void button_skill(void* arg) {
 	} else if (target.number == 0 && target.all && !is_toggled) {
 		if (target.enemy) {
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				if (combat_state.enemy.hp[i] <= 0)
+				if (!is_enemy_targetable_by_skill(skill_used, i, &combat_state))
 					continue;
 				combat_state.player.targeting = true;
 				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
@@ -953,7 +954,7 @@ static void button_skill(void* arg) {
 		} 
 		if (target.ally) {
 			for (int i = 0; i < NUM_ALLIES; ++i) {
-				if (combat_state.player.hp[i] <= 0)
+				if (!is_ally_targetable_by_skill(skill_used, i, &combat_state))
 					continue;
 				combat_state.player.targeting = true;
 				combat_state.player.targeting_info.attacking_character = (Character_ID)char_id;
@@ -978,7 +979,7 @@ static void button_skill(void* arg) {
 static void target_enemy(void* arg) {
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
 
-	if (combat_state.enemy.hp[eba->id] <= 0)
+	if(!is_enemy_targetable_by_skill(combat_state.player.targeting_info.skill_used, eba->id, &combat_state))
 		return;
 
 	if (!combat_state.player.targeting)
@@ -1006,7 +1007,7 @@ static void target_enemy(void* arg) {
 static void target_ally(void* arg) {
 	linked::Button_Info* eba = (linked::Button_Info*)arg;
 
-	if (combat_state.player.hp[eba->id] <= 0)
+	if (!is_ally_targetable_by_skill(combat_state.player.targeting_info.skill_used, eba->id, &combat_state))
 		return;
 
 	if (!combat_state.player.targeting)
@@ -2543,7 +2544,7 @@ static void layout_enemy_die(u32 enemy_index) {
 static void layout_ally_die(u32 ally_index) {
 	assert(ally_index <= NUM_ALLIES);
 	gw.allies_indicator[ally_index]->setBackgroundTexture(orb_dead_ally);
-	layout_set_enemy_image_opacity(ally_index, 0.5f, hm::vec4(0, 0, 0, 1));
+	layout_set_ally_image_opacity(ally_index, 0.5f, hm::vec4(0, 0, 0, 1));
 }
 
 static void put_space(int* length, char* buffer) {

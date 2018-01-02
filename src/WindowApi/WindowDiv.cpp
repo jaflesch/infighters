@@ -63,11 +63,6 @@ namespace linked
 			divMesh->render();
 			ws->setOpacity(1.0f);
 
-			//if (borderMesh) {
-			//	ws->useTexture = 0;
-			//	borderMesh->render();
-			//}
-
 			if (m_backgroundTexture != nullptr)
 				ws->unbindTextures();
 
@@ -86,8 +81,6 @@ namespace linked
 			ws->update(v);
 			b->getButtonMesh().render();
 			ws->setOpacity(1.0f);
-		
-			// renderizar botao aqui da um efeito interessante
 
 			if (b->getBackgroundTexture() != nullptr)
 				ws->unbindTextures();
