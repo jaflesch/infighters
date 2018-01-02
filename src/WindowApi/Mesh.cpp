@@ -22,7 +22,7 @@ Mesh::Mesh(Quad* quad, bool dynamicDraw)
 
 	genVAO();
 	genVBOS(quad->getIndexedModel());
-	indicesSize = quad->getIndexedModel()->indices.size() * sizeof(unsigned int);
+	indicesSize = (int)quad->getIndexedModel()->indices.size() * sizeof(unsigned int);
 	genIndexBuffer(quad->getIndexedModel());
 
 	this->referenceCount = 0;

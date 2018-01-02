@@ -87,7 +87,7 @@ linked::Window* Chat::init_chat()
 	linked::Window* result = 0;
 
 	// Chat Window
-	chatWindow = new linked::Window(500, 140, hm::vec2(10, window_info.height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
+	chatWindow = new linked::Window(500, 140, hm::vec2(10, (r32)window_info.height - 150), hm::vec4(0.16f, 0.15f, 0.2f, 0.5f), (unsigned char*)std::string("Chat").c_str(), 5,
 		W_BORDER | W_MOVABLE);
 	chatWindow->setBorderColor(hm::vec4(0, 0, 0.1f, 0.6f));
 	chatWindow->setBorderSizeX(1);
@@ -97,7 +97,7 @@ linked::Window* Chat::init_chat()
 		DIV_ANCHOR_BOTTOM | DIV_ANCHOR_LEFT);
 	chatWindow->divs.push_back(chatDiv);
 
-	chatLabel = new Label(*chatDiv, (unsigned char*)chatString.c_str(), chatString.size(), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_14, 5, 0);
+	chatLabel = new Label(*chatDiv, (unsigned char*)chatString.c_str(), (int)chatString.size(), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_14, 5, 0);
 	chatDiv->getLabels().push_back(chatLabel);
 
 	messagesDiv = new WindowDiv(*chatWindow, 500, 125, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0),
@@ -106,7 +106,7 @@ linked::Window* Chat::init_chat()
 	chatWindow->divs.push_back(messagesDiv);
 
 	for (unsigned int i = 0; i < CHAT_MAX_MSGS; i++)
-		messagesDiv->getLabels().push_back(new Label(*messagesDiv, nullptr, 0, hm::vec2(0, 105 - ((i + 1) * 15)), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_14, 5, 0));
+		messagesDiv->getLabels().push_back(new Label(*messagesDiv, nullptr, 0, hm::vec2(0, r32(105 - ((i + 1) * 15))), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_14, 5, 0));
 
 	return chatWindow;
 }
@@ -168,10 +168,10 @@ void Chat::update() {
 	else
 		chatDiv->setBackgroundColor(hm::vec4(0, 0, 0, 0));
 
-	chatLabel->setText((unsigned char*)chatString.c_str(), chatString.size() + 1);
+	chatLabel->setText((unsigned char*)chatString.c_str(), (int)chatString.size() + 1);
 }
 
-void Chat::handle_keystroke(int key, int params)
+void Chat::handle_keystroke(u64 key, u64 params)
 {
 	if (m_enabled) {
 		// clear the key events
@@ -209,7 +209,7 @@ void Chat::handle_keystroke(int key, int params)
 
 void Chat::next_history()
 {
-	int num_msg = messages.size();
+	size_t num_msg = messages.size();
 	if (num_msg == 0) return;
 	if (history_index == CHAT_MAX_MSGS) {
 		history_index = 0;
@@ -222,10 +222,10 @@ void Chat::next_history()
 
 void Chat::previous_history()
 {
-	int num_msg = messages.size();
+	size_t num_msg = messages.size();
 	if (num_msg == 0) return;
 	if (history_index == 0) {
-		history_index = num_msg - 1;
+		history_index = (int)num_msg - 1;
 	} else {
 		history_index--;
 	}
@@ -254,6 +254,6 @@ void Chat::set_next_message(std::string& msg) {
 
 	for (unsigned int i = 0; i < messages.size(); i++) {
 		linked::Label* l = messagesDiv->getLabels()[i];
-		l->setText((unsigned char*)messages[i].c_str(), messages[i].size() + 1);
+		l->setText((unsigned char*)messages[i].c_str(), (int)messages[i].size() + 1);
 	}
 }

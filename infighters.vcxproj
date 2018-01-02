@@ -71,11 +71,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>bin\$(Platform)\$(Configuration)\intermediaries</IntDir>
+    <IntDir>bin\$(Platform)\$(Configuration)\intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>bin\$(Platform)\$(Configuration)\intermediaries</IntDir>
+    <IntDir>bin\$(Platform)\$(Configuration)\intermediaries\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,10 +136,6 @@
     <ClCompile Include="src\font_render\font_rendering.cpp" />
     <ClCompile Include="src\font_render\os.cpp" />
     <ClCompile Include="src\font_render\render_engine.cpp" />
-    <ClCompile Include="src\freetypegl\platform.c" />
-    <ClCompile Include="src\freetypegl\texture-atlas.c" />
-    <ClCompile Include="src\freetypegl\texture-font.c" />
-    <ClCompile Include="src\freetypegl\vector.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ResourceLoad\ImageLoader.cpp" />
     <ClCompile Include="src\ResourceLoad\Texture.cpp" />
@@ -166,14 +162,6 @@
     <ClInclude Include="src\font_render\font_rendering.h" />
     <ClInclude Include="src\font_render\os.h" />
     <ClInclude Include="src\font_render\render_engine.h" />
-    <ClInclude Include="src\freetypegl\freetype-gl.h" />
-    <ClInclude Include="src\freetypegl\opengl.h" />
-    <ClInclude Include="src\freetypegl\platform.h" />
-    <ClInclude Include="src\freetypegl\stb_image.h" />
-    <ClInclude Include="src\freetypegl\texture-atlas.h" />
-    <ClInclude Include="src\freetypegl\texture-font.h" />
-    <ClInclude Include="src\freetypegl\vec234.h" />
-    <ClInclude Include="src\freetypegl\vector.h" />
     <ClInclude Include="src\ho_gl.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\ResourceLoad\ImageLoader.h" />

@@ -426,7 +426,7 @@ int exchange_char_selection(SOCKET* ConnectSocket, client_info * player, Char_Se
 }
 
 int send_struct(SOCKET* ConnectSocket, Target target) {
-	struct teste t;
+	//struct teste t;
 	
 	char buffer = skill_to_char(target.skill_used);		
 		
@@ -463,7 +463,7 @@ int receive_struct(SOCKET* ConnectSocket, Target * targets) {
 	int recvbuflen = DEFAULT_BUFLEN;
 	char recvbuf[DEFAULT_BUFLEN] = "";
 
-	struct teste t;
+	//struct teste t;
 	int iResult;
 			
 	for (int i = 0; i < NUM_ALLIES; ++i) {

@@ -137,7 +137,7 @@ void Window::render()
 
 	// Set clipping planes back to all the screen
 	Window::m_windowShader->clipTL = hm::vec2(-1, -1);
-	Window::m_windowShader->clipBR = hm::vec2(window_info.width, window_info.height);
+	Window::m_windowShader->clipBR = hm::vec2((float)window_info.width, (float)window_info.height);
 
 	// render window title in header if header enabled
 	if (h_header)
@@ -145,17 +145,18 @@ void Window::render()
 		// Set Clipping planes to all the context (to be always rendered)
 		Window::m_textShader->useShader();
 		Window::m_textShader->clipTL = hm::vec2(-1, -1);
-		Window::m_textShader->clipBR = hm::vec2(window_info.width, window_info.height);
+		Window::m_textShader->clipBR = hm::vec2((float)window_info.width, (float)window_info.height);
 		Window::m_textShader->update();
 
 		float rightLimit = getWindowBasePosition((float)m_width, 0).x;
-		float xpos = getPosition().x * 2.0f - m_width;
+		float xpos = m_position.x * 2.0f - m_width;
 		float ypos = getPosition().y * 2.0f - m_height - 10.0f;
 
 		if (m_titleCentered)
-			xpos += m_width / 2.0f;
+			xpos += m_width;
 
-		m_fontRenderer->RenderText(std::string((const char*)m_title), xpos, -ypos, rightLimit, m_titleColor, m_textShader, false);
+		hm::vec2 text_info = m_fontRenderer->RenderTextGetInfo((const char*)m_title, m_titleLength);
+		m_fontRenderer->RenderText((const char*)m_title, m_titleLength, xpos - text_info.x, -ypos, rightLimit, m_titleColor, m_textShader, false);
 		Window::m_textShader->stopShader();
 	}
 }
@@ -177,7 +178,7 @@ void Window::update()
 	if (m_attached && h_movable && focused)
 	{
 		update_background = false;
-		hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
+		hm::vec2 cursorPosition = hm::vec2((float)mouse_state.x, (float)mouse_state.y);
 		hm::vec2 delta = m_cursorPosWhenAttached - cursorPosition;
 		setPosition(m_posWhenAttached - delta);
 		// updates the screen position
@@ -230,7 +231,7 @@ void Window::mouseCallback(int button, int action, int mods)
 		if (action == 1)
 		//if (action == GLFW_PRESS)
 		{
-			m_cursorPosWhenAttached = hm::vec2(mouse_state.x, mouse_state.y);
+			m_cursorPosWhenAttached = hm::vec2((float)mouse_state.x, (float)mouse_state.y);
 			m_posWhenAttached = m_position;
 		}
 	}
@@ -276,11 +277,11 @@ void Window::attachMouse()
 		// If this is the first hovered window then handle it, otherwise another window is in front
 		// and also being hovered, in this case return
 		int thisIndex = 0;
-		for (int i = openedWindows.size() - 1; i >= 0; i--)
+		for (size_t i = openedWindows.size() - 1; i >= 0; i--)
 		{
 			if (openedWindows[i] == this)
 			{
-				thisIndex = i;
+				thisIndex = (int)i;
 				break;
 			}
 			if (openedWindows[i]->isHovered() && openedWindows[i]->m_active)
@@ -306,7 +307,7 @@ void Window::detachMouse()
 }
 bool Window::isHovered()
 {
-	hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
+	hm::vec2 cursorPosition = hm::vec2((float)mouse_state.x, (float)mouse_state.y);
 	hm::vec2 cursorPosRefWindow = hm::vec2(
 		cursorPosition.x + (m_width - window_info.width) / 2.0f,
 		cursorPosition.y + (m_height - window_info.height) / 2.0f);

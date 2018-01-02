@@ -1,13 +1,12 @@
 #pragma once
 #include <ho_gl.h>
 #include <string>
-class Camera;
 class Entity;
 
 class Shader
 {
 public:
-	Shader(std::string, Camera* camera);
+	Shader(std::string);
 	~Shader();
 	GLuint getShader();
 	virtual void useShader();
@@ -18,14 +17,12 @@ public:
 	void activateAlphaBlend();
 	void deactivateAlphaBlend();
 
-	void setCamera(Camera* c);
 	void setEntity(Entity* e);
 private:
 	GLuint loadShader(const char*, GLuint);
 	virtual void getUniformLocations();
 protected:
 	GLuint shader;
-	Camera* camera;
 	Entity* entity;
 };
 

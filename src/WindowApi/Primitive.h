@@ -70,6 +70,7 @@ public:
 		case 2: return top_color;
 		case 3: return bottom_color;
 		}
+		return left_color;
 	}
 
 	inline void setLeftColor(hm::vec4 color) { left_color = color; }

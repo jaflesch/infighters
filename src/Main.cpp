@@ -134,7 +134,7 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	application_state_init();
 
 	Timer timer;
-	srand(time(0));
+	srand((u32)time(0));
 
 	double laststart = timer.GetTime();
 	double totaltime = 0.0;
@@ -167,7 +167,6 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			} break;
 			case WM_KEYUP: {
 				size_t key = msg.wParam;
-				printf("%d\n", key);
 				keyboard_state.key[key] = false;
 				keyboard_state.key_event[key] = true;
 				if (keyboard_state.key_event[VK_UP] && g_chat->m_enabled) {

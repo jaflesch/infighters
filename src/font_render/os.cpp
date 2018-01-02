@@ -64,7 +64,7 @@ LRESULT CALLBACK window_proc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam
 		break;
 	case WM_CHAR:
 		if (g_chat && g_chat->m_active) {
-			g_chat->handle_keystroke(wparam, lparam);
+			g_chat->handle_keystroke((u64)wparam, (u64)lparam);
 		}
 		break;
 	case WM_SIZE: {

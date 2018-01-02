@@ -3,7 +3,7 @@
 
 extern Window_Info window_info;
 
-WindowShader::WindowShader(std::string fileName) : Shader(fileName, nullptr)
+WindowShader::WindowShader(std::string fileName) : Shader(fileName)
 {
 	m_opacity = 1.0f;
 	getUniformLocations();
@@ -29,8 +29,8 @@ void WindowShader::update(hm::vec2& translation)
 	float x = roundf(translation.x * 2.0f);
 	float y = roundf(-(translation.y * 2.0f));
 
-	float windowWidth = window_info.width;
-	float windowHeight = window_info.height;
+	float windowWidth = (float)window_info.width;
+	float windowHeight = (float)window_info.height;
 
 	//glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(x, y, 0));
 	hm::mat4 model = hm::mat4::translate(hm::vec3(x, y, 0));

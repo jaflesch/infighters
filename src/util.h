@@ -6,17 +6,16 @@
 #include <signal.h>
 #define __debugbreak() raise(SIGTRAP)
 #endif
-#define assert(X) if(!(X)) __debugbreak()
 
 #define MAX(X, Y) ((X < Y) ? Y : X)
 #define MIN(X, Y) ((X < Y) ? X : Y)
 
 // Alloc memory 'size' bytes
-extern void* memory_alloc(u32 size);
+extern void* memory_alloc(s64 size);
 // Free alloc'd memory block
 extern void memory_free(void* block);
 // Copy 'size' bytes from origin to destination
-extern void memory_copy(void* destination, void* origin, u32 size);
+extern void memory_copy(void* destination, void* origin, s64 size);
 // Copy string from origin to destination, with \0
 extern void string_copy(s8* destination, s8* origin);
 // Compare two strings, 0 if equal

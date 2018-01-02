@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-FontShader::FontShader(std::string filename) : Shader(filename, nullptr)
+FontShader::FontShader(std::string filename) : Shader(filename)
 {
 	getUniformLocations();
 }

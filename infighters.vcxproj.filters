@@ -60,18 +60,6 @@
     <ClCompile Include="src\ResourceLoad\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\freetypegl\platform.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\freetypegl\texture-atlas.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\freetypegl\texture-font.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\freetypegl\vector.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\font_render\font_rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -147,30 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ResourceLoad\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\freetype-gl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\opengl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\platform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\texture-atlas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\texture-font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\vec234.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\freetypegl\vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\font_render\font_rendering.h">

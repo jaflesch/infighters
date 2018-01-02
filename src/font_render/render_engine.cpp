@@ -237,7 +237,7 @@ namespace engine {
 	void border_prepare_render() {
 		glUseProgram(quad2d_shader);
 
-		hm::mat4 projection = hm::mat4::ortho(0, window_info.width, 0, window_info.height);
+		hm::mat4 projection = hm::mat4::ortho(0, (float)window_info.width, 0, (float)window_info.height);
 		glUniformMatrix4fv(quad2d_projection_location, 1, GL_TRUE, projection.data);
 		glUniform1i(quad2d_use_texture, 0);
 	}
@@ -306,7 +306,7 @@ namespace engine {
 	void quad_prepare_render() {
 		glUseProgram(quad2d_shader);
 
-		hm::mat4 projection = hm::mat4::ortho(0, window_info.width, 0, window_info.height);
+		hm::mat4 projection = hm::mat4::ortho(0, (float)window_info.width, 0, (float)window_info.height);
 		glUniformMatrix4fv(quad2d_projection_location, 1, GL_TRUE, projection.data);
 		glUniform1i(quad2d_use_texture, 0);
 	}

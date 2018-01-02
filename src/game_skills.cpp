@@ -108,7 +108,6 @@ s32 calculate_ally_damage_reduction(int target_index, int damage, Skill_Damage d
 			return -damage;
 		if (reduction & SKILL_DEF_INVULNERABILITY) {
 			u32 type = combat_state->player.reduction_type[target_index];
-			Skill_Group sgroup;
 			if (type & SKILL_TYPE_PHYSICAL && skill_groups[id].type == SKILL_TYPE_PHYSICAL)
 				return 0;
 			if (type & SKILL_TYPE_MENTAL && skill_groups[id].type == SKILL_TYPE_MENTAL)

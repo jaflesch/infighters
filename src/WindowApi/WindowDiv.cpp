@@ -230,6 +230,6 @@ namespace linked
 	}
 
 	void WindowDiv::createBorder(float l, float r, float t, float b) {
-		borderMesh = new Mesh(new Border(hm::vec3(0, 0, 0), m_width * 2, m_height * 2, l * 2, r * 2, t * 2, b * 2));
+		borderMesh = new Mesh(new Border(hm::vec3(0, 0, 0), (float)m_width * 2, (float)m_height * 2, l * 2, r * 2, t * 2, b * 2));
 	}
 }

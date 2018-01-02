@@ -34,13 +34,14 @@ struct Camera {
 	void rotate_y(float amt);
 };
 
+
 struct Vertex3D {
 	float pos[3];
 	float normal[3];
 	float tex[2];
 };
 
-struct Texture;
+class Texture;
 
 struct IndexedModel3D {
 	GLuint vao;

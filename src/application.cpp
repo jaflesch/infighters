@@ -534,8 +534,12 @@ hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
 hm::vec4 cyan(0.0f, 1.0f, 1.0f, 1.0f);
 hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
 hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
-hm::vec4 enem_hp_bar_full_color(1, 0.71f, 0.29f, 1.0f);
-hm::vec4 enem_hp_bar_empty_color(0.6f, 0.29f, 0.02f, 1.0f);
+hm::vec4 enem_hp_bar_full_color(1, 0.3529f, 0, 1.0f);
+hm::vec4 enem_hp_bar_empty_color(0.61f, 0.21f, 0.0f, 1.0f);
+
+//hm::vec4 enem_hp_bar_full_color(1, 0, 0.4f, 1.0f);			//#ff0066
+//hm::vec4 enem_hp_bar_empty_color(0.6f, 0.0f, 0.2392f, 1.0f);	// #99003d
+
 hm::vec4 enemy_color(1, 0.71f, 0.29f, 1.0f);
 
 static SOCKET * connection;
@@ -730,7 +734,7 @@ static void button_exchange_orb_arrow(void* arg) {
 	}
 }
 
-#define ARCSIN_1 1.57079633
+#define ARCSIN_1 1.57079633f
 
 struct Enemy_Target_Animation {
 	bool is_animating;
@@ -1088,7 +1092,7 @@ void hide_all_windows() {
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
 	gw.exchange_orbs->setActive(false);
-	//gw.null_orb_modal->setActive(false);
+	gw.null_orb_modal->setActive(false);
 }
 
 void init_intro_mode() {
@@ -1096,14 +1100,14 @@ void init_intro_mode() {
 	Texture* playbutton_normal = new Texture("../../../res/textures/playbutton_normal.png");
 	Texture* playbutton_hover = new Texture("../../../res/textures/playbutton_hover.png");
 	
-	linked::Window* logo_window = new linked::Window(logo->width, logo->height, hm::vec2(window_info.width / 2 - logo->width / 2, window_info.height / 2 - logo->height / 2), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
+	linked::Window* logo_window = new linked::Window(logo->width, logo->height, hm::vec2((r32)(window_info.width / 2 - logo->width / 2), (r32)(window_info.height / 2 - logo->height / 2)), hm::vec4(0, 0, 0, 0), 0, 0, linked::W_UNFOCUSABLE);
 	linked::WindowDiv* logo_div = new linked::WindowDiv(*logo_window, logo->width, logo->height, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	//logo_div->setBackgroundTexture(logo);
 	logo_window->divs.push_back(logo_div);
 	gw.intro_logo = logo_window;
 
 	linked::Label* play_label = new linked::Label(*logo_div, (u8*)"PLAY", sizeof("PLAY"), hm::vec2(90.0f, 15.0f), hm::vec4(1,1,1,1), FONT_OSWALD_REGULAR_24, 0, 0);
-	linked::Button* play_button = new linked::Button(*logo_div, play_label, hm::vec2(logo->width / 2 - 230 / 2, logo->height - 140.0f), 230, 60, hm::vec4(0.91, 0.23f, 0.88, 1), 0);
+	linked::Button* play_button = new linked::Button(*logo_div, play_label, hm::vec2((r32)(logo->width / 2 - 230 / 2), (r32)logo->height - 140.0f), 230, 60, hm::vec4(0.91f, 0.23f, 0.88f, 1), 0);
 	play_button->setAllBGTexture(playbutton_hover);
 	play_button->setNormalBGTexture(playbutton_normal);
 	play_button->setHoveredTextColor(hm::vec4(1, 1, 1, 1));
@@ -1154,12 +1158,12 @@ void init_char_selection_mode()
 	float char_window_height = 300.0f;
 
 	// Character selected lower window (bottom)
-	linked::Window* char_selected_window = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
+	linked::Window* char_selected_window = new linked::Window(6 * (int)char_window_width + 100, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
 	gw.char_selected_window = char_selected_window;
 
-	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_selected_window, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_selected_window, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_selected_window, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_selected_window, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	s_div1->createBorder(1, 1, 1, 1);
 	s_div1->setBorderColor(cyan);
 	s_div2->createBorder(1, 1, 1, 1);
@@ -1214,7 +1218,7 @@ void init_char_selection_mode()
 	char_sel_state.play_button_div = play_div;
 
 	// Character selection window (top)
-	linked::Window* char_selection_window = new linked::Window(6 * char_window_width + 100.0f, 630, hm::vec2(520, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
+	linked::Window* char_selection_window = new linked::Window(6 * (int)char_window_width + 100, 630, hm::vec2(520, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, linked::W_UNFOCUSABLE);
 	gw.char_selection_window = char_selection_window;
 
 	Texture* chars_texture[NUM_CHARS] = {};
@@ -1264,7 +1268,7 @@ void init_char_selection_mode()
 	float char_div_offset_x = 0.0f;
 	float char_div_offset_y = 0.0f;
 	for (int i = 0; i < NUM_CHARS; ++i) {
-		char_divs[i] = new linked::WindowDiv(*char_selection_window, char_window_width, char_window_height, 0.0f, 0.0f,
+		char_divs[i] = new linked::WindowDiv(*char_selection_window, (int)char_window_width, (int)char_window_height, 0.0f, 0.0f,
 			hm::vec2(25.0f + 10.0f * char_div_offset_x + char_window_width * char_div_offset_x, 10.0f * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
 			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		char_selection_window->divs.push_back(char_divs[i]);
@@ -1276,7 +1280,7 @@ void init_char_selection_mode()
 			char_div_offset_x = 0.0f;
 			char_div_offset_y += 1.0f;
 		}
-		linked::Button* button = new linked::Button(*char_divs[i], 0, hm::vec2(0, 0), char_window_width, char_window_height, char_window_color, i);
+		linked::Button* button = new linked::Button(*char_divs[i], 0, hm::vec2(0, 0), (int)char_window_width, (int)char_window_height, char_window_color, i);
 		button->setHoveredBGColor(char_window_hover_color);
 		button->setHeldBGColor(char_window_held_color);
 		Texture* char_texture = chars_texture[i];
@@ -1294,19 +1298,19 @@ void init_char_information_mode()
 	float char_window_width = 140.0f;
 	float char_window_height = 140.0f;
 
-	linked::Window* char_info_window = new linked::Window(6 * char_window_width + 100.0f - 20.0f, 630, hm::vec2(530, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.9f), 0, 0, linked::W_BORDER|linked::W_UNFOCUSABLE);
+	linked::Window* char_info_window = new linked::Window(6 * (int)char_window_width + 100 - 20, 630, hm::vec2(530, 30), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.9f), 0, 0, linked::W_BORDER|linked::W_UNFOCUSABLE);
 	char_info_window->setBorderSizeX(10.0f);
 	char_info_window->setBorderSizeY(0.0f);
 	hm::vec4 border_color = hm::vec4(1.0f, 0.71f, 0.29f, 1.0f);
 	char_info_window->setBorderColor(border_color);
 	gw.char_info_window = char_info_window;
 
-	linked::Window* char_info_window_bot = new linked::Window(6 * char_window_width + 100.0f, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
+	linked::Window* char_info_window_bot = new linked::Window(6 * (int)char_window_width + 100, 200, hm::vec2(520, 670), hm::vec4(12.0f / 255.0f, 16.0f / 255.0f, 40.0f / 255.0f, 0.55f), 0, 0, 0);
 	gw.char_info_window_bot = char_info_window_bot;
 
-	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_info_window_bot, char_window_width, char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div1 = new linked::WindowDiv(*char_info_window_bot, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 0.0f + char_window_width * 0.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div2 = new linked::WindowDiv(*char_info_window_bot, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 1.0f + char_window_width * 1.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* s_div3 = new linked::WindowDiv(*char_info_window_bot, (int)char_window_width, (int)char_window_width, 0.0f, 0.0f, hm::vec2(25.0f + 10.0f * 2.0f + char_window_width * 2.0f, 10.0f), hm::vec4(0, 0, 0, 1.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	s_div1->createBorder(1, 1, 1, 1);
 	s_div1->setBorderColor(cyan);
 	s_div2->createBorder(1, 1, 1, 1);
@@ -1335,12 +1339,12 @@ void init_char_information_mode()
 	float char_div_offset_y = 0.0f;
 	float skills_spacing = 30.0f;
 	for (int i = 0; i < NUM_SKILLS; ++i) {
-		skills_divs[i] = new linked::WindowDiv(*char_info_window, char_window_width, char_window_height, 0.0f, 0.0f,
+		skills_divs[i] = new linked::WindowDiv(*char_info_window, (int)char_window_width, (int)char_window_height, 0.0f, 0.0f,
 			hm::vec2(start_offset_x + skills_spacing * char_div_offset_x + char_window_width * char_div_offset_x, skills_spacing * (char_div_offset_y + 1.0f) + char_div_offset_y * char_window_height),
 			char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		char_info_window->divs.push_back(skills_divs[i]);
 
-		linked::Button* button = new linked::Button(*skills_divs[i], 0, hm::vec2(0, 0), char_window_width, char_window_height, char_window_color, i);
+		linked::Button* button = new linked::Button(*skills_divs[i], 0, hm::vec2(0, 0), (int)char_window_width, (int)char_window_height, char_window_color, i);
 		button->setHoveredBGColor(char_window_hover_color);
 		button->setHeldBGColor(char_window_held_color);
 		skills_divs[i]->getButtons().push_back(button);
@@ -1364,15 +1368,15 @@ void init_char_information_mode()
 	gw.char_info_skill_cost = skill_cost;
 
 	float orb_size = 32.0f;
-	linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*skill_cost, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_1);
-	linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5), 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*skill_cost, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(0 + (orb_size + 5), 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_2);
-	linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 2, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*skill_cost, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 2, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_3);
-	linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 3, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*skill_cost, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 3, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_4);
-	linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*skill_cost, orb_size, orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 4, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+	linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*skill_cost, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(0 + (orb_size + 5) * 4, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 	skill_cost->divs.push_back(skill_cost_div_5);
 
 	linked::WindowDiv* skill_group_div = new linked::WindowDiv(*char_info_window, 640, 48, 0, 0, hm::vec2(start_offset_x, 630.0f - 48.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
@@ -1551,32 +1555,32 @@ void init_combat_mode()
 	float skill_img_size = 75.0f;
 
 	for (int i = 0; i < NUM_ALLIES; ++i) {
-		gw.allies[i] = new linked::Window(size_img, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.allies[i] = new linked::Window((int)size_img, (int)size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.allies[i]->setBorderSizeX(1.0f);
 		gw.allies[i]->setBorderSizeY(1.0f);
 		gw.allies[i]->setBorderColor(cyan);
-		linked::WindowDiv* allies_div = new linked::WindowDiv(*gw.allies[i], size_img, size_img, 0, 0, hm::vec2(0, 0), char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* allies_div = new linked::WindowDiv(*gw.allies[i], (int)size_img, (int)size_img, 0, 0, hm::vec2(0, 0), char_window_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies[i]->divs.push_back(allies_div);
-		linked::Button* dummy_ally_button = new linked::Button(*allies_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		linked::Button* dummy_ally_button = new linked::Button(*allies_div, 0, hm::vec2(0, 0), (int)size_img, (int)size_img, hm::vec4(0, 0, 0, 0), i);
 		dummy_ally_button->button_info.id = i;
 		dummy_ally_button->setClickedCallback(target_ally);
 		allies_div->getButtons().push_back(dummy_ally_button);
 
 		start_pos.x += size_img + x_spacing;
-		gw.allies_info[i] = new linked::Window(size_info, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.allies_info[i] = new linked::Window((int)size_info, (int)size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.allies_info[i]->setBorderSizeX(1.0f);
 		gw.allies_info[i]->setBorderSizeY(1.0f);
 		gw.allies_info[i]->setBorderColor(cyan);
 
 		float x_off = 0.0f;
 		for (int k = 0; k < NUM_SKILLS; ++k) {
-			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window(skill_img_size, skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 10.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
-			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], skill_img_size, skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			gw.allies_skills[i * NUM_SKILLS + k] = new linked::Window((int)skill_img_size, (int)skill_img_size, start_pos + hm::vec2(x_spacing + x_off, hp_bar_height + y_spacing * 2 + 10.0f), hm::vec4(1, 1, 1, 0), 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
+			linked::WindowDiv* skill_div = new linked::WindowDiv(*gw.allies_skills[i * NUM_SKILLS + k], (int)skill_img_size, (int)skill_img_size, 0, 0, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			gw.allies_skills[i * NUM_SKILLS + k]->divs.push_back(skill_div);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(ally_hp_bar_full_color);
-			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), skill_img_size, skill_img_size, hm::vec4(0, 1, 1, 1), k);
+			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), (int)skill_img_size, (int)skill_img_size, hm::vec4(0, 1, 1, 1), k);
 			skill_button->button_info.data = (void*)i;
 			skill_button->button_info.id = k;
 			skill_button->setClickedCallback(button_skill);
@@ -1592,13 +1596,13 @@ void init_combat_mode()
 			x_off += skill_img_size + x_spacing;
 		}
 
-		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), ally_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.allies_info[i], int(size_info - 2 * x_spacing + 2), (int)hp_bar_height + 2, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), ally_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies_info[i]->divs.push_back(hpempty);
 
-		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), ally_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.allies_info[i], int(size_info - 2 * x_spacing), (int)hp_bar_height, 0, 0, hm::vec2(x_spacing, x_spacing), ally_hp_bar_full_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies_info[i]->divs.push_back(hpfilled);
 
-		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.allies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.allies_info[i], int(size_info - 2 * x_spacing + 2), (int)hp_bar_height + 2, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.allies_info[i]->divs.push_back(status_info);
 		linked::Label* hplabel = new linked::Label(*status_info, (u8*)"100/100", sizeof("100/100"), hm::vec2(size_info - sizeof("100/100") * 10.0f, 0.0f), hm::vec4(0, 1, 1, 1), FONT_OSWALD_REGULAR_16, 0, 0);
 		status_info->getLabels().push_back(hplabel);
@@ -1606,7 +1610,7 @@ void init_combat_mode()
 		r32 begin_negative = 0.0f;
 		for (int b = 0; b < MAX_STATUS; ++b) {
 			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
-			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative + b_spacing, -2.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
+			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative + b_spacing, -2.0f), (int)hp_bar_height, (int)hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
 			status_info->getButtons().push_back(negative_status);
 		}
 
@@ -1618,8 +1622,8 @@ void init_combat_mode()
 		target_pos.x += (size_img + x_spacing + size_info + target_spacing);
 
 		for (int k = 0; k < NUM_ALLIES; ++k) {
-			linked::Window* target_window = new linked::Window(target_icon_size, target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
-			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, target_icon_size, target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			linked::Window* target_window = new linked::Window((int)target_icon_size, (int)target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, (int)target_icon_size, (int)target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			target_window->divs.push_back(target_div);
 			target_pos.x += 10.0f + target_icon_size;
 			gw.ally_target[i][k] = target_window;
@@ -1632,32 +1636,32 @@ void init_combat_mode()
 	start_pos.y = 120.0f;
 
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
-		gw.enemies[i] = new linked::Window(size_img, size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.enemies[i] = new linked::Window((int)size_img, (int)size_img, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.enemies[i]->setBorderSizeX(1.0f);
 		gw.enemies[i]->setBorderSizeY(1.0f);
 		gw.enemies[i]->setBorderColor(enem_hp_bar_full_color);
 
-		linked::WindowDiv* enemy_image_div = new linked::WindowDiv(*gw.enemies[i], size_img, size_img, 0, 0, hm::vec2(0,0), hm::vec4(0,0,0,1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* enemy_image_div = new linked::WindowDiv(*gw.enemies[i], (int)size_img, (int)size_img, 0, 0, hm::vec2(0,0), hm::vec4(0,0,0,1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		enemy_image_div->setBackgroundTexture(char_textures[i]);
 		gw.enemies[i]->divs.push_back(enemy_image_div);
-		linked::Button* dummy_enemy_button = new linked::Button(*enemy_image_div, 0, hm::vec2(0, 0), size_img, size_img, hm::vec4(0, 0, 0, 0), i);
+		linked::Button* dummy_enemy_button = new linked::Button(*enemy_image_div, 0, hm::vec2(0, 0), (int)size_img, (int)size_img, hm::vec4(0, 0, 0, 0), i);
 		dummy_enemy_button->button_info.id = i;
 		dummy_enemy_button->setClickedCallback(target_enemy);
 		enemy_image_div->getButtons().push_back(dummy_enemy_button);
 
 		start_pos.x -= (x_spacing + size_info);
-		gw.enemies_info[i] = new linked::Window(size_info, size_enemy_bars, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+		gw.enemies_info[i] = new linked::Window((int)size_info, (int)size_enemy_bars, start_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
 		gw.enemies_info[i]->setBorderSizeX(1.0f);
 		gw.enemies_info[i]->setBorderSizeY(1.0f);
 		gw.enemies_info[i]->setBorderColor(enem_hp_bar_full_color);
 		
-		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), enem_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* hpempty = new linked::WindowDiv(*gw.enemies_info[i], int(size_info - 2 * x_spacing + 2), (int)hp_bar_height + 2, 0, 0, hm::vec2(x_spacing - 1, x_spacing - 1), enem_hp_bar_empty_color, linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(hpempty);
 		
-		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing, hp_bar_height, 0, 0, hm::vec2(-x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_RIGHT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* hpfilled = new linked::WindowDiv(*gw.enemies_info[i], int(size_info - 2 * x_spacing), (int)hp_bar_height, 0, 0, hm::vec2(-x_spacing, x_spacing), enem_hp_bar_full_color, linked::DIV_ANCHOR_RIGHT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(hpfilled);
 		
-		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.enemies_info[i], size_info - 2 * x_spacing + 2, hp_bar_height + 2.0f, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* status_info = new linked::WindowDiv(*gw.enemies_info[i], int(size_info - 2 * x_spacing + 2), (int)hp_bar_height + 2, 0, 0, hm::vec2(x_spacing, y_spacing + hp_bar_height), hm::vec4(0, 0, 1, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		gw.enemies_info[i]->divs.push_back(status_info);
 		linked::Label* hplabel = new linked::Label(*status_info, (u8*)"100/100", sizeof("100/100"), hm::vec2(/*size_info - sizeof("100/100") * 10.0f*/ 0.0f, 0.0f), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_16, 0, 0);
 		status_info->getLabels().push_back(hplabel);
@@ -1665,7 +1669,7 @@ void init_combat_mode()
 		r32 begin_negative = size_info - 2 * x_spacing + 2 - hp_bar_height;
 		for (int b = 0; b < MAX_STATUS; ++b) {
 			r32 b_spacing = (r32)b * hp_bar_height + 5.0f * (r32)b;
-			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative - b_spacing, 0.0f), hp_bar_height, hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
+			linked::Button* negative_status = new linked::Button(*status_info, 0, hm::vec2(begin_negative - b_spacing, 0.0f), (int)hp_bar_height, (int)hp_bar_height, hm::vec4(1, 0, 0, 0), 0);
 			status_info->getButtons().push_back(negative_status);
 		}
 
@@ -1677,8 +1681,8 @@ void init_combat_mode()
 		target_pos.x -= (x_spacing + size_info + target_icon_size + target_spacing);
 		s32 max_ = MAX(NUM_ALLIES, NUM_ENEMIES);
 		for (int k = 0; k < max_ ; ++k) {
-			linked::Window* target_window = new linked::Window(target_icon_size, target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
-			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, target_icon_size, target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+			linked::Window* target_window = new linked::Window((int)target_icon_size, (int)target_icon_size, target_pos, char_window_color, 0, 0, linked::W_UNFOCUSABLE | linked::W_BORDER);
+			linked::WindowDiv* target_div = new linked::WindowDiv(*target_window, (int)target_icon_size, (int)target_icon_size, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 			target_window->divs.push_back(target_div);
 			target_pos.x -= 10.0f + target_icon_size;
 			gw.enemy_target[i][k] = target_window;
@@ -1695,28 +1699,28 @@ void init_combat_mode()
 		linked::WindowDiv* orbs_div = new linked::WindowDiv(*combat_bottom_info, 500, 100, 0, 0, hm::vec2(45.0f, 0), hm::vec4(1, 0, 0, 0.0f), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_Y);
 		combat_bottom_info->divs.push_back(orbs_div);
 
-		linked::Button* multiple_orb_button = new linked::Button(*orbs_div, 0, hm::vec2(0, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* multiple_orb_button = new linked::Button(*orbs_div, 0, hm::vec2(0, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
 		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		orbs_div->getButtons().push_back(multiple_orb_button);
 
-		linked::Button* hard_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* hard_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		hard_orb_button->setAllBGTexture(orb_textures[0]);
 		orbs_div->getButtons().push_back(hard_orb_button);
 
-		linked::Button* soft_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* soft_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		soft_orb_button->setAllBGTexture(orb_textures[1]);
 		orbs_div->getButtons().push_back(soft_orb_button);
 
-		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		vr_orb_button->setAllBGTexture(orb_textures[2]);
 		orbs_div->getButtons().push_back(vr_orb_button);
 
-		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		bios_orb_button->setAllBGTexture(orb_textures[3]);
 		orbs_div->getButtons().push_back(bios_orb_button);
 
-		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		Texture* xchg_orb_texture = new Texture("../../../res/orbs/exchange_orb.png");
 		exchange_orb_button->setAllBGTexture(xchg_orb_texture);
 		hm::vec4 exchange_orb_button_hovered_bgcolor(0, 1, 1, 0.7f);
@@ -1786,15 +1790,15 @@ void init_combat_mode()
 		skill_desc_div->m_render = false;
 
 		float orb_size = 32.0f;
-		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_1);
-		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_2);
-		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_3);
-		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_4);
-		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, orb_size, orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_5);
 
 		skill_cost_div_1->m_render = false;
@@ -1817,21 +1821,39 @@ void init_combat_mode()
 	}
 	
 	{
-#if 0
+#if 1
 		// Sacrifice Null orb Modal
-		linked::Window* null_orb_modal = new linked::Window(440, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Sacrifice Orb", sizeof "  Sacrifice Orb",
+		linked::Window* null_orb_modal = new linked::Window(300, 140, hm::vec2((r32)window_info.width / 2 - 300 / 2, (r32)window_info.height / 2 - 120 / 2), char_window_color, (u8*)"Choose an orb to sacrifice", sizeof "Choose an orb to sacrifice",
 			linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
 		null_orb_modal->setBorderColor(greener_cyan);
 		null_orb_modal->setTitleColor(char_window_color);
 		null_orb_modal->setTitleCentered(true);
 		null_orb_modal->setActive(false);
 		gw.null_orb_modal = null_orb_modal;
+
+		linked::WindowDiv* null_orb_modal_div = new linked::WindowDiv(*null_orb_modal, 230, 50, 0, 0, hm::vec2(0, 30), hm::vec4(1, 0, 0, 1), linked::DIV_CENTER_X | linked::DIV_ANCHOR_TOP);
+		null_orb_modal->divs.push_back(null_orb_modal_div);
+		linked::Button* orb_hard = new linked::Button(*null_orb_modal_div, 0, hm::vec2(0, 0), 50, 50, hm::vec4(0,0,0,1), 0);
+		orb_hard->setAllBGTexture(orb_textures[ORB_HARD]);
+		null_orb_modal_div->getButtons().push_back(orb_hard);
+		linked::Button* orb_soft = new linked::Button(*null_orb_modal_div, 0, hm::vec2(50 * 1 + 10 * 1, 0), 50, 50, hm::vec4(0, 0, 0, 1), 0);
+		orb_soft->setAllBGTexture(orb_textures[ORB_SOFT]);
+		null_orb_modal_div->getButtons().push_back(orb_soft);
+		linked::Button* orb_vr = new linked::Button(*null_orb_modal_div, 0, hm::vec2(50 * 2 + 10 * 2, 0), 50, 50, hm::vec4(0, 0, 0, 1), 0);
+		orb_vr->setAllBGTexture(orb_textures[ORB_VR]);
+		null_orb_modal_div->getButtons().push_back(orb_vr);
+		linked::Button* orb_bios = new linked::Button(*null_orb_modal_div, 0, hm::vec2(50 * 3 + 10 * 3, 0), 50, 50, hm::vec4(0, 0, 0, 1), 0);
+		orb_bios->setAllBGTexture(orb_textures[ORB_BIOS]);
+		null_orb_modal_div->getButtons().push_back(orb_bios);
+
+		linked::WindowDiv* null_orb_modal_div_2 = new linked::WindowDiv(*null_orb_modal, 230, 50, 0, 0, hm::vec2(0, 80), hm::vec4(1, 0, 0, 1), linked::DIV_CENTER_X | linked::DIV_ANCHOR_TOP);
+		null_orb_modal->divs.push_back(null_orb_modal_div_2);
 #endif
 	}
 
 	{
 		// Multiple Orb Modal
-		linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2(window_info.width / 2 - 460 / 2, window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+		linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2((r32)window_info.width / 2 - 460 / 2, (r32)window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
 			linked::W_HEADER|linked::W_BORDER|linked::W_MOVABLE);
 		exchange_orbs->setBorderColor(greener_cyan);
 		exchange_orbs->setTitleColor(char_window_color);
@@ -1867,24 +1889,24 @@ void init_combat_mode()
 		float orbs_size = 32.0f;
 		float orbs_height = 36.0f;
 
-		linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
 		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		info_div->getButtons().push_back(multiple_orb_button);
 
-		linked::Button* hard_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* hard_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		hard_orb_button->setAllBGTexture(orb_textures[0]);
 		info_div->getButtons().push_back(hard_orb_button);
 
-		linked::Button* soft_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* soft_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		soft_orb_button->setAllBGTexture(orb_textures[1]);
 		info_div->getButtons().push_back(soft_orb_button);
 
-		linked::Button* vr_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* vr_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		vr_orb_button->setAllBGTexture(orb_textures[2]);
 		info_div->getButtons().push_back(vr_orb_button);
 
-		linked::Button* bios_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, orbs_height), orbs_size, orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* bios_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		bios_orb_button->setAllBGTexture(orb_textures[3]);
 		info_div->getButtons().push_back(bios_orb_button);
 		
@@ -1913,7 +1935,7 @@ void init_combat_mode()
 		hm::vec4 arrow_normal_color = greener_cyan;
 		arrow_normal_color.z = 0.0f;
 		// up
-		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_HARD);
+		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
 		hard_orb_arrow_up->setAllBGTexture(arrow_up);
 		hard_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
 		hard_orb_arrow_up->setInactiveAllBGColor(darker_gray);
@@ -1921,7 +1943,7 @@ void init_combat_mode()
 		hard_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(hard_orb_arrow_up);
 
-		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_SOFT);
+		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
 		soft_orb_arrow_up->setAllBGTexture(arrow_up);
 		soft_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
 		soft_orb_arrow_up->setInactiveAllBGColor(darker_gray);
@@ -1929,7 +1951,7 @@ void init_combat_mode()
 		soft_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(soft_orb_arrow_up);
 
-		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_VR);
+		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
 		vr_orb_arrow_up->setAllBGTexture(arrow_up);
 		vr_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
 		vr_orb_arrow_up->setInactiveAllBGColor(darker_gray);
@@ -1937,7 +1959,7 @@ void init_combat_mode()
 		vr_orb_arrow_up->button_info.data = (void*)ARROW_UP;
 		info_div->getButtons().push_back(vr_orb_arrow_up);
 
-		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_BIOS);
+		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
 		bios_orb_arrow_up->setAllBGTexture(arrow_up);
 		bios_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
 		bios_orb_arrow_up->setInactiveAllBGColor(darker_gray);
@@ -1946,7 +1968,7 @@ void init_combat_mode()
 		info_div->getButtons().push_back(bios_orb_arrow_up);
 
 		// down
-		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_HARD);
+		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
 		hard_orb_arrow_down->setAllBGTexture(arrow_down);
 		hard_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
 		hard_orb_arrow_down->setInactiveAllBGColor(darker_gray);
@@ -1954,7 +1976,7 @@ void init_combat_mode()
 		hard_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(hard_orb_arrow_down);
 
-		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_SOFT);
+		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
 		soft_orb_arrow_down->setAllBGTexture(arrow_down);
 		soft_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
 		soft_orb_arrow_down->setInactiveAllBGColor(darker_gray);
@@ -1962,7 +1984,7 @@ void init_combat_mode()
 		soft_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(soft_orb_arrow_down);
 
-		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_VR);
+		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
 		vr_orb_arrow_down->setAllBGTexture(arrow_down);
 		vr_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
 		vr_orb_arrow_down->setInactiveAllBGColor(darker_gray);
@@ -1970,7 +1992,7 @@ void init_combat_mode()
 		vr_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
 		info_div->getButtons().push_back(vr_orb_arrow_down);
 
-		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), arrow_up_size, arrow_up_size, arrow_normal_color, ORB_BIOS);
+		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
 		bios_orb_arrow_down->setAllBGTexture(arrow_down);
 		bios_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
 		bios_orb_arrow_down->setInactiveAllBGColor(darker_gray);
@@ -2039,7 +2061,7 @@ void init_combat_state() {
 	}
 
 	// @Temporary
-	//gw.null_orb_modal->setActive(true);
+	gw.null_orb_modal->setActive(true);
 }
 
 void init_application()
@@ -2278,7 +2300,7 @@ void update_game_mode(double frametime)
 				// this is when the turn is flipped
 				end_turn();
 			}
-			layout_set_timer_percentage(turn_time / TURN_DURATION);
+			layout_set_timer_percentage((r32)(turn_time / TURN_DURATION));
 
 			// enemy targeting
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
@@ -2801,4 +2823,8 @@ static void layout_apply_status_enemy(s32 target_index, s32 stat_index, Texture*
 	if (!status_image) {
 		gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 0));
 	}
+}
+
+static void layout_null_orb_modal_set_amount(Orb_ID id, s32 amount) {
+
 }

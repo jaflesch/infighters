@@ -154,7 +154,7 @@ namespace linked
 
 	bool Button::isHovered() const
 	{
-		hm::vec2 cursorPosition = hm::vec2(mouse_state.x, mouse_state.y);
+		hm::vec2 cursorPosition = hm::vec2((float)mouse_state.x, (float)mouse_state.y);
 
 		hm::vec2 buttonPosition = getScreenPosition();
 		
