@@ -21,30 +21,35 @@ GLuint get_font_texture(Font_ID font_id) {
 	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
 		return font_list.list[font_id].atlas_full_id;
 	}
+	return 0;
 }
 
 r32 get_font_max_height(Font_ID font_id) {
 	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
 		return (r32)font_list.list[font_id].max_height;
 	}
+	return 0;
 }
 
 r32 get_font_max_width(Font_ID font_id) {
 	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
 		return (r32)font_list.list[font_id].max_width;
 	}
+	return 0;
 }
 
 r32 get_font_size(Font_ID font_id) {
 	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
 		return (r32)font_list.list[font_id].font_size;
 	}
+	return 0;
 }
 
 bool get_font_is_unicode(Font_ID font_id) {
 	if (font_id >= 0 && font_list.used[font_id] && font_list.list[font_id].loaded) {
 		return (r32)font_list.list[font_id].unicode;
 	}
+	return false;
 }
 
 int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_limit, bool is_unicode)
@@ -89,7 +94,7 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 	s32 max_width = font->face->size->metrics.max_advance >> 6;
 	s32 num_glyphs = font->face->num_glyphs;
 	s32 num_glyphs_loaded = 0;
-	s32 size = next_2_pow((s32)sqrtf(max_width * num_glyphs)) * 4;
+	s32 size = (s32)next_2_pow((s32)sqrtf(float(max_width * num_glyphs))) * 4;
 	r32 atlasf_size = (r32)size;
 	font->atlas_size = size;
 
@@ -120,7 +125,7 @@ int font_load(Font_Info* font, const s8* filepath, u32 pixel_point, u32 load_lim
 				x_adv = 0;
 			}
 			// copy from the FT bitmap to atlas in the correct position
-			for (u32 h = 0; h < height; ++h) {
+			for (s32 h = 0; h < height; ++h) {
 				u8* b = font->face->glyph->bitmap.buffer;
 				memory_copy(font->atlas_data + (size * (h + y_adv)) + x_adv, b + width * h, width);
 			}
@@ -281,7 +286,7 @@ void font_finish_load(Font_Info* font)
 {
 	if (font->finish_load) {
 		font->finish_load = false;
-		u32 size = font->atlas_size;
+		GLsizei size = (GLsizei)font->atlas_size;
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &font->atlas_full_id);
 		glBindTexture(GL_TEXTURE_2D, font->atlas_full_id);
@@ -344,8 +349,8 @@ void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& pos
 		GLfloat xpos = (GLfloat)position.x + characters[index].bearing[0];
 		GLfloat ypos = (GLfloat)position.y - (characters[index].size[1] - characters[index].bearing[1]);
 
-		GLfloat w = characters[index].size[0];
-		GLfloat h = characters[index].size[1];
+		GLfloat w = (GLfloat)characters[index].size[0];
+		GLfloat h = (GLfloat)characters[index].size[1];
 
 		float data[] = {
 			xpos + w, ypos      , 0.0f, characters[index].topr.x, characters[index].topr.y, color.r, color.g, color.b, color.a,
@@ -366,7 +371,7 @@ void text_draw(Font_Info* font, s64 offset_, u8* text, s32 length, hm::vec2& pos
 extern "C" u32 load_font_thread(void *arg)
 {
 	Font_Info* font = (Font_Info*)arg;
-	int err = font_load(font, (s8*)font->name.data, font->font_size, 1024);
+	int err = font_load(font, (s8*)font->name.data, (u32)font->font_size, 1024);
 	if (err == -1) font->error_loading = true;
 	return 0;
 }
@@ -431,7 +436,7 @@ int render_text(Font_ID font_id, string text, hm::vec2& position, hm::vec4 color
 		if (font->text_buffer_offset + text.length >= font->text_buffer_max_length) {
 			text_buffer_realloc(font, font->text_buffer_offset + text.length + 512);
 		}
-		text_draw(font, font->text_buffer_offset, text.data, text.length, position, color, font->unicode);
+		text_draw(font, font->text_buffer_offset, text.data, (u32)text.length, position, color, font->unicode);
 		font->text_buffer_offset += text.length;
 		font->text_buffer_length += text.length;
 	} else {
@@ -507,8 +512,8 @@ int render_text_get_info(Font_ID font_id, string text_in, hm::vec2& position_out
 			GLfloat xpos = (GLfloat)position_out.x + characters[index].bearing[0];
 			GLfloat ypos = (GLfloat)position_out.y - (characters[index].size[1] - characters[index].bearing[1]);
 
-			GLfloat w = characters[index].size[0];
-			GLfloat h = characters[index].size[1];
+			GLfloat w = (GLfloat)characters[index].size[0];
+			GLfloat h = (GLfloat)characters[index].size[1];
 
 			if (h > max_height) {
 				max_height = h;
@@ -533,7 +538,7 @@ void font_rendering_flush() {
 
 	for (int i = 0; i < sizeof(font_list.list) / sizeof(Font_Info); ++i) {
 		if (font_list.used[i] && font_list.list[i].loaded) {
-			text_buffer_draw(&font_list.list[i], font_list.list[i].text_buffer_length, hm::vec2(window_info.width, window_info.height));
+			text_buffer_draw(&font_list.list[i], (s32)font_list.list[i].text_buffer_length, hm::vec2((r32)window_info.width, (r32)window_info.height));
 			font_list.list[i].text_buffer_length = 0;
 			font_list.list[i].text_buffer_offset = 0;
 		}
@@ -559,7 +564,7 @@ Font_Table::Font_Table(int max_entries) : max_entries(max_entries){
 }
 
 Font_ID Font_Table::entry_exist(string name, int size) {
-	u32 hash = (djb2_hash(name.data, name.length) + size) % max_entries;
+	u32 hash = (djb2_hash(name.data, (s32)name.length) + size) % max_entries;
 	if (entries[hash].used) {
 		if (equal(&name, &entries[hash].name)) {
 			return entries[hash].id;
@@ -577,7 +582,7 @@ Font_ID Font_Table::entry_exist(string name, int size) {
 }
 
 void Font_Table::insert(Font_ID id, string name, int size) {
-	u32 hash = (djb2_hash(name.data, name.length) + size) % max_entries;
+	u32 hash = (djb2_hash(name.data, (s32)name.length) + size) % max_entries;
 	while (entries[hash].used) {
 		hash += 1;
 		if (hash >= max_entries) hash = 0;

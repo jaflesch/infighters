@@ -34,13 +34,14 @@ struct Camera {
 	void rotate_y(float amt);
 };
 
+
 struct Vertex3D {
 	float pos[3];
 	float normal[3];
 	float tex[2];
 };
 
-struct Texture;
+class Texture;
 
 struct IndexedModel3D {
 	GLuint vao;
@@ -316,6 +317,7 @@ struct Player {
 	u32 reduction_type[NUM_ALLIES];		// Skill_Type or'd together
 	u32 reduction_points[NUM_ALLIES][SKILL_DEF_NUMBER];
 	s32 reduction_duration[NUM_ALLIES][SKILL_DEF_NUMBER];
+	bool reduction_percentile[NUM_ALLIES][SKILL_DEF_NUMBER];
 
 	u32 status[NUM_ALLIES];				// Skill_Condition or'd together
 	s32 status_duration[NUM_ALLIES][SKILL_CONDITION_NUMBER];

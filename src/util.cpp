@@ -5,9 +5,11 @@
 #include <stdarg.h>
 
 
-void* memory_alloc(u32 size)
+void* memory_alloc(s64 size)
 {
-	return calloc(1, size);
+	if(size > 0)
+		return calloc(1, size);
+	return 0;
 }
 
 void memory_free(void* block) 
@@ -15,9 +17,9 @@ void memory_free(void* block)
 	free(block);
 }
 
-void memory_copy(void* destination, void* origin, u32 size)
-{
-	memcpy(destination, origin, size);
+void memory_copy(void* destination, void* origin, s64 size) {
+	if(size > 0)
+		memcpy(destination, origin, size);
 }
 
 void string_copy(s8* destination, s8* origin)

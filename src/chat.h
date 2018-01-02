@@ -14,7 +14,7 @@ struct Chat {
 	void set_next_message(std::string& msg);
 
 	linked::Window* init_chat();
-	void handle_keystroke(int key, int params);
+	void handle_keystroke(u64 key, u64 params);
 	void next_history();
 	void previous_history();
 	int history_index;

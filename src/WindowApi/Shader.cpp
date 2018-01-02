@@ -3,12 +3,11 @@
 #include "../common.h"
 #include <iostream>
 
-Shader::Shader(std::string filename, Camera* camera)
+Shader::Shader(std::string filename)
 {
 	GLuint ShaderProgram = glCreateProgram();
 	ShaderProgram = loadShader(filename.c_str(), ShaderProgram);
 	shader = ShaderProgram;
-	this->camera = camera;
 
 	glUseProgram(ShaderProgram);
 }
@@ -64,7 +63,7 @@ GLuint Shader::loadShader(const char* filename, GLuint shaderProgram)
 	const GLchar* p_v[1];
 	p_v[0] = VertexShaderCode.c_str();
 	GLint v_Lengths[1];
-	v_Lengths[0] = VertexShaderCode.length();
+	v_Lengths[0] = (GLint)VertexShaderCode.length();
 	glShaderSource(VertexShader, 1, p_v, v_Lengths);
 
 	glCompileShader(VertexShader);
@@ -95,7 +94,7 @@ GLuint Shader::loadShader(const char* filename, GLuint shaderProgram)
 	const GLchar* p_f[1];
 	p_f[0] = FragmentShaderCode.c_str();
 	GLint f_Lengths[1];
-	f_Lengths[0] = FragmentShaderCode.length();
+	f_Lengths[0] = (GLint)FragmentShaderCode.length();
 	glShaderSource(FragmentShader, 1, p_f, f_Lengths);
 
 	glCompileShader(FragmentShader);
@@ -145,11 +144,6 @@ void Shader::deactivateAlphaBlend()
 GLuint Shader::getShader()
 {
 	return this->shader;
-}
-
-void Shader::setCamera(Camera* c)
-{
-	this->camera = c;
 }
 
 void Shader::setEntity(Entity* e)

@@ -21,7 +21,8 @@ class FontRenderer
 public:
 	FontRenderer(float fontSize, int textureQuality);
 	~FontRenderer();
-	TextInfo RenderText(std::string text, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat);
+	TextInfo RenderText(const char* text, int length, float xPos, float yPos, float pixelWidthLimit, const hm::vec4 color, FontShader* shader, bool wordFormat);
+	hm::vec2 RenderTextGetInfo(const char* text, int length);
 private:
 	unsigned int* data;
 	float fontSize;

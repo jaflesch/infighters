@@ -63,11 +63,6 @@ namespace linked
 			divMesh->render();
 			ws->setOpacity(1.0f);
 
-			//if (borderMesh) {
-			//	ws->useTexture = 0;
-			//	borderMesh->render();
-			//}
-
 			if (m_backgroundTexture != nullptr)
 				ws->unbindTextures();
 
@@ -86,8 +81,6 @@ namespace linked
 			ws->update(v);
 			b->getButtonMesh().render();
 			ws->setOpacity(1.0f);
-		
-			// renderizar botao aqui da um efeito interessante
 
 			if (b->getBackgroundTexture() != nullptr)
 				ws->unbindTextures();
@@ -95,8 +88,9 @@ namespace linked
 
 		if (m_render) {
 			hm::vec2 relative_pos = getRelativePosition();
-			ws->update(relative_pos);
 			if (borderMesh) {
+				ws->setTextColor(borderMesh->getBorder()->getBGColor());
+				ws->update(relative_pos);
 				ws->useTexture = 0;
 				borderMesh->render();
 			}
@@ -237,6 +231,6 @@ namespace linked
 	}
 
 	void WindowDiv::createBorder(float l, float r, float t, float b) {
-		borderMesh = new Mesh(new Border(hm::vec3(0, 0, 0), m_width * 2, m_height * 2, l * 2, r * 2, t * 2, b * 2));
+		borderMesh = new Mesh(new Border(hm::vec3(0, 0, 0), (float)m_width * 2, (float)m_height * 2, l * 2, r * 2, t * 2, b * 2));
 	}
 }

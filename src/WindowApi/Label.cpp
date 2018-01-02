@@ -29,7 +29,7 @@ namespace linked
 		lineSpace(0), 
 		m_yAdvance(0)
 	{
-		m_font_size = get_font_size(font_id);
+		m_font_size = (int)get_font_size(font_id);
 	}
 
 	Label::Label(const WindowDiv& div, unsigned char* text, int textLength, hm::vec2 position, Font_ID font_id) :
@@ -58,8 +58,8 @@ namespace linked
 			if (font_id >= FONT_NUMBER) {
 				font_id = 0;
 			}
-			r32 xPos = (int)(renderPosition.x * (float)ww);
-			r32 yPos = (int)(-renderPosition.y * (float)wh);
+			r32 xPos = roundf(renderPosition.x * (float)ww);
+			r32 yPos = roundf(-renderPosition.y * (float)wh);
 			hm::vec2 start_pos = hm::vec2((xPos / 2.0f) + 800, (yPos / 2.0f) + 450 - get_font_size(font_id));
 			
 			if (m_textLength > 0) {

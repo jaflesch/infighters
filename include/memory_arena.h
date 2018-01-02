@@ -19,7 +19,7 @@
 #ifdef HO_USE_ASSERT
 #include <assert.h>
 #else
-#define assert(X)
+#define assert(X) do { if(!(X)) __debugbreak(); } while(0)
 #endif
 
 typedef struct {
@@ -56,7 +56,7 @@ void arena_create(Memory_Arena* arena, size_t size) {
 	arena->block_size = size;
 	arena->num_allocs = 0;
 	arena->num_blocks = 1;
-	arena->current_block = index;
+	arena->current_block = (int)index;
 }
 
 void arena_release(Memory_Arena* arena) {

@@ -53,7 +53,7 @@ struct Font_Table_Entry {
 
 struct Font_Table {
 	int num_entries;
-	int max_entries;
+	u32 max_entries;
 	Font_Table_Entry* entries;
 	
 	Font_Table(int max_entries);
