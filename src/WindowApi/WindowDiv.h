@@ -52,12 +52,7 @@ public:
 	Texture* getBackgroundTexture(){ return this->m_backgroundTexture; }
 	inline void setOpacity(float opacity) { this->m_opacity = opacity; }
 	inline float getOpacity() const { return this->m_opacity; }
-	inline void setBorderColor(hm::vec4 color) {
-		borderMesh->getBorder()->setLeftColor(color);
-		borderMesh->getBorder()->setRightColor(color);
-		borderMesh->getBorder()->setTopColor(color);
-		borderMesh->getBorder()->setBottomColor(color);
-	}
+	inline void setBorderColor(hm::vec4 color) { borderMesh->getBorder()->setBGColor(color); }
 
 	void createBorder(float l, float r, float t, float b);
 private:

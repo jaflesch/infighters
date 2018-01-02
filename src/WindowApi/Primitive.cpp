@@ -151,7 +151,7 @@ IndexedModel* Quad::getIndexedModel()
 {
 	return model;
 }
-
+#if 0
 void Border::genVAO()
 {
 	//glGenVertexArrays(4, VertexArrayID);
@@ -235,3 +235,98 @@ Border::Border(hm::vec3 center, float width, float height, float left_size, floa
 	genVBOS();
 	genIndexBuffer();
 }
+
+#else
+void Border::genVAO()
+{
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+}
+
+void Border::genVBOS()
+{
+	glBindVertexArray(VertexArrayID);
+	glGenBuffers(1, &VertexBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, VertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER, model->positions.size() * sizeof(float) * 3, &model->positions[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glDisableVertexAttribArray(0);
+}
+
+void Border::genIndexBuffer()
+{
+	glBindVertexArray(VertexArrayID);
+	glGenBuffers(1, &IndexBufferID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->indices.size() * sizeof(unsigned int), &model->indices[0], GL_STATIC_DRAW);
+}
+
+Border::Border(hm::vec3 center, float width, float height, float left_size, float right_size, float top_size, float bottom_size)
+{
+	model = new IndexedModel();
+
+	bg_color = hm::vec4(1, 1, 1, 1);
+
+	float half_width = width / 2.0f;
+	float half_height = height / 2.0f;
+
+	// topL topR botL botR
+	model->positions.push_back(vec3(center.x - half_width - left_size, center.y + half_height + top_size, 0.0f));
+	model->positions.push_back(vec3(center.x - half_width, center.y + half_height, 0.0f));
+	model->positions.push_back(vec3(center.x - half_width - left_size, center.y - half_height - bottom_size, 0.0f));
+	model->positions.push_back(vec3(center.x - half_width, center.y - half_height, 0.0f));
+
+	model->positions.push_back(vec3(center.x + half_width, center.y + half_height, 0));
+	model->positions.push_back(vec3(center.x + half_width + right_size, center.y + half_height + top_size, 0));
+	model->positions.push_back(vec3(center.x + half_width, center.y - half_height, 0));
+	model->positions.push_back(vec3(center.x + half_width + right_size, center.y - half_height - bottom_size, 0));
+
+	model->positions.push_back(vec3(center.x - half_width - left_size, center.y + half_height + top_size, 0));
+	model->positions.push_back(vec3(center.x + half_width + right_size, center.y + half_height + top_size, 0));
+	model->positions.push_back(vec3(center.x - half_width, center.y + half_height, 0));
+	model->positions.push_back(vec3(center.x + half_width, center.y + half_height, 0));
+
+	model->getPositions()->push_back(vec3(center.x - half_width, center.y - half_height, 0));
+	model->getPositions()->push_back(vec3(center.x + half_width, center.y - half_height, 0));
+	model->getPositions()->push_back(vec3(center.x - half_width - left_size, center.y - half_height - bottom_size, 0));
+	model->getPositions()->push_back(vec3(center.x + half_width + right_size, center.y - half_height - bottom_size, 0));
+
+	model->indices.push_back(0);
+	model->indices.push_back(3);
+	model->indices.push_back(1);
+	model->indices.push_back(0);
+	model->indices.push_back(2);
+	model->indices.push_back(3);
+
+	model->indices.push_back(0 + 4);
+	model->indices.push_back(3 + 4);
+	model->indices.push_back(1 + 4);
+	model->indices.push_back(0 + 4);
+	model->indices.push_back(2 + 4);
+	model->indices.push_back(3 + 4);
+
+	model->indices.push_back(0 + 8);
+	model->indices.push_back(3 + 8);
+	model->indices.push_back(1 + 8);
+	model->indices.push_back(0 + 8);
+	model->indices.push_back(2 + 8);
+	model->indices.push_back(3 + 8);
+
+	model->indices.push_back(0 + 12);
+	model->indices.push_back(3 + 12);
+	model->indices.push_back(1 + 12);
+	model->indices.push_back(0 + 12);
+	model->indices.push_back(2 + 12);
+	model->indices.push_back(3 + 12);
+
+	genVAO();
+	genVBOS();
+	genIndexBuffer();
+}
+
+IndexedModel* Border::getIndexedModel()
+{
+	return model;
+}
+#endif

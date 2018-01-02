@@ -88,8 +88,9 @@ namespace linked
 
 		if (m_render) {
 			hm::vec2 relative_pos = getRelativePosition();
-			ws->update(relative_pos);
 			if (borderMesh) {
+				ws->setTextColor(borderMesh->getBorder()->getBGColor());
+				ws->update(relative_pos);
 				ws->useTexture = 0;
 				borderMesh->render();
 			}

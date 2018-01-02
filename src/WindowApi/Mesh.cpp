@@ -29,8 +29,10 @@ Mesh::Mesh(Quad* quad, bool dynamicDraw)
 }
 
 Mesh::Mesh(Border* border) {
+	this->indexedModel = border->getIndexedModel();
 	this->border = border;
 	this->openglDrawHint = GL_STATIC_DRAW;
+	indicesSize = (int)border->getIndexedModel()->indices.size() * sizeof(unsigned int);
 }
 
 Mesh::~Mesh()
@@ -123,25 +125,18 @@ void Mesh::render()
 		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
-	}
-	else if (border) {
-		for (int i = 0; i < 4; ++i) {
-			
-			hm::vec4 color = border->getColor(i);
-			glUniform4fv(linked::Window::m_windowShader->getUniformTextColor(), 1, &color.x);
+	} else if (border) {
+		glBindVertexArray(border->VertexArrayID);
 
-			glBindVertexArray(border->VertexArrayID[i]);
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
 
-			glEnableVertexAttribArray(0);
-			glEnableVertexAttribArray(1);
-			glEnableVertexAttribArray(2);
+		glDrawElements(GL_TRIANGLES, indicesSize / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-			glDisableVertexAttribArray(2);
-			glDisableVertexAttribArray(1);
-			glDisableVertexAttribArray(0);
-		}
+		glDisableVertexAttribArray(2);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(0);
 	}
 }
 
