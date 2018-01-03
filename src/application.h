@@ -387,6 +387,11 @@ struct Game_Windows {
 	linked::Window* exchange_orbs;
 	linked::Window* null_orb_modal;
 
+	Texture* end_turn_button_player_turn;
+	Texture* end_turn_button_enemy_turn;
+	Texture* end_turn_button_player_turn_hover;
+	Texture* end_turn_button_enemy_turn_hover;
+
 	// combat target
 	linked::Window* enemy_target[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
 	linked::Window* ally_target[NUM_ALLIES][NUM_ALLIES];

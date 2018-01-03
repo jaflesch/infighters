@@ -37,48 +37,6 @@ private:
 
 	IndexedModel* model;
 };
-/*
-class Border : public Primitive
-{
-public:
-	Border(hm::vec3 center, float width, float height, float left_size, float right_size, float top_size, float bottom_size);
-
-	GLuint VertexArrayID[4];
-	GLuint VertexBufferID[4];
-	GLuint IndexBufferID[4];
-
-	IndexedModel* models[4];	// left right top bottom
-private:
-	hm::vec4 left_color;
-	hm::vec4 right_color;
-	hm::vec4 top_color;
-	hm::vec4 bottom_color;
-
-	void genVAO();
-	void genVBOS();
-	void genIndexBuffer();
-
-public:
-	inline hm::vec4 getLeftColor() { return left_color; }
-	inline hm::vec4 getRightColor() { return right_color; }
-	inline hm::vec4 getTopColor() { return top_color; }
-	inline hm::vec4 getBottomColor() { return bottom_color; }
-	inline hm::vec4 getColor(int index) { 
-		switch (index) {
-		case 0: return left_color;
-		case 1: return right_color;
-		case 2: return top_color;
-		case 3: return bottom_color;
-		}
-		return left_color;
-	}
-
-	inline void setLeftColor(hm::vec4 color) { left_color = color; }
-	inline void setRightColor(hm::vec4 color) { right_color = color; }
-	inline void setTopColor(hm::vec4 color) { top_color = color; }
-	inline void setBottomColor(hm::vec4 color) { bottom_color = color; }
-};
-*/
 
 class Border : public Primitive
 {
