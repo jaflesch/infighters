@@ -172,7 +172,10 @@ int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
 	sizeof "BRANCH DAMAGE"
 };
 
-char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
+char** skill_desc = 0;
+int* skill_desc_length = 0;
+
+char* skill_desc_pt[NUM_SKILLS * NUM_CHARS] = {
 	// Zer0
 	"Ataca um oponente e realiza 20 de dano.",
 	"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
@@ -246,7 +249,7 @@ char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
 	"Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno."
 };
 
-int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
+int skill_desc_pt_length[sizeof(skill_desc_pt) / sizeof(char*)] = {
 	// Zer0
 	sizeof "Ataca um oponente e realiza 20 de dano.",
 	sizeof "Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
@@ -415,7 +418,7 @@ char* skill_desc_en[NUM_SKILLS * NUM_CHARS] = {
 	//"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
 	"Attacks the opponent with less HP and deals 20 damage. For 2 turns, the target stays with BURN status.\nIf the target is already in BURN status, they suffer an additional 10 crushing damage.",
 	//"Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
-	"If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN status for 2 turns.",
+	"If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN\nstatus for 2 turns.",
 	//"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
 	"In the next turn, receive 4 orbs of energy: one of each category.",
 	//"=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
@@ -442,10 +445,10 @@ char* skill_desc_en[NUM_SKILLS * NUM_CHARS] = {
 	"Assuming that the battle got into a damage condition, Cl0ckB0y makes a conditional jump that makes him invulnerable for 1 turn."
 };
 
-int skill_desc_length_en[sizeof(skill_desc) / sizeof(char*)] = {
+int skill_desc_en_length[sizeof(skill_desc_en) / sizeof(char*)] = {
 	// Zer0
 	//"Ataca um oponente e realiza 20 de dano.",
-	sizeof "Attacks an opponent dealing 20 damage.",
+	sizeof ("Attacks an opponent dealing 20 damage."),
 	//"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
 	sizeof "Marks an enemy and, if in the next turn they make an attack on Zer0, their attack is denied, \nsuffer 20 damage and receive Paralyze status for 1 turn.",
 	//"Cria uma atmosfera negativa no campo de batalha. False Rush e Contradiction acertam todos os adversários\ndurante 3 turnos.",
@@ -537,7 +540,7 @@ int skill_desc_length_en[sizeof(skill_desc) / sizeof(char*)] = {
 	//"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
 	sizeof "Attacks the opponent with less HP and deals 20 damage. For 2 turns, the target stays with BURN status.\nIf the target is already in BURN status, they suffer an additional 10 crushing damage.",
 	//"Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
-	sizeof "If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN status for 2 turns.",
+	sizeof "If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN\nstatus for 2 turns.",
 	//"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
 	sizeof "In the next turn, receive 4 orbs of energy: one of each category.",
 	//"=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
@@ -1572,6 +1575,9 @@ void init_application()
 
 	char_descriptions = char_descriptions_en;
 	char_descriptions_length = char_descriptions_en_length;
+
+	skill_desc = skill_desc_en;
+	skill_desc_length = skill_desc_en_length;
 
 	// init console chat
 	chat_window = chat.init_chat();
