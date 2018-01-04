@@ -157,9 +157,9 @@ s32 deal_damage_to_target_enemy(int target_index, int source_index, int damage, 
 		deal_damage_to_target_ally(source_index, -1, -dmg, dmg_type, skill_id, combat_state);
 		return dmg;
 	}
-
-	combat_state->enemy.hp[target_index] = MAX(0, combat_state->enemy.hp[target_index] - dmg);
-	layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], combat_state->enemy.hp[target_index]);
+	s32 hp_to_set = MAX(0, combat_state->enemy.hp[target_index] - dmg);
+	layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], hp_to_set);
+	combat_state->enemy.hp[target_index] = hp_to_set;
 	if (combat_state->enemy.hp[target_index] == 0) {
 		layout_enemy_die(target_index);
 	}
@@ -175,8 +175,9 @@ s32 deal_damage_to_target_ally(int target_index, int source_index, int damage, S
 		return dmg;
 	}
 
-	combat_state->player.hp[target_index] = MAX(0, combat_state->player.hp[target_index] - dmg);
-	layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], combat_state->player.hp[target_index]);
+	s32 ho_to_set = MAX(0, combat_state->player.hp[target_index] - dmg);
+	layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], ho_to_set);
+	combat_state->player.hp[target_index] = ho_to_set;
 	if (combat_state->player.hp[target_index] == 0) {
 		layout_ally_die(target_index);
 	}
@@ -840,8 +841,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					apply_status_to_ally(target_index, SKILL_CONDITION_BURN, 3, combat_state);
 				} else {
 					s32 newhp = MIN(combat_state->enemy.hp[target_index] + 25, combat_state->enemy.max_hp[target_index]);
-					combat_state->enemy.hp[target_index] = newhp;
 					layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], newhp);
+					combat_state->enemy.hp[target_index] = newhp;
 					apply_status_to_enemy(target_index, SKILL_CONDITION_FREEZE, 2, combat_state);
 				}
 			} else {
@@ -849,8 +850,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					apply_status_to_enemy(target_index, SKILL_CONDITION_BURN, 3, combat_state);
 				} else {
 					s32 newhp = MIN(combat_state->player.hp[target_index] + 25, combat_state->player.max_hp[target_index]);
-					combat_state->player.hp[target_index] = newhp;
 					layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], newhp);
+					combat_state->player.hp[target_index] = newhp;
 					apply_status_to_ally(target_index, SKILL_CONDITION_FREEZE, 2, combat_state);
 				}
 			}
@@ -1010,6 +1011,7 @@ void update_skill_state_end_turn(Combat_State* combat_state) {
 		skill_state_ally.overclock_duration -= 1;
 
 	for (int i = 0; i < NUM_ALLIES; ++i) {
+		combat_state->player.skill_in_use[i] = SKILL_NONE;
 		for (int k = 0; k < SKILL_DEF_NUMBER; ++k) {
 			if (combat_state->player.reduction_duration[i][k] > 0) {
 				combat_state->player.reduction_duration[i][k]--;

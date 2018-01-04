@@ -815,7 +815,23 @@ static void button_callback_sacrifice_orb_cancel(void* arg) {
 	}
 }
 static void button_callback_sacrifice_orb_endturn(void* arg) {
-	
+	s32 sum = 0;
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		sum += combat_state.sacrifice_orbs_state.orb_right_amount[i];
+	}
+
+	if (sum == combat_state.total_null_orbs_in_temp_use) {
+		for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+			combat_state.orbs_amount[i] -= combat_state.sacrifice_orbs_state.orb_right_amount[i];
+			layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
+		}
+		combat_state.total_orbs -= sum;
+		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+		combat_state.total_null_orbs_in_temp_use = 0;
+
+		button_callback_sacrifice_orb_cancel(0);
+		end_turn();
+	}
 }
 static void sacrifice_orbs_start() {
 	gw.sacrifice_orb_ui->window->setActive(true);
@@ -1473,6 +1489,7 @@ void update_game_mode(double frametime)
 				// this is when the turn is flipped
 				end_turn();
 			}
+			layout_update_hp_animations(frametime);
 			layout_set_timer_percentage((r32)(turn_time / TURN_DURATION));
 
 			// enemy targeting
@@ -1879,11 +1896,32 @@ static void layout_change_orb_amount(Orb_ID id, int amt) {
 	label->setText((u8*)selected, count + 1);
 }
 
+struct HP_Bar_Animation {
+	bool ally_hp_animating[NUM_ALLIES];
+	bool enemy_hp_animating[NUM_ENEMIES];
+
+	int ally_start_hp[NUM_ALLIES];
+	int enemy_start_hp[NUM_ALLIES];
+
+	int ally_hp_to_set[NUM_ALLIES];
+	int enemy_hp_to_set[NUM_ENEMIES];
+
+	r32 ally_current_animating_hp[NUM_ALLIES];
+	r32 enemy_current_animating_hp[NUM_ENEMIES];
+};
+
+static HP_Bar_Animation hp_bar_animation = {};
+
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set)
 {
 	// hp_empty
 	// hp_full
 	// hp_label
+
+	hp_bar_animation.ally_hp_animating[ally_index] = true;
+	hp_bar_animation.ally_hp_to_set[ally_index] = hp_to_set;
+	hp_bar_animation.ally_start_hp[ally_index] = combat_state.player.hp[ally_index];
+	hp_bar_animation.ally_current_animating_hp[ally_index] = combat_state.player.hp[ally_index];
 
 	static char hp_buffer[NUM_ALLIES][32] = {};
 	memset(hp_buffer[ally_index], 0, sizeof(hp_buffer[NUM_ALLIES]));
@@ -1891,9 +1929,9 @@ static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set)
 	hp_buffer[ally_index][count++] = '/';
 	count += s32_to_str_base10(max_hp, hp_buffer[ally_index] + count);
 
-	int max_width = gw.allies_info[ally_index]->divs[0]->getWidth() - 2;
-	int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
-	gw.allies_info[ally_index]->divs[1]->setWidth(new_width);
+	//int max_width = gw.allies_info[ally_index]->divs[0]->getWidth() - 2;
+	//int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
+	//gw.allies_info[ally_index]->divs[1]->setWidth(new_width);
 
 	linked::Label* hp_label = gw.allies_info[ally_index]->divs[2]->getLabels()[0];
 	hp_label->setText((u8*)hp_buffer[ally_index], count + 1);
@@ -1905,18 +1943,68 @@ static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set)
 	// hp_full
 	// hp_label
 
+	hp_bar_animation.enemy_hp_animating[enemy_index] = true;
+	hp_bar_animation.enemy_hp_to_set[enemy_index] = hp_to_set;
+	hp_bar_animation.enemy_start_hp[enemy_index] = combat_state.enemy.hp[enemy_index];
+	hp_bar_animation.enemy_current_animating_hp[enemy_index] = combat_state.enemy.hp[enemy_index];
+
 	static char hp_buffer[NUM_ENEMIES][32] = {};
 	memset(hp_buffer[enemy_index], 0, sizeof(hp_buffer[NUM_ENEMIES]));
 	int count = s32_to_str_base10(hp_to_set, hp_buffer[enemy_index]);
 	hp_buffer[enemy_index][count++] = '/';
 	count += s32_to_str_base10(max_hp, hp_buffer[enemy_index] + count);
 
-	int max_width = gw.enemies_info[enemy_index]->divs[0]->getWidth() - 2;
-	int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
-	gw.enemies_info[enemy_index]->divs[1]->setWidth(new_width);
+	//int max_width = gw.enemies_info[enemy_index]->divs[0]->getWidth() - 2;
+	//int new_width = (int)roundf((r32)(hp_to_set * max_width) / (r32)max_hp);
+	//gw.enemies_info[enemy_index]->divs[1]->setWidth(new_width);
 
 	linked::Label* hp_label = gw.enemies_info[enemy_index]->divs[2]->getLabels()[0];
 	hp_label->setText((u8*)hp_buffer[enemy_index], count + 1);
+}
+
+static void layout_update_hp_animations(r32 delta) {
+	const r32 seconds_to_animate = 0.8f;
+	delta /= seconds_to_animate;
+
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		if (!hp_bar_animation.enemy_hp_animating[i])
+			continue;
+		int max_width = gw.enemies_info[i]->divs[0]->getWidth() - 2;
+		
+		r32 update = (hp_bar_animation.enemy_start_hp[i] - hp_bar_animation.enemy_hp_to_set[i]);
+		r32 move = hp_bar_animation.enemy_current_animating_hp[i] - delta * update;
+		hp_bar_animation.enemy_current_animating_hp[i] = move;
+
+		if (update > 0 && move <= hp_bar_animation.enemy_hp_to_set[i]) {
+			move = hp_bar_animation.enemy_hp_to_set[i];
+			hp_bar_animation.enemy_hp_animating[i] = false;
+		} else if (update <= 0 && move >= hp_bar_animation.enemy_hp_to_set[i]) {
+			move = hp_bar_animation.enemy_hp_to_set[i];
+			hp_bar_animation.enemy_hp_animating[i] = false;
+		}
+		int new_width = (int)roundf((r32)(move * max_width) / (r32)combat_state.enemy.max_hp[i]);
+		gw.enemies_info[i]->divs[1]->setWidth(new_width);
+	}
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (!hp_bar_animation.ally_hp_animating[i])
+			continue;
+		int max_width = gw.allies_info[i]->divs[0]->getWidth() - 2;
+		
+		r32 update = (hp_bar_animation.ally_start_hp[i] - hp_bar_animation.ally_hp_to_set[i]);
+		r32 move = hp_bar_animation.ally_current_animating_hp[i] - delta * update;
+		hp_bar_animation.ally_current_animating_hp[i] = move;
+
+		if (update > 0 && move <= hp_bar_animation.ally_hp_to_set[i]) {
+			move = hp_bar_animation.ally_hp_to_set[i];
+			hp_bar_animation.ally_hp_animating[i] = false;
+		} else if(update <= 0 && move >= hp_bar_animation.ally_hp_to_set[i]){
+			move = hp_bar_animation.ally_hp_to_set[i];
+			hp_bar_animation.ally_hp_animating[i] = false;
+		}
+		int new_width = (int)roundf((r32)(move * max_width) / (r32)combat_state.player.max_hp[i]);
+		gw.allies_info[i]->divs[1]->setWidth(new_width);
+	}
 }
 
 static void layout_set_timer_percentage(r32 percentage)

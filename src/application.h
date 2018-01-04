@@ -261,6 +261,8 @@ static void layout_set_exchange_modal_upper_orbs(Orb_ID id, s32 index);
 
 static void layout_set_sacrifice_modal_quantity(bool orb_left, Orb_ID orb_id, s32 quantity);
 
+static void layout_update_hp_animations(r32 delta);
+
 // Gameplay structures
 #define NUM_CHARS 12
 #define NUM_SKILLS 4
