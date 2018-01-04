@@ -170,6 +170,12 @@ struct vec4 {
 
 	vec4() {}
 	vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+	vec4(unsigned int hex) {
+		x = (float)((hex & 0xff000000) >> 24) / 255.0f;
+		y = (float)((hex & 0xff0000) >> 16) / 255.0f;
+		z = (float)((hex & 0xff00) >> 8) / 255.0f;
+		w = (float)(hex & 0xff) / 255.0f;
+	}
 
 	static inline float dot(vec4 l, vec4 r) {
 		return l.x * r.x + l.y * r.y + l.z * r.z + l.w * r.w;

@@ -13,6 +13,7 @@
 
 
 #define DEFAULT_BUFLEN 512
+//#define IP_MACHING_SERVER "201.21.40.208"			// ip do server q faz o matching
 #define IP_MACHING_SERVER "127.0.0.1"			// ip do server q faz o matching
 #define MATCHING_PORT 44443						// porta da conexao pro matching
 #define MATCHING_PORT_L "44443"			

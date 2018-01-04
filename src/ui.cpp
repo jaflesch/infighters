@@ -35,7 +35,7 @@ void hide_all_windows() {
 	gw.combat_bottom_info->setActive(false);
 	gw.timer_window->setActive(false);
 	gw.player_name_window->setActive(false);
-	gw.exchange_orbs->setActive(false);
+	//gw.exchange_orbs->setActive(false);
 	gw.null_orb_modal->setActive(false);
 }
 
@@ -331,6 +331,253 @@ void init_char_information_mode()
 
 	linked::Label* skill_cooldown_label = new linked::Label(*skill_group_div, (u8*)"", 0, hm::vec2(600, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_LIGHT_12, 0, 0);
 	skill_group_div->getLabels().push_back(skill_cooldown_label);
+}
+
+struct Exchance_Orbs_UI {
+	linked::Window* window;
+	linked::WindowDiv* upper_orbs_div;
+};
+
+void init_exchange_orbs_modal() {
+	using namespace linked;
+	linked::Window* exchange_orbs = new linked::Window(450, 380, hm::vec2((r32)window_info.width / 2 - 450 / 2, (r32)window_info.height / 2 - 380 / 2), char_window_color, (u8*)"Exchange Orbs", sizeof "Exchange Orbs",
+		linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
+	exchange_orbs->setBorderColor(cyan);
+	exchange_orbs->setTitleColor(hm::vec4(0x0B8383ff));
+	exchange_orbs->setTitleCentered(true);
+	//gw.exchange_orbs = exchange_orbs;
+	//exchange_orbs->setActive(false);
+
+	// Orbs filling up
+	WindowDiv* upper_orbs = new WindowDiv(*exchange_orbs, 140, 40, 0, 0, hm::vec2(0, 20), hm::vec4(1, 0, 0, 1), DIV_CENTER_X | DIV_ANCHOR_TOP);
+	exchange_orbs->divs.push_back(upper_orbs);
+
+	Button* upper_orb_buttons[3] = {};
+	for (int i = 0; i < 3; ++i) {
+		const r32 spacing = 10.0f;
+		upper_orb_buttons[i] = new Button(*upper_orbs, 0, hm::vec2((r32)i * (spacing + 40.0f), 0), 40, 40, hm::vec4(0, 1, 0, 1), i);
+		//upper_orb_buttons[i]->setAllBGTexture();
+		upper_orbs->getButtons().push_back(upper_orb_buttons[i]);
+	}
+	
+	// Orbs Left side (Orbs Left)
+	WindowDiv* orbs_left = new WindowDiv(*exchange_orbs, 140, 200, 0, 0, hm::vec2(30, 0), hm::vec4(1, 0, 0, 0), DIV_ANCHOR_LEFT | DIV_CENTER_Y | DIV_ANCHOR_TOP);
+	exchange_orbs->divs.push_back(orbs_left);
+	Label* orbs_left_label = new Label(*orbs_left, (u8*)"ORBS LEFT", sizeof("ORBS LEFT"), hm::vec2(0, 0), hm::vec4(0x0B8383ff), FONT_OSWALD_REGULAR_18, 0, 0);
+	orbs_left->getLabels().push_back(orbs_left_label);
+
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		const r32 y_spacing = 10.0f;
+		Button* orb = new Button(*orbs_left, 0, hm::vec2(0.0f, 50.0f + (r32)i * (30.0f + y_spacing)), 30, 30, hm::vec4(1, 1, 0, 1), i);
+		orb->setAllBGTexture(orb_textures[i]);
+		orbs_left->getButtons().push_back(orb);
+		Label* quantity = new Label(*orbs_left, (u8*)"000", sizeof("000"), hm::vec2(40, 55.0f + (r32)i * (30.0f + y_spacing)), hm::vec4(1,1,1,1), FONT_OSWALD_REGULAR_18, 0, 0);
+		orbs_left->getLabels().push_back(quantity);
+	}
+
+	// Orbs Right side (New Orbs)
+	WindowDiv* orbs_new = new WindowDiv(*exchange_orbs, 140, 200, 0, 0, hm::vec2(-30, 0), hm::vec4(1, 0, 0, 0), DIV_ANCHOR_RIGHT | DIV_CENTER_Y | DIV_ANCHOR_TOP);
+	exchange_orbs->divs.push_back(orbs_new);
+	Label* new_orbs_label = new Label(*orbs_new, (u8*)"NEW ORBS", sizeof("NEW ORBS"), hm::vec2(60, 0), hm::vec4(0x0B8383ff), FONT_OSWALD_REGULAR_18, 0, 0);
+	orbs_new->getLabels().push_back(new_orbs_label);
+
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		const r32 y_spacing = 10.0f;
+		Button* orb = new Button(*orbs_new, 0, hm::vec2(108.0f, 50.0f + (r32)i * (30.0f + y_spacing)), 30, 30, hm::vec4(1, 1, 0, 1), i);
+		orb->setAllBGTexture(orb_textures[i]);
+		orbs_new->getButtons().push_back(orb);
+		Label* quantity = new Label(*orbs_new, (u8*)"000", sizeof("000"), hm::vec2(70, 55.0f + (r32)i * (30.0f + y_spacing)), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
+		orbs_new->getLabels().push_back(quantity);
+	}
+
+	// Arrows
+	WindowDiv* arrows_div = new WindowDiv(*exchange_orbs, 60, 200, 0, 0, hm::vec2(0, 140), hm::vec4(1, 0, 0, 0), DIV_ANCHOR_TOP | DIV_CENTER_X);
+	exchange_orbs->divs.push_back(arrows_div);
+
+	Texture* arrow_left_texture = new Texture("../../../res/orbs/arrow_left_blue.png");
+	Texture* arrow_right_texture = new Texture("../../../res/orbs/arrow_right_blue.png");
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		const r32 y_spacing = 10.0f;
+		// left arrows
+		Button* left = new Button(*arrows_div, 0, hm::vec2(0, (r32)i * (30.0f + y_spacing)), 24, 24, hm::vec4(0, 1, 0, 1), i);
+		left->setAllBGTexture(arrow_left_texture);
+		arrows_div->getButtons().push_back(left);
+		Button* right = new Button(*arrows_div, 0, hm::vec2(35, (r32)i * (30.0f + y_spacing)), 24, 24, hm::vec4(0, 0, 1, 1), i);
+		right->setAllBGTexture(arrow_right_texture);
+		arrows_div->getButtons().push_back(right);
+	}
+
+	// Confirm and cancel buttons
+	WindowDiv* confirm_cancel_button = new WindowDiv(*exchange_orbs, 390, 70, 0, 0, hm::vec2(0, 0), hm::vec4(1, 0, 0, 0), DIV_ANCHOR_BOTTOM | DIV_CENTER_X);
+	exchange_orbs->divs.push_back(confirm_cancel_button);
+
+	Button* confirm = new Button(*confirm_cancel_button, new Label(*confirm_cancel_button, (u8*)"EXCHANGE", sizeof("EXCHANGE"), hm::vec2(56, 15), hm::vec4(1,1,1,1), FONT_OSWALD_BOLD_18, 0, 0),
+		hm::vec2(0, 0), 185, 55, hm::vec4(1, 1, 1, 1), 0);
+	Texture* confirm_button_texture = new Texture("../../../res/textures/playbutton_normal.png");
+	confirm->setAllBGTexture(confirm_button_texture);
+	confirm_cancel_button->getButtons().push_back(confirm);
+
+	Button* cancel = new Button(*confirm_cancel_button, new Label(*confirm_cancel_button, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(66, 15), cyan, FONT_OSWALD_REGULAR_18, 0, 0),
+		hm::vec2(204, 0), 185, 55, hm::vec4(1, 1, 1, 1), 0);
+	Texture* cancel_button_texture = new Texture("../../../res/textures/button_border_cyan.png");
+	cancel->setAllBGTexture(cancel_button_texture);
+	confirm_cancel_button->getButtons().push_back(cancel);
+
+#if 0
+	// Multiple Orb Modal
+	linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2((r32)window_info.width / 2 - 460 / 2, (r32)window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
+		linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
+	exchange_orbs->setBorderColor(greener_cyan);
+	exchange_orbs->setTitleColor(char_window_color);
+	exchange_orbs->setTitleCentered(true);
+	gw.exchange_orbs = exchange_orbs;
+	exchange_orbs->setActive(false);
+
+	// Close Multiple Orb Modal
+	linked::WindowDiv* close_div = new linked::WindowDiv(*exchange_orbs, 360, 40, 0, 0, hm::vec2(0, -20), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_BOTTOM | linked::DIV_CENTER_X);
+	exchange_orbs->divs.push_back(close_div);
+	linked::Label* close_label = new linked::Label(*close_div, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
+	close_label->setPosition(hm::vec2((100.0f - close_label->getTextWidth()) / 2.0f, 10));
+	linked::Button* close_button = new linked::Button(*close_div, close_label, hm::vec2(200, 0), 100, 40, greener_cyan, 0);
+	close_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+	close_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+	close_button->setClickedCallback(button_exchange_orbs_close);
+	close_div->getButtons().push_back(close_button);
+
+	linked::Label* confirm_label = new linked::Label(*close_div, (u8*)"CONFIRM", sizeof("CONFIRM"), hm::vec2(10, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
+	confirm_label->setPosition(hm::vec2((100.0f - confirm_label->getTextWidth()) / 2.0f, 10));
+	linked::Button* confirm_button = new linked::Button(*close_div, confirm_label, hm::vec2(60, 0), 100, 40, greener_cyan, 0);
+	confirm_button->setInactiveAllBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
+	confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
+	confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
+	confirm_button->setClickedCallback(button_exchange_orbs_confirm);
+	close_div->getButtons().push_back(confirm_button);
+
+	// Multiple Orb Modal Orbs
+	linked::WindowDiv* info_div = new linked::WindowDiv(*exchange_orbs, 220, 120, 0, 0, hm::vec2(0, 30), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_X);
+	exchange_orbs->divs.push_back(info_div);
+	combat_state.exchange_orbs_state.info_div = info_div;
+
+	float orbs_size = 32.0f;
+	float orbs_height = 36.0f;
+
+	linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+	Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
+	multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
+	info_div->getButtons().push_back(multiple_orb_button);
+
+	linked::Button* hard_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+	hard_orb_button->setAllBGTexture(orb_textures[0]);
+	info_div->getButtons().push_back(hard_orb_button);
+
+	linked::Button* soft_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+	soft_orb_button->setAllBGTexture(orb_textures[1]);
+	info_div->getButtons().push_back(soft_orb_button);
+
+	linked::Button* vr_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+	vr_orb_button->setAllBGTexture(orb_textures[2]);
+	info_div->getButtons().push_back(vr_orb_button);
+
+	linked::Button* bios_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+	bios_orb_button->setAllBGTexture(orb_textures[3]);
+	info_div->getButtons().push_back(bios_orb_button);
+
+	linked::Label* multiple_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(0, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+	r32 text_width = multiple_orb_label->getTextWidth();
+	multiple_orb_label->setPosition(hm::vec2(orbs_size / 2.0f - text_width / 2.0f, 72));
+	info_div->getLabels().push_back(multiple_orb_label);
+
+	r32 spacing = (18 + (orbs_size + 10)) + (orbs_size / 2.0f - text_width / 2.0f);
+	linked::Label* hard_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+	info_div->getLabels().push_back(hard_orb_label);
+	spacing += (orbs_size + 10);
+	linked::Label* soft_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+	info_div->getLabels().push_back(soft_orb_label);
+	spacing += (orbs_size + 10);
+	linked::Label* vr_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+	info_div->getLabels().push_back(vr_orb_label);
+	spacing += (orbs_size + 10);
+	linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
+	info_div->getLabels().push_back(bios_orb_label);
+
+	Texture* arrow_up = new Texture("../../../res/orbs/arrow_up.png");
+	Texture* arrow_down = new Texture("../../../res/orbs/arrow_down.png");
+	float arrow_up_size = 24.0f;
+	hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
+	hm::vec4 arrow_normal_color = greener_cyan;
+	arrow_normal_color.z = 0.0f;
+	// up
+	linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
+	hard_orb_arrow_up->setAllBGTexture(arrow_up);
+	hard_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+	hard_orb_arrow_up->setInactiveAllBGColor(darker_gray);
+	hard_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+	hard_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+	info_div->getButtons().push_back(hard_orb_arrow_up);
+
+	linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
+	soft_orb_arrow_up->setAllBGTexture(arrow_up);
+	soft_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+	soft_orb_arrow_up->setInactiveAllBGColor(darker_gray);
+	soft_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+	soft_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+	info_div->getButtons().push_back(soft_orb_arrow_up);
+
+	linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
+	vr_orb_arrow_up->setAllBGTexture(arrow_up);
+	vr_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+	vr_orb_arrow_up->setInactiveAllBGColor(darker_gray);
+	vr_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+	vr_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+	info_div->getButtons().push_back(vr_orb_arrow_up);
+
+	linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
+	bios_orb_arrow_up->setAllBGTexture(arrow_up);
+	bios_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
+	bios_orb_arrow_up->setInactiveAllBGColor(darker_gray);
+	bios_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
+	bios_orb_arrow_up->button_info.data = (void*)ARROW_UP;
+	info_div->getButtons().push_back(bios_orb_arrow_up);
+
+	// down
+	linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
+	hard_orb_arrow_down->setAllBGTexture(arrow_down);
+	hard_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+	hard_orb_arrow_down->setInactiveAllBGColor(darker_gray);
+	hard_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+	hard_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+	info_div->getButtons().push_back(hard_orb_arrow_down);
+
+	linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
+	soft_orb_arrow_down->setAllBGTexture(arrow_down);
+	soft_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+	soft_orb_arrow_down->setInactiveAllBGColor(darker_gray);
+	soft_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+	soft_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+	info_div->getButtons().push_back(soft_orb_arrow_down);
+
+	linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
+	vr_orb_arrow_down->setAllBGTexture(arrow_down);
+	vr_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+	vr_orb_arrow_down->setInactiveAllBGColor(darker_gray);
+	vr_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+	vr_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+	info_div->getButtons().push_back(vr_orb_arrow_down);
+
+	linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
+	bios_orb_arrow_down->setAllBGTexture(arrow_down);
+	bios_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
+	bios_orb_arrow_down->setInactiveAllBGColor(darker_gray);
+	bios_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
+	bios_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
+	info_div->getButtons().push_back(bios_orb_arrow_down);
+
+	Texture* reset_button_texture = new Texture("../../../res/orbs/reset.png");
+	linked::Button* reset_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 5 + 22, 72 + 12), 32, 32, hm::vec4(0, 1, 0.7f, 0), 10);
+	reset_button->setAllBGTexture(reset_button_texture);
+	reset_button->setHoveredBGColor(hm::vec4(0, 0.7f, 0.5f, 0));
+	info_div->getButtons().push_back(reset_button);
+#endif
 }
 
 void init_combat_mode()
@@ -800,161 +1047,7 @@ void init_combat_mode()
 #endif
 	}
 
-	{
-		// Multiple Orb Modal
-		linked::Window* exchange_orbs = new linked::Window(420, 260, hm::vec2((r32)window_info.width / 2 - 460 / 2, (r32)window_info.height / 2 - 260 / 2), char_window_color, (u8*)"  Exchange Orbs", sizeof "  Exchange Orbs",
-			linked::W_HEADER | linked::W_BORDER | linked::W_MOVABLE);
-		exchange_orbs->setBorderColor(greener_cyan);
-		exchange_orbs->setTitleColor(char_window_color);
-		exchange_orbs->setTitleCentered(true);
-		gw.exchange_orbs = exchange_orbs;
-		exchange_orbs->setActive(false);
-
-		// Close Multiple Orb Modal
-		linked::WindowDiv* close_div = new linked::WindowDiv(*exchange_orbs, 360, 40, 0, 0, hm::vec2(0, -20), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_BOTTOM | linked::DIV_CENTER_X);
-		exchange_orbs->divs.push_back(close_div);
-		linked::Label* close_label = new linked::Label(*close_div, (u8*)"CANCEL", sizeof("CANCEL"), hm::vec2(20, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
-		close_label->setPosition(hm::vec2((100.0f - close_label->getTextWidth()) / 2.0f, 10));
-		linked::Button* close_button = new linked::Button(*close_div, close_label, hm::vec2(200, 0), 100, 40, greener_cyan, 0);
-		close_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
-		close_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
-		close_button->setClickedCallback(button_exchange_orbs_close);
-		close_div->getButtons().push_back(close_button);
-
-		linked::Label* confirm_label = new linked::Label(*close_div, (u8*)"CONFIRM", sizeof("CONFIRM"), hm::vec2(10, 10), hm::vec4(0, 0, 0.2f, 1.0f), FONT_OSWALD_REGULAR_16, 0, 0);
-		confirm_label->setPosition(hm::vec2((100.0f - confirm_label->getTextWidth()) / 2.0f, 10));
-		linked::Button* confirm_button = new linked::Button(*close_div, confirm_label, hm::vec2(60, 0), 100, 40, greener_cyan, 0);
-		confirm_button->setInactiveAllBGColor(hm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-		confirm_button->setHoveredBGColor(greener_cyan - hm::vec4(0.1f, 0.1f, 0.1f, 0.0f));
-		confirm_button->setHoveredTextColor(char_window_color + hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
-		confirm_button->setClickedCallback(button_exchange_orbs_confirm);
-		close_div->getButtons().push_back(confirm_button);
-
-		// Multiple Orb Modal Orbs
-		linked::WindowDiv* info_div = new linked::WindowDiv(*exchange_orbs, 220, 120, 0, 0, hm::vec2(0, 30), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_X);
-		exchange_orbs->divs.push_back(info_div);
-		combat_state.exchange_orbs_state.info_div = info_div;
-
-		float orbs_size = 32.0f;
-		float orbs_height = 36.0f;
-
-		linked::Button* multiple_orb_button = new linked::Button(*info_div, 0, hm::vec2(0, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		Texture* multiple_orbs_texture = new Texture("../../../res/orbs/all_orbs.png");
-		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
-		info_div->getButtons().push_back(multiple_orb_button);
-
-		linked::Button* hard_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		hard_orb_button->setAllBGTexture(orb_textures[0]);
-		info_div->getButtons().push_back(hard_orb_button);
-
-		linked::Button* soft_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		soft_orb_button->setAllBGTexture(orb_textures[1]);
-		info_div->getButtons().push_back(soft_orb_button);
-
-		linked::Button* vr_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		vr_orb_button->setAllBGTexture(orb_textures[2]);
-		info_div->getButtons().push_back(vr_orb_button);
-
-		linked::Button* bios_orb_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, orbs_height), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
-		bios_orb_button->setAllBGTexture(orb_textures[3]);
-		info_div->getButtons().push_back(bios_orb_button);
-
-		linked::Label* multiple_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(0, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
-		r32 text_width = multiple_orb_label->getTextWidth();
-		multiple_orb_label->setPosition(hm::vec2(orbs_size / 2.0f - text_width / 2.0f, 72));
-		info_div->getLabels().push_back(multiple_orb_label);
-
-		r32 spacing = (18 + (orbs_size + 10)) + (orbs_size / 2.0f - text_width / 2.0f);
-		linked::Label* hard_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
-		info_div->getLabels().push_back(hard_orb_label);
-		spacing += (orbs_size + 10);
-		linked::Label* soft_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
-		info_div->getLabels().push_back(soft_orb_label);
-		spacing += (orbs_size + 10);
-		linked::Label* vr_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
-		info_div->getLabels().push_back(vr_orb_label);
-		spacing += (orbs_size + 10);
-		linked::Label* bios_orb_label = new linked::Label(*info_div, (u8*)"0", sizeof("0"), hm::vec2(spacing, 72), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_14, 0, 0);
-		info_div->getLabels().push_back(bios_orb_label);
-
-		Texture* arrow_up = new Texture("../../../res/orbs/arrow_up.png");
-		Texture* arrow_down = new Texture("../../../res/orbs/arrow_down.png");
-		float arrow_up_size = 24.0f;
-		hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
-		hm::vec4 arrow_normal_color = greener_cyan;
-		arrow_normal_color.z = 0.0f;
-		// up
-		linked::Button* hard_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
-		hard_orb_arrow_up->setAllBGTexture(arrow_up);
-		hard_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
-		hard_orb_arrow_up->setInactiveAllBGColor(darker_gray);
-		hard_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
-		hard_orb_arrow_up->button_info.data = (void*)ARROW_UP;
-		info_div->getButtons().push_back(hard_orb_arrow_up);
-
-		linked::Button* soft_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
-		soft_orb_arrow_up->setAllBGTexture(arrow_up);
-		soft_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
-		soft_orb_arrow_up->setInactiveAllBGColor(darker_gray);
-		soft_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
-		soft_orb_arrow_up->button_info.data = (void*)ARROW_UP;
-		info_div->getButtons().push_back(soft_orb_arrow_up);
-
-		linked::Button* vr_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
-		vr_orb_arrow_up->setAllBGTexture(arrow_up);
-		vr_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
-		vr_orb_arrow_up->setInactiveAllBGColor(darker_gray);
-		vr_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
-		vr_orb_arrow_up->button_info.data = (void*)ARROW_UP;
-		info_div->getButtons().push_back(vr_orb_arrow_up);
-
-		linked::Button* bios_orb_arrow_up = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 8), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
-		bios_orb_arrow_up->setAllBGTexture(arrow_up);
-		bios_orb_arrow_up->setHoveredBGColor(arrow_hovered_color);
-		bios_orb_arrow_up->setInactiveAllBGColor(darker_gray);
-		bios_orb_arrow_up->setClickedCallback(button_exchange_orb_arrow);
-		bios_orb_arrow_up->button_info.data = (void*)ARROW_UP;
-		info_div->getButtons().push_back(bios_orb_arrow_up);
-
-		// down
-		linked::Button* hard_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_HARD);
-		hard_orb_arrow_down->setAllBGTexture(arrow_down);
-		hard_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
-		hard_orb_arrow_down->setInactiveAllBGColor(darker_gray);
-		hard_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
-		hard_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
-		info_div->getButtons().push_back(hard_orb_arrow_down);
-
-		linked::Button* soft_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 2 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_SOFT);
-		soft_orb_arrow_down->setAllBGTexture(arrow_down);
-		soft_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
-		soft_orb_arrow_down->setInactiveAllBGColor(darker_gray);
-		soft_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
-		soft_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
-		info_div->getButtons().push_back(soft_orb_arrow_down);
-
-		linked::Button* vr_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 3 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_VR);
-		vr_orb_arrow_down->setAllBGTexture(arrow_down);
-		vr_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
-		vr_orb_arrow_down->setInactiveAllBGColor(darker_gray);
-		vr_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
-		vr_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
-		info_div->getButtons().push_back(vr_orb_arrow_down);
-
-		linked::Button* bios_orb_arrow_down = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 4 + 22, 72 + 18), (int)arrow_up_size, (int)arrow_up_size, arrow_normal_color, ORB_BIOS);
-		bios_orb_arrow_down->setAllBGTexture(arrow_down);
-		bios_orb_arrow_down->setHoveredBGColor(arrow_hovered_color);
-		bios_orb_arrow_down->setInactiveAllBGColor(darker_gray);
-		bios_orb_arrow_down->setClickedCallback(button_exchange_orb_arrow);
-		bios_orb_arrow_down->button_info.data = (void*)ARROW_DOWN;
-		info_div->getButtons().push_back(bios_orb_arrow_down);
-
-		Texture* reset_button_texture = new Texture("../../../res/orbs/reset.png");
-		linked::Button* reset_button = new linked::Button(*info_div, 0, hm::vec2((orbs_size + 10) * 5 + 22, 72 + 12), 32, 32, hm::vec4(0, 1, 0.7f, 0), 10);
-		reset_button->setAllBGTexture(reset_button_texture);
-		reset_button->setHoveredBGColor(hm::vec4(0, 0.7f, 0.5f, 0));
-		info_div->getButtons().push_back(reset_button);
-	}
+	init_exchange_orbs_modal();
 	{
 		// Status stuff
 		Texture* default_status = new Texture("../../../res/status/status_default.png");

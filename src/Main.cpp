@@ -56,6 +56,7 @@ extern Font_ID fonts[32];
 
 #define DEFAULT_FONT "../../../res/fonts/Oswald-Regular.ttf"
 #define OSWALD_LIGHT "../../../res/fonts/Oswald-Light.ttf"
+#define OSWALD_BOLD "../../../res/fonts/Oswald-Bold.ttf"
 
 void application_state_init()
 {
@@ -80,6 +81,9 @@ void application_state_init()
 	fonts[FONT_OSWALD_REGULAR_24] = load_font(OSWALD_LIGHT, 24, false);
 	fonts[FONT_OSWALD_REGULAR_32] = load_font(OSWALD_LIGHT, 32, false);
 	fonts[FONT_OSWALD_REGULAR_38] = load_font(OSWALD_LIGHT, 38, false);
+
+	fonts[FONT_OSWALD_BOLD_16] = load_font(OSWALD_BOLD, 16, false);
+	fonts[FONT_OSWALD_BOLD_18] = load_font(OSWALD_BOLD, 18, false);
 
 	init_application();
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);

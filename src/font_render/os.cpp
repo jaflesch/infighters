@@ -173,7 +173,7 @@ s32 create_window(Window_Info* window_info)
 		window_class.lpszClassName,
 		"Infighters",
 		window_style_flags,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		50, 50,
 		window_info->width, window_info->height, NULL, NULL, window_info->hinstance, NULL
 	);
 

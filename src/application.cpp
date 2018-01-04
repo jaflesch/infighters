@@ -1743,30 +1743,30 @@ static void layout_change_orb_amount(Orb_ID id, int amt) {
 }
 
 static void layout_change_exchange_orb_amount(Orb_ID id, int amt) {
-	static char all_orbs_buffer[16] = { 0 };
-	static char hard_orb_buffer[16] = { 0 };
-	static char soft_orb_buffer[16] = { 0 };
-	static char vr_orb_buffer[16] = { 0 };
-	static char bios_orb_buffer[16] = { 0 };
-
-	char* selected = 0;
-	linked::Label* label = 0;
-	linked::WindowDiv* info_div = combat_state.exchange_orbs_state.info_div;
-	
-
-	switch (id) {
-	case ORB_HARD: selected = (char*)&hard_orb_buffer; label = info_div->getLabels()[ORB_HARD + 1]; break;
-	case ORB_SOFT: selected = (char*)&soft_orb_buffer; label = info_div->getLabels()[ORB_SOFT + 1]; break;
-	case ORB_VR:   selected = (char*)&vr_orb_buffer;   label = info_div->getLabels()[ORB_VR + 1]; break;
-	case ORB_BIOS: selected = (char*)&bios_orb_buffer; label = info_div->getLabels()[ORB_BIOS + 1]; break;
-	case ORB_ALL:  selected = (char*)&all_orbs_buffer; label = info_div->getLabels()[0]; break;
-	case ORB_NULL: return;
-	}
-
-	memset(selected, 0, sizeof(all_orbs_buffer));
-	int count = s32_to_str_base10(amt, selected);
-
-	label->setText((u8*)selected, count + 1);
+	//static char all_orbs_buffer[16] = { 0 };
+	//static char hard_orb_buffer[16] = { 0 };
+	//static char soft_orb_buffer[16] = { 0 };
+	//static char vr_orb_buffer[16] = { 0 };
+	//static char bios_orb_buffer[16] = { 0 };
+	//
+	//char* selected = 0;
+	//linked::Label* label = 0;
+	//linked::WindowDiv* info_div = combat_state.exchange_orbs_state.info_div;
+	//
+	//
+	//switch (id) {
+	//case ORB_HARD: selected = (char*)&hard_orb_buffer; label = info_div->getLabels()[ORB_HARD + 1]; break;
+	//case ORB_SOFT: selected = (char*)&soft_orb_buffer; label = info_div->getLabels()[ORB_SOFT + 1]; break;
+	//case ORB_VR:   selected = (char*)&vr_orb_buffer;   label = info_div->getLabels()[ORB_VR + 1]; break;
+	//case ORB_BIOS: selected = (char*)&bios_orb_buffer; label = info_div->getLabels()[ORB_BIOS + 1]; break;
+	//case ORB_ALL:  selected = (char*)&all_orbs_buffer; label = info_div->getLabels()[0]; break;
+	//case ORB_NULL: return;
+	//}
+	//
+	//memset(selected, 0, sizeof(all_orbs_buffer));
+	//int count = s32_to_str_base10(amt, selected);
+	//
+	//label->setText((u8*)selected, count + 1);
 }
 
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set)

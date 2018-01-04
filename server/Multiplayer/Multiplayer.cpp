@@ -9,7 +9,8 @@
 #endif
 
 #define DEFAULT_BUFLEN 512
-#define IP_MACHING_SERVER "127.0.0.1"
+//#define IP_MACHING_SERVER "127.0.0.1"
+#define IP_MACHING_SERVER "0.0.0.0"
 #define MATCHING_PORT 44443
 #define MATCHING_PORT_L "44443"
 #define GAME_PORT 44444
