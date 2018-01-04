@@ -39,6 +39,7 @@ namespace linked
 		m_backgroundNormalTexture = m_backgroundTexture;
 		m_backgroundHoveredTexture = m_backgroundTexture;
 		m_backgroundHeldTexture = m_backgroundTexture;
+		m_backgroundInactiveTexture = m_backgroundTexture;
 
 		m_backgroundColor = backgroundColor;
 		m_backgroundNormalColor = backgroundColor;
@@ -109,10 +110,13 @@ namespace linked
 					m_backgroundColor = m_backgroundToggledHoveredColor;
 				else
 					m_backgroundColor = m_backgroundHoveredColor;
+				m_backgroundTexture = m_backgroundHoveredTexture;
 			}
-			else
+			else {
 				m_backgroundColor = m_backgroundInactiveHoveredColor;
-			m_backgroundTexture = m_backgroundHoveredTexture;
+				m_backgroundTexture = m_backgroundInactiveTexture;
+			}
+			
 			if (m_label)
 				m_label->setTextColor(m_labelHoveredTextColor);
 		}
@@ -125,9 +129,11 @@ namespace linked
 					m_backgroundColor = m_backgroundToggledHeldColor;
 				else
 					m_backgroundColor = m_backgroundHeldColor;
-			} else
+				m_backgroundTexture = m_backgroundHeldTexture;
+			} else {
 				m_backgroundColor = m_backgroundInactiveHeldColor;
-			m_backgroundTexture = m_backgroundHeldTexture;
+				m_backgroundTexture = m_backgroundInactiveTexture;
+			}
 			if (m_label)
 				m_label->setTextColor(m_labelHeldTextColor);
 		}
@@ -139,9 +145,11 @@ namespace linked
 					m_backgroundColor = m_backgroundToggledNormalColor;
 				else
 					m_backgroundColor = m_backgroundNormalColor;
-			} else
+				m_backgroundTexture = m_backgroundNormalTexture;
+			} else {
 				m_backgroundColor = m_backgroundInactiveNormalColor;
-			m_backgroundTexture = m_backgroundNormalTexture;
+				m_backgroundTexture = m_backgroundInactiveTexture;
+			}
 			if(m_label)
 				m_label->setTextColor(m_labelNormalTextColor);
 		}

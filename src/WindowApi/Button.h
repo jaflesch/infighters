@@ -71,7 +71,8 @@ private:
 	Texture* m_backgroundTexture, 
 		*m_backgroundHeldTexture,
 		*m_backgroundHoveredTexture,
-		*m_backgroundNormalTexture;
+		*m_backgroundNormalTexture,
+		*m_backgroundInactiveTexture;
 
 	static bool clicked;
 	static int mouseStatus;
@@ -126,7 +127,9 @@ public:
 		this->m_backgroundNormalTexture = texture;
 		this->m_backgroundHeldTexture = texture;
 		this->m_backgroundHoveredTexture = texture;
+		this->m_backgroundInactiveTexture = texture;
 	}
+	inline void setInactiveTexture(Texture* texture) { this->m_backgroundInactiveTexture = texture; }
 
 	inline void setNormalTextColor(hm::vec4 color){ this->m_labelNormalTextColor = color; }
 	inline void setHeldText(hm::vec4 color){ this->m_labelHeldTextColor = color; }

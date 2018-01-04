@@ -246,7 +246,6 @@ static void layout_ally_die(u32 ally_index);
 static void layout_set_skill_group_from_skill(int skill_index, linked::Label* label);
 static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label);
 static void layout_change_orb_amount(Orb_ID id, int amt);
-static void layout_change_exchange_orb_amount(Orb_ID id, int amt);
 static void layout_toggle_char_selection(int id, std::vector<linked::WindowDiv*>* divs, bool selected);
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set);
 static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set);
@@ -257,6 +256,10 @@ static void layout_update_endturn_button();
 static void layout_apply_status_ally(s32 index, s32 stat_index, Texture* status_image);
 static void layout_apply_status_enemy(s32 index, s32 stat_index, Texture* status_image);
 
+static void layout_set_exchange_modal_quantity(bool orb_left, Orb_ID orb_id, s32 quantity);
+static void layout_set_exchange_modal_upper_orbs(Orb_ID id, s32 index);
+
+static void layout_set_sacrifice_modal_quantity(bool orb_left, Orb_ID orb_id, s32 quantity);
 
 // Gameplay structures
 #define NUM_CHARS 12
@@ -282,36 +285,38 @@ struct Char_Selection_State {
 };
 
 struct Orb_Exchange_State {
-	bool active = false;
-	bool state_changed = false;
-	bool can_confirm = false;
-	int num_lost = 0;
-	int num_gain = 0;
-	int accumulated = 0;
-	int orbs_amount_added_subtracted[ORB_NUMBER];
-	int orbs_start_amount[ORB_NUMBER];
+	bool		active;
+	s32			orb_left_amount[ORB_NUMBER - 1];
+	s32			orb_new_amount[ORB_NUMBER - 1];
+	s32			orb_changes[ORB_NUMBER - 1];
+	s32			exchanging_count;
+	Orb_ID		exchanging[3];
+};
 
-	// Visual
-	linked::WindowDiv* info_div;
+struct Orb_Sacrifice_State {
+	bool		active;
+	s32			orb_left_amount[ORB_NUMBER - 1];
+	s32			orb_right_amount[ORB_NUMBER - 1];
 };
 
 struct Target {
-	Character_ID attacking_character;
-	Skill_ID skill_used;
-	s32 ally_target_index[NUM_ALLIES];	 // -1 if none
-	s32 enemy_target_index[NUM_ENEMIES]; // -1 if none
+	Character_ID	attacking_character;
+	Skill_ID		skill_used;
+	s32				ally_target_index[NUM_ALLIES];	 // -1 if none
+	s32				enemy_target_index[NUM_ENEMIES]; // -1 if none
 	linked::Window* ally_target_image[NUM_ALLIES];
 	linked::Window* enemy_target_image[NUM_ENEMIES];
 };
 
 struct Player {
-	Character_ID char_id[NUM_ALLIES];
-	s32 hp[NUM_ALLIES];
-	s32 max_hp[NUM_ALLIES];
+	Character_ID	char_id[NUM_ALLIES];
+	s32				hp[NUM_ALLIES];
+	s32				max_hp[NUM_ALLIES];
 
 	bool targeting;
 	Target targeting_info;
 	Target targets[NUM_ALLIES];
+	Skill_ID skill_in_use[NUM_ALLIES];
 	
 	u32 reduction[NUM_ALLIES];			// Skill_Defense or'd together
 	u32 reduction_type[NUM_ALLIES];		// Skill_Type or'd together
@@ -330,11 +335,13 @@ struct Combat_State {
 	bool player_turn;
 	int orbs_amount[ORB_NUMBER];
 	int total_orbs;
+	int total_null_orbs_in_temp_use;
 
 	Player player;
 	Player enemy;
 
 	Orb_Exchange_State exchange_orbs_state;
+	Orb_Sacrifice_State sacrifice_orbs_state;
 
 	// Visual
 	Skill_ID last_hovered;
@@ -350,6 +357,41 @@ struct Combat_State {
 	linked::Label* all_orbs_label;
 
 	linked::Button* end_turn_button;
+};
+
+struct Exchange_Orbs_UI {
+	linked::Window* window;
+	linked::WindowDiv* upper_orbs_div;	// 3 buttons here in order
+
+	linked::WindowDiv* orbs_left;	// 4 buttons and 4 labels
+	linked::WindowDiv* orbs_new;	// 4 buttons and 4 labels
+
+	linked::Button* arrows_left[ORB_NUMBER - 1];
+	linked::Button* arrows_right[ORB_NUMBER - 1];
+
+	linked::Button* confirm;
+	linked::Button* cancel;
+
+	Texture* empty_orb_texture;
+};
+
+struct Sacrifice_Orbs_UI {
+	linked::Window* window;
+
+	linked::Label* orb_number_label;
+
+	linked::WindowDiv* orbs_left;	// 4 buttons and 4 labels
+	linked::WindowDiv* orbs_right;	// 4 buttons and 4 labels
+
+	linked::Button* arrows_left[ORB_NUMBER - 1];
+	linked::Button* arrows_right[ORB_NUMBER - 1];
+
+	linked::Button* endturn;
+	linked::Button* cancel;
+
+	linked::WindowDiv* skills_miniatures;	// 3 buttons here in order
+
+	Texture* empty_skill_texture;
 };
 
 struct Game_Windows {
@@ -384,8 +426,10 @@ struct Game_Windows {
 
 	linked::WindowDiv* allies_indicator[NUM_ALLIES];
 	linked::WindowDiv* enemies_indicator[NUM_ENEMIES];
-	linked::Window* exchange_orbs;
-	linked::Window* null_orb_modal;
+
+	// Modais
+	Exchange_Orbs_UI* exchange_orb_ui;
+	Sacrifice_Orbs_UI* sacrifice_orb_ui;
 
 	Texture* end_turn_button_player_turn;
 	Texture* end_turn_button_enemy_turn;

@@ -608,129 +608,239 @@ static void button_combat_start_mode(void* arg)
 	change_game_mode(MODE_COMBAT);
 }
 
-static void button_exchange_orb(void* arg) {
-	// Setup view and state
-	layout_change_exchange_orb_amount(ORB_ALL, 0);
-	combat_state.exchange_orbs_state.accumulated = 0;
-	for (int i = 0; i < ORB_NUMBER; ++i) {
-		layout_change_exchange_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
-		combat_state.exchange_orbs_state.orbs_start_amount[i] = combat_state.orbs_amount[i];
-		combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i] = 0;
-	}
-
-	// reset confirm button color
-	linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
-	confirm_button->setActive(false, false);
-
-	// Gray out all upper arrows
-	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
-		combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(false, false);
-		if (combat_state.exchange_orbs_state.orbs_start_amount[i] <= 0)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(false, false);
-		else
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(true);
-	}
-
-	combat_state.exchange_orbs_state.active = true;
-	gw.exchange_orbs->setActive(true);
-}
-
-static void button_exchange_orbs_close(void* arg) {
-	AudioController::cancelAudio.play();
+static void button_callback_exchange_orb_cancel(void* arg) {
+	printf("Exchange Cancel!\n");
+	gw.exchange_orb_ui->window->setActive(false);
 	combat_state.exchange_orbs_state.active = false;
-	gw.exchange_orbs->setActive(false);
-}
-
-static void button_exchange_orbs_confirm(void* arg) {
-	assert(combat_state.exchange_orbs_state.active == true);
-	if (!combat_state.exchange_orbs_state.can_confirm)
-		return;
-	if (combat_state.exchange_orbs_state.state_changed) {
-		// reset state
-		combat_state.exchange_orbs_state.state_changed = false;
-
-		for (int i = 0; i < ORB_NUMBER; ++i) {
-			if (i == ORB_NULL) continue;
-			combat_state.orbs_amount[i] += combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i];
-			layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
-			memset(&combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i], 0, sizeof(combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i]));
-		}
-		combat_state.total_orbs -= combat_state.exchange_orbs_state.num_lost;
-		combat_state.total_orbs += combat_state.exchange_orbs_state.num_gain;
-
-		// @todo test this
-		int sum_orbs = 0;
-		for (int i = 0; i < ORB_NUMBER; ++i)
-			sum_orbs += combat_state.orbs_amount[i];
-		assert(combat_state.total_orbs == sum_orbs);
-
-		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
-
-		combat_state.exchange_orbs_state.num_lost = 0;
-		combat_state.exchange_orbs_state.num_gain = 0;
-
-		// close
-		combat_state.exchange_orbs_state.active = false;
-		gw.exchange_orbs->setActive(false);
-	}
-}
-
-static void button_exchange_orb_arrow(void* arg) {
-	linked::Button_Info* eba = (linked::Button_Info*)arg;
-	int curr_orbs = combat_state.exchange_orbs_state.orbs_start_amount[eba->id] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id];
-	bool state_changed = false;
-	if (eba->data == (void*)ARROW_UP) {
-		// Arrow up
-		if (combat_state.exchange_orbs_state.accumulated >= 3) {
-			state_changed = true;
-			combat_state.exchange_orbs_state.state_changed = true;
-			combat_state.exchange_orbs_state.accumulated -= 3;
-			combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id] += 1;
-			combat_state.exchange_orbs_state.num_gain += 1;
-		}
-	} else {
-		// Arrow down
-		if (curr_orbs > 0) {
-			state_changed = true;
-			combat_state.exchange_orbs_state.state_changed = true;
-			combat_state.exchange_orbs_state.accumulated += 1;
-			combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id] -= 1;
-			combat_state.exchange_orbs_state.num_lost += 1;
-		}
-	}
-	
-	if (state_changed) {
-		layout_change_exchange_orb_amount((Orb_ID)eba->id, combat_state.exchange_orbs_state.orbs_start_amount[eba->id] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[eba->id]);
-		layout_change_exchange_orb_amount(ORB_ALL, combat_state.exchange_orbs_state.accumulated);
-
-		// update confirm button
-		linked::Button* confirm_button = gw.exchange_orbs->divs[0]->getButtons()[1];
-		if (combat_state.exchange_orbs_state.accumulated == 0) {
-			assert(combat_state.exchange_orbs_state.num_lost % 3 == 0);
-			confirm_button->setActive(true);
-			combat_state.exchange_orbs_state.can_confirm = true;
-		} else {
-			confirm_button->setActive(false);
-			combat_state.exchange_orbs_state.can_confirm = false;
-		}
-	}
-
-	hm::vec4 arrow_hovered_color = hm::vec4(1, 1, 1, 0.1f);
-	if (combat_state.exchange_orbs_state.accumulated >= 3) {
-		for (int i = 0; i < ORB_NUMBER - 1; ++i)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(true);
-	} else {
-		for (int i = 0; i < ORB_NUMBER - 1; ++i)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 5]->setActive(false);
-	}
 	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
-		int curr_amt = combat_state.exchange_orbs_state.orbs_start_amount[i] + combat_state.exchange_orbs_state.orbs_amount_added_subtracted[i];
-		if (curr_amt <= 0)
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(false);
-		else
-			combat_state.exchange_orbs_state.info_div->getButtons()[i + 9]->setActive(true);
+		layout_set_exchange_modal_quantity(false, (Orb_ID)i, 0);
+		combat_state.exchange_orbs_state.orb_changes[i] = 0;
+	}
+	for (int i = 0; i < 3; ++i) {
+		layout_set_exchange_modal_upper_orbs(ORB_NONE, (Orb_ID)i);
+		combat_state.exchange_orbs_state.exchanging[i] = ORB_NONE;
+	}
+	combat_state.exchange_orbs_state.exchanging_count = 0;
+}
+static void button_callback_exchange_orb_confirm(void* arg) {
+	printf("Exchange Confirm!\n");
+
+	s32 sum = 0;
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		sum += combat_state.exchange_orbs_state.orb_new_amount[i];
+	}
+
+	if ((combat_state.exchange_orbs_state.exchanging_count < 3 && combat_state.exchange_orbs_state.exchanging_count > 0) || sum > 0) {
+			return;
+	}
+
+	sum = 0;
+
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		combat_state.orbs_amount[i] += combat_state.exchange_orbs_state.orb_changes[i];
+		sum += combat_state.exchange_orbs_state.orb_changes[i];
+		layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
+	}
+	combat_state.total_orbs += sum;
+	layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
+
+	button_callback_exchange_orb_cancel(0);
+}
+static void button_callback_exchange_orb_arrow_left(void* arg) {
+	printf("Exchange Arrow Left\n");
+	int id = ((linked::Button_Info*)arg)->id;
+
+	// it was really exchanging
+	assert(combat_state.exchange_orbs_state.exchanging_count >= 3);
+
+	// Unset upper orbs
+	for (s32 i = 0; i < 3; ++i) {
+		layout_set_exchange_modal_upper_orbs(ORB_NONE, i);
+		combat_state.exchange_orbs_state.exchanging[i] = ORB_NONE;
+	}
+	combat_state.exchange_orbs_state.exchanging_count = 0;
+
+	// Remove from right
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		if(combat_state.exchange_orbs_state.orb_new_amount[i] > 0)
+			combat_state.exchange_orbs_state.orb_changes[i] -= combat_state.exchange_orbs_state.orb_new_amount[i];
+		combat_state.exchange_orbs_state.orb_new_amount[i] = 0;
+		layout_set_exchange_modal_quantity(false, (Orb_ID)i, 0);
+	}
+
+	// Put on the left
+	combat_state.exchange_orbs_state.orb_changes[id] += 1;
+	combat_state.exchange_orbs_state.orb_left_amount[id] += 1;
+	layout_set_exchange_modal_quantity(true, (Orb_ID)id, combat_state.exchange_orbs_state.orb_left_amount[id]);
+
+	// Reset arrow buttons
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		if(combat_state.exchange_orbs_state.orb_left_amount[i] > 0)
+			gw.exchange_orb_ui->arrows_right[i]->setActive(true);
+		gw.exchange_orb_ui->arrows_left[i]->setActive(false, false);
 	}
 }
+static void button_callback_exchange_orb_arrow_right(void* arg) {
+	printf("Exchange Arrow Right\n");
+	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
+
+	// the button was really active?
+	assert(combat_state.exchange_orbs_state.orb_left_amount[id] > 0);
+
+	// if it was ...
+
+	// Set the upper orbs
+	for (s32 i = 0; i < 3; ++i) {
+		if (combat_state.exchange_orbs_state.exchanging[i] == ORB_NONE) {
+			layout_set_exchange_modal_upper_orbs(id, i);
+			combat_state.exchange_orbs_state.exchanging[i] = id;
+			break;
+		}
+	}
+	// Remove from left
+	combat_state.exchange_orbs_state.orb_left_amount[id] -= 1;
+	combat_state.exchange_orbs_state.orb_new_amount[id] += 1;
+	layout_set_exchange_modal_quantity(true, id, combat_state.exchange_orbs_state.orb_left_amount[id]);
+	layout_set_exchange_modal_quantity(false, id, combat_state.exchange_orbs_state.orb_new_amount[id]);
+
+	// Exchanging count gets bigger, if it ever gets to 3 deactivate
+	// right arrows and activate all left arrows except the ones present
+	// in the exchanging
+	combat_state.exchange_orbs_state.exchanging_count += 1;
+	if (combat_state.exchange_orbs_state.exchanging_count >= 3) {
+
+		for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+			gw.exchange_orb_ui->arrows_right[i]->setActive(false, false);
+			bool different_orb = true;
+			for (s32 j = 0; j < 3; ++j) {
+				if (combat_state.exchange_orbs_state.exchanging[j] == (Orb_ID)i) {
+					different_orb = false;
+					break;
+				}
+			}
+			if(different_orb)
+				gw.exchange_orb_ui->arrows_left[i]->setActive(true);
+		}
+	}
+
+	if (combat_state.exchange_orbs_state.orb_left_amount[id] == 0)
+		gw.exchange_orb_ui->arrows_right[id]->setActive(false, false);
+}
+static void button_callback_exchange_orb(void* arg) {
+	gw.exchange_orb_ui->window->setActive(true);
+	combat_state.exchange_orbs_state.active = true;
+
+	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		combat_state.exchange_orbs_state.orb_changes[i] = 0;
+		combat_state.exchange_orbs_state.orb_new_amount[i] = 0;
+		combat_state.exchange_orbs_state.orb_left_amount[i] = combat_state.orbs_amount[i];
+		layout_set_exchange_modal_quantity(true, (Orb_ID)i, combat_state.orbs_amount[i]);
+		gw.exchange_orb_ui->arrows_left[i]->setActive(false, false);
+		if(combat_state.orbs_amount[i] > 0)
+			gw.exchange_orb_ui->arrows_right[i]->setActive(true);
+	}
+	for (int i = 0; i < 3; ++i) {
+		layout_set_exchange_modal_upper_orbs(ORB_NONE, (Orb_ID)i);
+		combat_state.exchange_orbs_state.exchanging[i] = ORB_NONE;
+	}
+	combat_state.exchange_orbs_state.exchanging_count = 0;
+}
+
+static void button_callback_sacrifice_orb_arrow_left(void* arg) {
+	printf("Sacrifice Arrow Left\n");
+	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
+
+	s32 sum = 0;
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		sum += combat_state.sacrifice_orbs_state.orb_right_amount[i];
+	}
+
+	if (combat_state.sacrifice_orbs_state.orb_right_amount[id] > 0) {
+		// Update left and right
+		combat_state.sacrifice_orbs_state.orb_right_amount[id] -= 1;
+		layout_set_sacrifice_modal_quantity(false, id, combat_state.sacrifice_orbs_state.orb_right_amount[id]);
+		combat_state.sacrifice_orbs_state.orb_left_amount[id] += 1;
+		layout_set_sacrifice_modal_quantity(true, id, combat_state.sacrifice_orbs_state.orb_left_amount[id]);
+		gw.sacrifice_orb_ui->orb_number_label->getText()[0] = combat_state.total_null_orbs_in_temp_use - sum + 1 + 0x30;
+		// Activate right arrows
+		for (s32 i = 0; i < ORB_NUMBER; ++i) {
+			if(combat_state.sacrifice_orbs_state.orb_left_amount[id] > 0)
+				gw.sacrifice_orb_ui->arrows_right[i]->setActive(true);
+		}
+
+		if (combat_state.sacrifice_orbs_state.orb_right_amount[id] == 0) {
+			gw.sacrifice_orb_ui->arrows_left[id]->setActive(false, false);
+		}
+	}
+}
+static void button_callback_sacrifice_orb_arrow_right(void* arg) {
+	printf("Sacrifice Arrow Right\n");
+	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
+	// the button was really active?
+	assert(combat_state.sacrifice_orbs_state.orb_left_amount[id] > 0);
+
+	s32 sum = 0;
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		sum += combat_state.sacrifice_orbs_state.orb_right_amount[i];
+	}
+
+	assert(sum < combat_state.total_null_orbs_in_temp_use);
+	if (sum == combat_state.total_null_orbs_in_temp_use - 1) {
+		for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+			gw.sacrifice_orb_ui->arrows_right[i]->setActive(false, false);
+		}
+	}
+
+	// Remove from left
+	combat_state.sacrifice_orbs_state.orb_left_amount[id] -= 1;
+	combat_state.sacrifice_orbs_state.orb_right_amount[id] += 1;
+	layout_set_sacrifice_modal_quantity(true, id, combat_state.sacrifice_orbs_state.orb_left_amount[id]);
+	layout_set_sacrifice_modal_quantity(false, id, combat_state.sacrifice_orbs_state.orb_right_amount[id]);
+
+	if (combat_state.sacrifice_orbs_state.orb_left_amount[id] == 0) {
+		gw.sacrifice_orb_ui->arrows_right[id]->setActive(false, false);
+	}
+
+	// Update left arrow to be enabled
+	gw.sacrifice_orb_ui->arrows_left[id]->setActive(true);
+
+	// Update Label number
+	gw.sacrifice_orb_ui->orb_number_label->getText()[0] = combat_state.total_null_orbs_in_temp_use - sum - 1 + 0x30;
+}
+static void button_callback_sacrifice_orb_cancel(void* arg) {
+	gw.sacrifice_orb_ui->window->setActive(false);
+	// Put the skills used in place
+	for (s32 i = 0; i < NUM_ALLIES; ++i) {
+		gw.sacrifice_orb_ui->skills_miniatures->getButtons()[i]->setAllBGTexture(gw.sacrifice_orb_ui->empty_skill_texture);
+	}
+}
+static void button_callback_sacrifice_orb_endturn(void* arg) {
+	
+}
+static void sacrifice_orbs_start() {
+	gw.sacrifice_orb_ui->window->setActive(true);
+	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
+		gw.sacrifice_orb_ui->arrows_left[i]->setActive(false, false);
+		layout_set_sacrifice_modal_quantity(true, (Orb_ID)i, combat_state.orbs_amount[i]);
+		layout_set_sacrifice_modal_quantity(false, (Orb_ID)i, 0);
+		combat_state.sacrifice_orbs_state.orb_left_amount[i] = combat_state.orbs_amount[i];
+		combat_state.sacrifice_orbs_state.orb_right_amount[i] = 0;
+		if(combat_state.orbs_amount[i] > 0)
+			gw.sacrifice_orb_ui->arrows_right[i]->setActive(true);
+	}
+	assert(combat_state.total_null_orbs_in_temp_use < 10);	// 10 not supported yet
+
+	gw.sacrifice_orb_ui->orb_number_label->getText()[0] = combat_state.total_null_orbs_in_temp_use + 0x30;
+
+	// Put the skills used in place
+	for (s32 i = 0; i < NUM_ALLIES; ++i) {
+		Skill_ID used = combat_state.player.skill_in_use[i];
+		if(used != SKILL_NONE)
+			gw.sacrifice_orb_ui->skills_miniatures->getButtons()[i]->setAllBGTexture(skill_textures[used]);
+	}
+	combat_state.sacrifice_orbs_state.active = true;
+}
+
 
 #define ARCSIN_1 1.57079633f
 
@@ -830,8 +940,17 @@ static void combat_state_reset_all_targets() {
 }
 
 static bool has_enough_orbs(Skill_ID skill_used) {
+	s32 total_orbs = combat_state.total_orbs;
 	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
+		total_orbs -= skill_costs[skill_used][i];
 		if (skill_costs[skill_used][i] > combat_state.orbs_amount[i]) {
+			return false;
+		}
+	}
+	s32 null_orb_cost = skill_costs[skill_used][ORB_NULL];
+	if (null_orb_cost > 0) {
+		if (total_orbs - combat_state.total_null_orbs_in_temp_use < null_orb_cost) {
+			printf("Not enough orbs to sacrifice\n");
 			return false;
 		}
 	}
@@ -879,6 +998,8 @@ static void button_skill(void* arg) {
 			return;
 		} else {
 			temporary_modify_orbs(skill_used, -1);
+			combat_state.total_null_orbs_in_temp_use += skill_costs[skill_used][ORB_NULL];
+			combat_state.player.skill_in_use[char_id] = skill_used;
 		}
 	}
 
@@ -886,6 +1007,8 @@ static void button_skill(void* arg) {
 		// untoggle?
 		printf("untoggle\n");
 		temporary_modify_orbs(skill_used, 1);
+		combat_state.total_null_orbs_in_temp_use -= skill_costs[skill_used][ORB_NULL];
+		combat_state.player.skill_in_use[char_id] = SKILL_NONE;
 		combat_state_reset_target(char_id, skill_used);
 		reset_targets_animation();
 	} else {
@@ -1077,6 +1200,7 @@ void init_combat_state() {
 	}
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		int index = char_sel_state.selections[i];
+		combat_state.player.skill_in_use[i] = SKILL_NONE;
 		combat_state.player.char_id[i] = (Character_ID)index;
 		combat_state.player.max_hp[i] = 100;
 		combat_state.player.hp[i] = 100;
@@ -1095,9 +1219,6 @@ void init_combat_state() {
 		combat_state.player.targets[k].skill_used = SKILL_NONE;
 		combat_state.player.targets[k].attacking_character = CHAR_NONE;
 	}
-
-	// @Temporary
-	gw.null_orb_modal->setActive(true);
 }
 
 void init_application()
@@ -1144,6 +1265,17 @@ void init_application()
 	layout_change_orb_amount(ORB_VR, 4);
 	layout_change_orb_amount(ORB_BIOS, 5);
 	layout_change_orb_amount(ORB_ALL, 5 + 2 + 3 + 4);
+#else
+	combat_state.orbs_amount[ORB_HARD] = 1;
+	combat_state.orbs_amount[ORB_SOFT] = 0;
+	combat_state.orbs_amount[ORB_VR] = 0;
+	combat_state.orbs_amount[ORB_BIOS] = 0;
+	combat_state.total_orbs = 1;
+	layout_change_orb_amount(ORB_HARD, 1);
+	layout_change_orb_amount(ORB_SOFT, 0);
+	layout_change_orb_amount(ORB_VR, 0);
+	layout_change_orb_amount(ORB_BIOS, 0);
+	layout_change_orb_amount(ORB_ALL, 1);
 #endif
 
 	// init console chat
@@ -1223,6 +1355,11 @@ static void add_orb(Orb_ID orb_type, s32 count) {
 
 // Gameplay functions
 void end_turn() {
+	if (combat_state.total_null_orbs_in_temp_use > 0) {
+		sacrifice_orbs_start();
+		return;
+	}
+
 	// apply skills
 	apply_skills_and_send();
 	printf("\nEND TURN\n");
@@ -1742,33 +1879,6 @@ static void layout_change_orb_amount(Orb_ID id, int amt) {
 	label->setText((u8*)selected, count + 1);
 }
 
-static void layout_change_exchange_orb_amount(Orb_ID id, int amt) {
-	//static char all_orbs_buffer[16] = { 0 };
-	//static char hard_orb_buffer[16] = { 0 };
-	//static char soft_orb_buffer[16] = { 0 };
-	//static char vr_orb_buffer[16] = { 0 };
-	//static char bios_orb_buffer[16] = { 0 };
-	//
-	//char* selected = 0;
-	//linked::Label* label = 0;
-	//linked::WindowDiv* info_div = combat_state.exchange_orbs_state.info_div;
-	//
-	//
-	//switch (id) {
-	//case ORB_HARD: selected = (char*)&hard_orb_buffer; label = info_div->getLabels()[ORB_HARD + 1]; break;
-	//case ORB_SOFT: selected = (char*)&soft_orb_buffer; label = info_div->getLabels()[ORB_SOFT + 1]; break;
-	//case ORB_VR:   selected = (char*)&vr_orb_buffer;   label = info_div->getLabels()[ORB_VR + 1]; break;
-	//case ORB_BIOS: selected = (char*)&bios_orb_buffer; label = info_div->getLabels()[ORB_BIOS + 1]; break;
-	//case ORB_ALL:  selected = (char*)&all_orbs_buffer; label = info_div->getLabels()[0]; break;
-	//case ORB_NULL: return;
-	//}
-	//
-	//memset(selected, 0, sizeof(all_orbs_buffer));
-	//int count = s32_to_str_base10(amt, selected);
-	//
-	//label->setText((u8*)selected, count + 1);
-}
-
 static void layout_set_ally_hp(int ally_index, int max_hp, int hp_to_set)
 {
 	// hp_empty
@@ -1856,8 +1966,4 @@ static void layout_apply_status_enemy(s32 target_index, s32 stat_index, Texture*
 	if (!status_image) {
 		gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 0));
 	}
-}
-
-static void layout_null_orb_modal_set_amount(Orb_ID id, s32 amount) {
-
 }
