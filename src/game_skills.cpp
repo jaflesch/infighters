@@ -782,13 +782,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_DELETE: {
 			// @todo check for control
 			if (from_enemy) {
-				combat_state->player.hp[target_index] = 0;
-				layout_ally_die(target_index);
 				layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], 0);
+				layout_ally_die(target_index);
+				combat_state->player.hp[target_index] = 0;
 			} else {
-				combat_state->enemy.hp[target_index] = 0;
-				layout_enemy_die(target_index);
 				layout_set_enemy_hp(target_index, combat_state->enemy.max_hp[target_index], 0);
+				layout_enemy_die(target_index);
+				combat_state->enemy.hp[target_index] = 0;
 			}
 		}break;
 		
@@ -909,13 +909,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_OVERCLOCK: {
 			if (from_enemy) {
 				int half_max_hp = combat_state->enemy.max_hp[source_index] / 2;
-				combat_state->enemy.hp[source_index] = half_max_hp;
 				layout_set_enemy_hp(source_index, combat_state->enemy.max_hp[source_index], half_max_hp);
+				combat_state->enemy.hp[source_index] = half_max_hp;
 				gain_invulnerability_enemy(source_index, 2, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 			} else {
 				int half_max_hp = combat_state->player.max_hp[source_index] / 2;
-				combat_state->player.hp[source_index] = half_max_hp;
 				layout_set_ally_hp(source_index, combat_state->player.max_hp[source_index], half_max_hp);
+				combat_state->player.hp[source_index] = half_max_hp;
 				gain_invulnerability_ally(source_index, 2, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 			}
 			skill_state->overclock_duration = 2 + 1;
