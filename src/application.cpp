@@ -176,151 +176,398 @@ char* skill_desc[NUM_SKILLS * NUM_CHARS] = {
 	// Zer0
 	"Ataca um oponente e realiza 20 de dano.",
 	"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
-	"Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
-	"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno.",
+	"Cria uma atmosfera negativa no campo de batalha. False Rush e Contradiction acertam todos os adversários\ndurante 3 turnos.",
+	"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável por 1 turno.",
 
 	// On1
 	"Ataca um oponente e realiza 30 de dano.",
-	"Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno,\no adversário utilizar qualquer habilidade, sofrerá 15 de dano crushing.",
-	"On1 canaliza sua positividade e aumenta suas habilidades. Por 3\nturnos, On1 tem redução de dano de 15% e Truth Slash e Tautology\ngastam uma energia a menos.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	"Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno, o adversário utilizar\nqualquer habilidade, sofrerá 15 de dano crushing.",
+	"On1 canaliza sua positividade e aumenta suas habilidades. Por 3 turnos, On1 tem redução de dano de 15%\ne Truth Slash e Tautology gastam uma energia a menos.",
+	"Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.",
 
 	// Serial
-	"Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL.\nPorém, o adversário recebe 10 de dano se estiver nesse status.",
-	"Infringe 15 de dano piercing a um oponente e adiciona status STUN\npor 1 turno.",
+	"Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL. Porém, o adversário recebe 10 de dano\nse estiver nesse status.",
+	"Infringe 15 de dano piercing a um oponente e adiciona status STUN por 1 turno.",
 	"Todos os adversários recebem status PARALYZE por 3 turnos.",
-	"Envolto por uma densa camada encriptada, Serial K3yll3R fica\ninvulnerável por 1 turno.",
+	"Envolto por uma densa camada encriptada, Serial K3yll3R fica invulnerável por 1 turno.",
 
 	// Ray
-	"Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica\ninvulnerável a golpes PHYSICAL por 1 turno.",
+	"Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica invulnerável a golpes PHYSICAL por 1 turno.",
 	"Por 1 turno, todos os aliados recebem REFLEX DEFENSE.",
 	"Aplica um golpe em todos os inimigos e realiza 35 de dano normal.",
-	"Usando suas técnicas de computação gráfica, R4y Tr4c3y fica\ninvulnerável por 1 turno.",
+	"Usando suas técnicas de computação gráfica, R4y Tr4c3y fica invulnerável por 1 turno.",
 
 	// AStar
-	"Ataca um oponente e realiza 20 de dano. Para cada vez que um\noponente recebe novamente este golpe, o dano é aumentado em 5\npontos. O efeito é acumulativo.",
+	"Ataca um oponente e realiza 20 de dano. Para cada vez que um oponente recebe novamente este golpe, o dano\né aumentado em 5 pontos. O efeito é acumulativo.",
 	"Produz 25 de dano crushing a um oponente.",
-	"Durante 4 turnos, todos os adversários atingidos por Neural Network\npodem receber o ataque Perceptron. A-St4r recebe 30 pontos de ABSORPTION.",
+	"Durante 4 turnos, todos os adversários atingidos por Neural Network podem receber o ataque Perceptron.\nA-St4r recebe 30 pontos de ABSORPTION.",
 	"Para se proteger, A-St4r corre até as colinas e fica invulnerável por 1 turno.",
 
 	// Deadlock
-	"Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma\nhabilidade com duração CONTROL, elimina a habilidade e este sofre\nstatus SLEEP por 2 turnos.",
-	"Atinge todos os adversários e, no próximo turno, apenas um pode\nutilizar alguma habilidade.",
+	"Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma habilidade com duração CONTROL, elimina a\nhabilidade e este sofre status SLEEP por 2 turnos.",
+	"Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.",
 	"Acerta um inimigo aleatório e coloca o status SLEEP por 3 turnos.",
-	"D3ADL0CK cria um clone seu para receber golpe no seu lugar,\nengana o adversário e fica invulnerável por 1 turno.",
+	"D3ADL0CK cria um clone seu para receber golpe no seu lugar, engana o adversário e fica invulnerável por 1 turno.",
 
 	// Norma
-	"Ataca um oponente, realiza 25 de dano piercing e há 50% de chance\nde causar status BURN por 3 turnos.",
-	"Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION.\nO adversário que atacar N0rma recebe o status POISON por 2 turnos.",
-	"Acerta todos os adversários com 30 de dano. Só pode ser utilizado\nenquanto a habilidade Automata Summon estiver ativa.",
-	"Aproveitando o universo não-determinístico, N0rma se esconde num\nestado protegido e e fica invulnerável por 1 turno.",
+	"Ataca um oponente, realiza 25 de dano piercing e há 50% de chance de causar status BURN por 3 turnos.",
+	"Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION. O adversário que atacar N0rma recebe o status\nPOISON por 2 turnos.",
+	"Acerta todos os adversários com 30 de dano. Só pode ser utilizado enquanto a habilidade Automata Summon estiver ativa.",
+	"Aproveitando o universo não-determinístico, N0rma se esconde num estado protegido e fica invulnerável por 1 turno.",
 
 	// Hazard
-	"Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5\npontos de defesa ABSORPTION por cada ataque bem sucedido.",
-	"Cria uma barreira redundante para os aliados. Cada personagem\nrecebe 15 pontos de redução de defesa por 3 turnos.",
+	"Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5 pontos de defesa ABSORPTION por cada ataque bem sucedido.",
+	"Cria uma barreira redundante para os aliados. Cada personagem recebe 15 pontos de redução de defesa por 3 turnos.",
 	"Cura qualquer status negativo de um aliado.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
+	"Para escapar de uma situação adversa, Haz4rd utiliza sua técnica de tolerância a falhas para avançar a um estado seguro,\nficando invulnerável por 1 turno.",
 
 	// Qwerty
-	"Qwerty altera sua forma física e ganha redução de dano de 40 pontos\npor 4 turnos.",
-	"Controla um inimigo por dois turnos. DELETE pode ser usado no\nadversário controlado.",
-	"Mata instantaneamente qualquer adversário que recebe este golpe,\ndesde que esteja sob efeito de CTRL.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
+	"Qwerty altera sua forma física e ganha redução de dano de 40 pontos por 4 turnos.",
+	"Controla um inimigo por dois turnos. DELETE pode ser usado no adversário controlado.",
+	"Mata instantaneamente qualquer adversário que recebe este golpe, desde que esteja sob efeito de CTRL.",
+	"Em meio ao perigo, Qwerty utiliza seus instintos para escapar da batalha e fica invulnerável por 1 turno.",
 
 	// Big O
-	"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos,\no alvo fica com status BURN. Se o alvo já possui status BURN, este\nsofre 10 de dano crushing adicional.",
-	"Se utilizado em um adversário, gera status BURN por 3 turnos. Se,\nem um aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.",
+	"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
+	"Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
 	"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
-	"Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	// @TODO
+	"=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
 
 	// New
-	"Ataca um oponente e realiza 25 de dano. New() recebe redução de\ndano de 10 pontos no próximo turno.",
-	"Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque\nque não seja UNIQUE nem exija uma técnica de preparação, sua\nhabilidade será copiada e poderá ser usada por New() também.",
+	"Ataca um oponente e realiza 25 de dano. New() recebe redução de dano de 10 pontos no próximo turno.",
+	"Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque que não seja UNIQUE nem exija uma\ntécnica de preparação, sua habilidade será copiada e poderá ser usada por New() também.",
 	"Cura todos os status negativos de um aliado.",
-	"Alterando sua estrutura física de forma dinâmica, New() fica\ninvulnerável por 1 turno.",
+	"Alterando sua estrutura física de forma dinâmica, New() fica invulnerável por 1 turno.",
 
 	// Clockboy
 	"Desfera 20 de dano a um adversário. Atribui status PARALYZE por 2 turnos.",
 	"Durante 2 turnos, nenhum golpe de Cl0ckB0y sofre COUNTER.",
-	"Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e\nseus ataques causam 500% a mais de dano.",
-	"Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y\nfaz um pulo condicional que o torna invulnerável por 1 turno."
+	"Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e seus ataques causam 500% a mais de dano.",
+	"Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno."
 };
 
 int skill_desc_length[sizeof(skill_desc) / sizeof(char*)] = {
 	// Zer0
 	sizeof "Ataca um oponente e realiza 20 de dano.",
 	sizeof "Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
-	sizeof "Cria uma atmosfera negativa no campo de batalha. False Rush e\nContradiction acertam todos os adversários durante 3 turnos.",
-	sizeof "Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável\npor 1 turno.",
+	sizeof "Cria uma atmosfera negativa no campo de batalha. False Rush e Contradiction acertam todos os adversários\ndurante 3 turnos.",
+	sizeof "Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável por 1 turno.",
 
 	// On1
 	sizeof "Ataca um oponente e realiza 30 de dano.",
-	sizeof "Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno,\no adversário utilizar qualquer habilidade, sofrerá 15 de dano crushing.",
-	sizeof "On1 canaliza sua positividade e aumenta suas habilidades. Por 3\nturnos, On1 tem redução de dano de 15% e Truth Slash e Tautology\ngastam uma energia a menos.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",
+	sizeof "Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno, o adversário utilizar\nqualquer habilidade, sofrerá 15 de dano crushing.",
+	sizeof "On1 canaliza sua positividade e aumenta suas habilidades. Por 3 turnos, On1 tem redução de dano de 15%\ne Truth Slash e Tautology gastam uma energia a menos.",
+	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.",
 
 	// Serial
-	sizeof "Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL.\nPorém, o adversário recebe 10 de dano se estiver nesse status.",
-	sizeof "Infringe 15 de dano piercing a um oponente e adiciona status STUN\npor 1 turno.",
+	sizeof "Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL. Porém, o adversário recebe 10 de dano\nse estiver nesse status.",
+	sizeof "Infringe 15 de dano piercing a um oponente e adiciona status STUN por 1 turno.",
 	sizeof "Todos os adversários recebem status PARALYZE por 3 turnos.",
-	sizeof "Envolto por uma densa camada encriptada, Serial K3yll3R fica\ninvulnerável por 1 turno.",
+	sizeof "Envolto por uma densa camada encriptada, Serial K3yll3R fica invulnerável por 1 turno.",
 
 	// Ray
-	sizeof "Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica\ninvulnerável a golpes PHYSICAL por 1 turno.",
+	sizeof "Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica invulnerável a golpes PHYSICAL por 1 turno.",
 	sizeof "Por 1 turno, todos os aliados recebem REFLEX DEFENSE.",
 	sizeof "Aplica um golpe em todos os inimigos e realiza 35 de dano normal.",
-	sizeof "Usando suas técnicas de computação gráfica, R4y Tr4c3y fica\ninvulnerável por 1 turno.",
+	sizeof "Usando suas técnicas de computação gráfica, R4y Tr4c3y fica invulnerável por 1 turno.",
 
 	// AStar
-	sizeof "Ataca um oponente e realiza 20 de dano. Para cada vez que um\noponente recebe novamente este golpe, o dano é aumentado em 5\npontos. O efeito é acumulativo.",
+	sizeof "Ataca um oponente e realiza 20 de dano. Para cada vez que um oponente recebe novamente este golpe, o dano\né aumentado em 5 pontos. O efeito é acumulativo.",
 	sizeof "Produz 25 de dano crushing a um oponente.",
-	sizeof "Durante 4 turnos, todos os adversários atingidos por Neural Network\npodem receber o ataque Perceptron. A-St4r recebe 30 pontos de ABSORPTION.",
+	sizeof "Durante 4 turnos, todos os adversários atingidos por Neural Network podem receber o ataque Perceptron.\nA-St4r recebe 30 pontos de ABSORPTION.",
 	sizeof "Para se proteger, A-St4r corre até as colinas e fica invulnerável por 1 turno.",
 
 	// Deadlock
-	sizeof "Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma\nhabilidade com duração CONTROL, elimina a habilidade e este sofre\nstatus SLEEP por 2 turnos.",
-	sizeof "Atinge todos os adversários e, no próximo turno, apenas um pode\nutilizar alguma habilidade.",
+	sizeof "Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma habilidade com duração CONTROL, elimina a\nhabilidade e este sofre status SLEEP por 2 turnos.",
+	sizeof "Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.",
 	sizeof "Acerta um inimigo aleatório e coloca o status SLEEP por 3 turnos.",
-	sizeof "D3ADL0CK cria um clone seu para receber golpe no seu lugar,\nengana o adversário e fica invulnerável por 1 turno.",
+	sizeof "D3ADL0CK cria um clone seu para receber golpe no seu lugar, engana o adversário e fica invulnerável por 1 turno.",
 
 	// Norma
-	sizeof "Ataca um oponente, realiza 25 de dano piercing e há 50% de chance\nde causar status BURN por 3 turnos.",
-	sizeof "Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION.\nO adversário que atacar N0rma recebe o status POISON por 2 turnos.",
-	sizeof "Acerta todos os adversários com 30 de dano. Só pode ser utilizado\nenquanto a habilidade Automata Summon estiver ativa.",
-	sizeof "Aproveitando o universo não-determinístico, N0rma se esconde num\nestado protegido e e fica invulnerável por 1 turno.",
+	sizeof "Ataca um oponente, realiza 25 de dano piercing e há 50% de chance de causar status BURN por 3 turnos.",
+	sizeof "Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION. O adversário que atacar N0rma recebe o status\nPOISON por 2 turnos.",
+	sizeof "Acerta todos os adversários com 30 de dano. Só pode ser utilizado enquanto a habilidade Automata Summon estiver ativa.",
+	sizeof "Aproveitando o universo não-determinístico, N0rma se esconde num estado protegido e fica invulnerável por 1 turno.",
 
 	// Hazard
-	sizeof "Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5\npontos de defesa ABSORPTION por cada ataque bem sucedido.",
-	sizeof "Cria uma barreira redundante para os aliados. Cada personagem\nrecebe 15 pontos de redução de defesa por 3 turnos.",
+	sizeof "Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5 pontos de defesa ABSORPTION por cada ataque bem sucedido.",
+	sizeof "Cria uma barreira redundante para os aliados. Cada personagem recebe 15 pontos de redução de defesa por 3 turnos.",
 	sizeof "Cura qualquer status negativo de um aliado.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
+	sizeof "Para escapar de uma situação adversa, Haz4rd utiliza sua técnica de tolerância a falhas para avançar a um estado seguro,\nficando invulnerável por 1 turno.",
 
 	// Qwerty
-	sizeof "Qwerty altera sua forma física e ganha redução de dano de 40 pontos\npor 4 turnos.",
-	sizeof "Controla um inimigo por dois turnos. DELETE pode ser usado no\nadversário controlado.",
-	sizeof "Mata instantaneamente qualquer adversário que recebe este golpe,\ndesde que esteja sob efeito de CTRL.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
+	sizeof "Qwerty altera sua forma física e ganha redução de dano de 40 pontos por 4 turnos.",
+	sizeof "Controla um inimigo por dois turnos. DELETE pode ser usado no adversário controlado.",
+	sizeof "Mata instantaneamente qualquer adversário que recebe este golpe, desde que esteja sob efeito de CTRL.",
+	sizeof "Em meio ao perigo, Qwerty utiliza seus instintos para escapar da batalha e fica invulnerável por 1 turno.",
 
 	// Big O
-	sizeof "Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos,\no alvo fica com status BURN. Se o alvo já possui status BURN, este\nsofre 10 de dano crushing adicional.",
-	sizeof "Se utilizado em um adversário, gera status BURN por 3 turnos. Se,\nem um aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.",
+	sizeof "Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
+	sizeof "Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
 	sizeof "No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
-	sizeof "Concentrando toda sua energia positiva, On1 obtém uma defesa\nabsoluta e fica invulnerável por 1 turno.",	//@TODO
+	sizeof "=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
 
 	// New
-	sizeof "Ataca um oponente e realiza 25 de dano. New() recebe redução de\ndano de 10 pontos no próximo turno.",
-	sizeof "Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque\nque não seja UNIQUE nem exija uma técnica de preparação, sua\nhabilidade será copiada e poderá ser usada por New() também.",
+	sizeof "Ataca um oponente e realiza 25 de dano. New() recebe redução de dano de 10 pontos no próximo turno.",
+	sizeof "Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque que não seja UNIQUE nem exija uma\ntécnica de preparação, sua habilidade será copiada e poderá ser usada por New() também.",
 	sizeof "Cura todos os status negativos de um aliado.",
-	sizeof "Alterando sua estrutura física de forma dinâmica, New() fica\ninvulnerável por 1 turno.",
+	sizeof "Alterando sua estrutura física de forma dinâmica, New() fica invulnerável por 1 turno.",
 
 	// Clockboy
 	sizeof "Desfera 20 de dano a um adversário. Atribui status PARALYZE por 2 turnos.",
 	sizeof "Durante 2 turnos, nenhum golpe de Cl0ckB0y sofre COUNTER.",
-	sizeof "Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e\nseus ataques causam 500% a mais de dano.",
-	sizeof "Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y\nfaz um pulo condicional que o torna invulnerável por 1 turno."
+	sizeof "Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e seus ataques causam 500% a mais de dano.",
+	sizeof "Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno."
 };
 
-char* char_descriptions[NUM_CHARS] = {
+char* skill_desc_en[NUM_SKILLS * NUM_CHARS] = {
+	// Zer0
+	//"Ataca um oponente e realiza 20 de dano.",
+	"Attacks an opponent dealing 20 damage.",
+	//"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
+	"Marks an enemy and, if in the next turn they make an attack on Zer0, their attack is denied, \nsuffer 20 damage and receive Paralyze status for 1 turn.",
+	//"Cria uma atmosfera negativa no campo de batalha. False Rush e Contradiction acertam todos os adversários\ndurante 3 turnos.",
+	"Creates a negative atmosphere in the battle field. False Rush and Contradiction hit all the enemies for 3 turns.",
+	//"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável por 1 turno.",
+	"Utilizing a shield created after a vacuum, Zer0 stays invulnerable for 1 turn.",
+
+	// On1
+	//"Ataca um oponente e realiza 30 de dano.",
+	"Attacks an opponent and deals 30 damage.",
+	//"Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno, o adversário utilizar\nqualquer habilidade, sofrerá 15 de dano crushing.",
+	"Attacks an enemy and deals 15 piercing damage. If, in the next turn, the enemy utilize any ability,\n they will receive 15 crushing damage.",
+	//"On1 canaliza sua positividade e aumenta suas habilidades. Por 3 turnos, On1 tem redução de dano de 15%\ne Truth Slash e Tautology gastam uma energia a menos.",
+	"On1 channels his positivity and increases his abilities. For 3 turns, On1 has 15% damage reduction,\nTruth Slash and Tautology cost one energy less.",
+	//"Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.",
+	"Concentrating all his positive energy, On1 acquires an absolute defense and stays invulnerable for 1 turn.",
+
+	// Serial
+	//"Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL. Porém, o adversário recebe 10 de dano\nse estiver nesse status.",
+	"Attacks an opponent and deals 20 damage. This ability ignores INVUL. But, the enemy receives 10 damage\nif they are in that state.",
+	//Infringe 15 de dano piercing a um oponente e adiciona status STUN por 1 turno.",
+	"Inflicts 15 piercing damage to an opponent and applies STUN status for 1 turn.",
+	//"Todos os adversários recebem status PARALYZE por 3 turnos.",
+	"All the enemies receive PARALYZE status for 3 turns.",
+	//"Envolto por uma densa camada encriptada, Serial K3yll3R fica invulnerável por 1 turno.",
+	"Surrounded by a dense encrypted layer, Serial K3yll3R stays invulnerable for 1 turn.",
+
+	// Ray
+	//"Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica invulnerável a golpes PHYSICAL por 1 turno.",
+	"Attacks an opponent, deals 15 damage and R4y Tr4c3y stays invulnerable to PHYSICAL attacks for 1 turn.",
+	//"Por 1 turno, todos os aliados recebem REFLEX DEFENSE.",
+	"For 1 turn, all the allies receive REFLEX DEFENSE.",
+	//"Aplica um golpe em todos os inimigos e realiza 35 de dano normal.",
+	"Apply a hit to all enemies and deals 35 normal damage.",
+	//"Usando suas técnicas de computação gráfica, R4y Tr4c3y fica invulnerável por 1 turno.",
+	"Using her computer graphics techniques, R4y Tr4c3y stays invulnerable for 1 turn.",
+
+	// AStar
+	//"Ataca um oponente e realiza 20 de dano. Para cada vez que um oponente recebe novamente este golpe, o dano\né aumentado em 5 pontos. O efeito é acumulativo.",
+	"Attacks an opponent and deals 20 damage. For each time that the opponent receives this ability, the damage\nis increased in 5 points. The effect is cumulative.",
+	//"Produz 25 de dano crushing a um oponente.",
+	"Produces 25 crushing damage to an opponent.",
+	//"Durante 4 turnos, todos os adversários atingidos por Neural Network podem receber o ataque Perceptron.\nA-St4r recebe 30 pontos de ABSORPTION.",
+	"During 4 turns, all the enemies hit by Neural Network can be hit by Perceptron.\nA-St4r receives 30 points of ABSORPTION.",
+	//"Para se proteger, A-St4r corre até as colinas e fica invulnerável por 1 turno.",
+	"To protect herself, A-St4r runs to the hills and stays invulnerable for 1 turn.",
+
+	// Deadlock
+	//"Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma habilidade com duração CONTROL, elimina a\nhabilidade e este sofre status SLEEP por 2 turnos.",
+	"Attacks an opponent and deals 25 damage. In case they are under any CONTROL duration abilities, eliminates the\nability and undergoes SLEEP status for 2 turns.",
+	//"Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.",
+	"Hits all the enemies and, in the next turn, only one can utilize an ability.",
+	//"Acerta um inimigo aleatório e coloca o status SLEEP por 3 turnos.",
+	"Hits a random enemy and puts them into SLEEP status for 3 turns.",
+	//"D3ADL0CK cria um clone seu para receber golpe no seu lugar, engana o adversário e fica invulnerável por 1 turno.",
+	"D3ADL0CK creates a clone of himself to receive the hit in his place, tricks the enemy and stays invulnerable for 1 turn.",
+
+	// Norma
+	//"Ataca um oponente, realiza 25 de dano piercing e há 50% de chance de causar status BURN por 3 turnos.",
+	"Attacks an opponent, deals 25 piercing damage and there is 50% chance of inflicting BURN status for 3 turns.",
+	//"Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION. O adversário que atacar N0rma recebe o status\nPOISON por 2 turnos.",
+	"Summon an ally, guaranteeing 15 points of ABSORPTION defense. The enemy that attacks N0rma receives the status\nPOISON for 2 turns.",
+	//"Acerta todos os adversários com 30 de dano. Só pode ser utilizado enquanto a habilidade Automata Summon estiver ativa.",
+	"Hits all the enemies dealing 30 damage. Can only be used when the ability Automata Summon is active.",
+	//"Aproveitando o universo não-determinístico, N0rma se esconde num estado protegido e fica invulnerável por 1 turno.",
+	"Taking advantage of a non-deterministic universe, N0rma hides in a protected state and stays invulnerable for 1 turn.",
+
+	// Hazard
+	//"Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5 pontos de defesa ABSORPTION por cada ataque bem sucedido.",
+	"Attacks all the enemies and deals 15 damage. Haz4rd receives 5 points of ABSORPTION defense for each attack that succeeded.",
+	//"Cria uma barreira redundante para os aliados. Cada personagem recebe 15 pontos de redução de defesa por 3 turnos.",
+	"Creates a redundant barrier for the allies. Each character receives 15 points of damage reduction for 3 turns.",
+	//"Cura qualquer status negativo de um aliado.",
+	"Removes any negative status of an ally.",
+	//"Para escapar de uma situação adversa, Haz4rd utiliza sua técnica de tolerância a falhas para avançar a um estado seguro,\nficando invulnerável por 1 turno.",
+	"In order to escape an adverse situation, Haz4rd utilizes his technique of fault tolerance to advance to a safe state,\nstaying invulnerable for 1 turn.",
+
+	// Qwerty
+	//"Qwerty altera sua forma física e ganha redução de dano de 40 pontos por 4 turnos.",
+	"Qwerty alters his physical form and obtains 40 damage reduction for 4 turns.",
+	//"Controla um inimigo por dois turnos. DELETE pode ser usado no adversário controlado.",
+	"Controls an enemy for two turns. DELETE can be used in the enemy controlled.",
+	//"Mata instantaneamente qualquer adversário que recebe este golpe, desde que esteja sob efeito de CTRL.",
+	"Kills any enemy that gets hit by this ability instantly, inasmuch as they are under the effect of CTRL.",
+	//"Em meio ao perigo, Qwerty utiliza seus instintos para escapar da batalha e fica invulnerável por 1 turno.",
+	"Among danger, Qwerty utilizes his instincts to escape the battle and stays invulnerable for 1 turn.",
+
+	// Big O
+	//"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
+	"Attacks the opponent with less HP and deals 20 damage. For 2 turns, the target stays with BURN status.\nIf the target is already in BURN status, they suffer an additional 10 crushing damage.",
+	//"Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
+	"If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN status for 2 turns.",
+	//"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
+	"In the next turn, receive 4 orbs of energy: one of each category.",
+	//"=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
+	"=Big-O= creates an illusion for the enemies, allowing an strategic escape that makes him invulnerable for 1 turn.",
+
+	// New
+	//"Ataca um oponente e realiza 25 de dano. New() recebe redução de dano de 10 pontos no próximo turno.",
+	"Attacks an opponent and deals 25 damage. New() receives 10 damage reduction points in the next turn.",
+	//"Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque que não seja UNIQUE nem exija uma\ntécnica de preparação, sua habilidade será copiada e poderá ser usada por New() também.",
+	"Selects and enemy and if, in the next turn, they utilize an ability that is'nt UNIQUE and does not require\na preparation technique, their ability is copied and may be used by New() also.",
+	//"Cura todos os status negativos de um aliado.",
+	"Removes any negative status of an ally.",
+	//"Alterando sua estrutura física de forma dinâmica, New() fica invulnerável por 1 turno.",
+	"Altering her basic structure in a dynamic way, New() stays invulnerable for 1 turn.",
+
+	// Clockboy
+	//"Desfera 20 de dano a um adversário. Atribui status PARALYZE por 2 turnos.",
+	"Deals 20 damage to an enemy. Attributes the PARALYZE status for 2 turns.",
+	//"Durante 2 turnos, nenhum golpe de Cl0ckB0y sofre COUNTER.",
+	"During 2 turns, any of the Cl0ckB0y's abilities suffer COUNTER.",
+	//"Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e seus ataques causam 500% a mais de dano.",
+	"Cl0ckb0y stays invulnerable for 2 turns, loses 50% of his energy and his abilities deal 500% more damage.",
+	//"Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno."
+	"Assuming that the battle got into a damage condition, Cl0ckB0y makes a conditional jump that makes him invulnerable for 1 turn."
+};
+
+int skill_desc_length_en[sizeof(skill_desc) / sizeof(char*)] = {
+	// Zer0
+	//"Ataca um oponente e realiza 20 de dano.",
+	sizeof "Attacks an opponent dealing 20 damage.",
+	//"Marca um adversário e, se no próximo turno ele realizar um ataque em Zer0, seu golpe é negado, \nsofre 20 de dano e recebe status Paralyze por 1 turno.",
+	sizeof "Marks an enemy and, if in the next turn they make an attack on Zer0, their attack is denied, \nsuffer 20 damage and receive Paralyze status for 1 turn.",
+	//"Cria uma atmosfera negativa no campo de batalha. False Rush e Contradiction acertam todos os adversários\ndurante 3 turnos.",
+	sizeof "Creates a negative atmosphere in the battle field. False Rush and Contradiction hit all the enemies for 3 turns.",
+	//"Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável por 1 turno.",
+	sizeof "Utilizing a shield created after a vacuum, Zer0 stays invulnerable for 1 turn.",
+
+	// On1
+	//"Ataca um oponente e realiza 30 de dano.",
+	sizeof "Attacks an opponent and deals 30 damage.",
+	//"Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno, o adversário utilizar\nqualquer habilidade, sofrerá 15 de dano crushing.",
+	sizeof "Attacks an enemy and deals 15 piercing damage. If, in the next turn, the enemy utilize any ability,\n they will receive 15 crushing damage.",
+	//"On1 canaliza sua positividade e aumenta suas habilidades. Por 3 turnos, On1 tem redução de dano de 15%\ne Truth Slash e Tautology gastam uma energia a menos.",
+	sizeof "On1 channels his positivity and increases his abilities. For 3 turns, On1 has 15% damage reduction,\nTruth Slash and Tautology cost one energy less.",
+	//"Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.",
+	sizeof "Concentrating all his positive energy, On1 acquires an absolute defense and stays invulnerable for 1 turn.",
+
+	// Serial
+	//"Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL. Porém, o adversário recebe 10 de dano\nse estiver nesse status.",
+	sizeof "Attacks an opponent and deals 20 damage. This ability ignores INVUL. But, the enemy receives 10 damage\nif they are in that state.",
+	//Infringe 15 de dano piercing a um oponente e adiciona status STUN por 1 turno.",
+	sizeof "Inflicts 15 piercing damage to an opponent and applies STUN status for 1 turn.",
+	//"Todos os adversários recebem status PARALYZE por 3 turnos.",
+	sizeof "All the enemies receive PARALYZE status for 3 turns.",
+	//"Envolto por uma densa camada encriptada, Serial K3yll3R fica invulnerável por 1 turno.",
+	sizeof "Surrounded by a dense encrypted layer, Serial K3yll3R stays invulnerable for 1 turn.",
+
+	// Ray
+	//"Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica invulnerável a golpes PHYSICAL por 1 turno.",
+	sizeof "Attacks an opponent, deals 15 damage and R4y Tr4c3y stays invulnerable to PHYSICAL attacks for 1 turn.",
+	//"Por 1 turno, todos os aliados recebem REFLEX DEFENSE.",
+	sizeof "For 1 turn, all the allies receive REFLEX DEFENSE.",
+	//"Aplica um golpe em todos os inimigos e realiza 35 de dano normal.",
+	sizeof "Apply a hit to all enemies and deals 35 normal damage.",
+	//"Usando suas técnicas de computação gráfica, R4y Tr4c3y fica invulnerável por 1 turno.",
+	sizeof "Using her computer graphics techniques, R4y Tr4c3y stays invulnerable for 1 turn.",
+
+	// AStar
+	//"Ataca um oponente e realiza 20 de dano. Para cada vez que um oponente recebe novamente este golpe, o dano\né aumentado em 5 pontos. O efeito é acumulativo.",
+	sizeof "Attacks an opponent and deals 20 damage. For each time that the opponent receives this ability, the damage\nis increased in 5 points. The effect is cumulative.",
+	//"Produz 25 de dano crushing a um oponente.",
+	sizeof "Produces 25 crushing damage to an opponent.",
+	//"Durante 4 turnos, todos os adversários atingidos por Neural Network podem receber o ataque Perceptron.\nA-St4r recebe 30 pontos de ABSORPTION.",
+	sizeof "During 4 turns, all the enemies hit by Neural Network can be hit by Perceptron.\nA-St4r receives 30 points of ABSORPTION.",
+	//"Para se proteger, A-St4r corre até as colinas e fica invulnerável por 1 turno.",
+	sizeof "To protect herself, A-St4r runs to the hills and stays invulnerable for 1 turn.",
+
+	// Deadlock
+	//"Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma habilidade com duração CONTROL, elimina a\nhabilidade e este sofre status SLEEP por 2 turnos.",
+	sizeof "Attacks an opponent and deals 25 damage. In case they are under any CONTROL duration abilities, eliminates the\nability and undergoes SLEEP status for 2 turns.",
+	//"Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.",
+	sizeof "Hits all the enemies and, in the next turn, only one can utilize an ability.",
+	//"Acerta um inimigo aleatório e coloca o status SLEEP por 3 turnos.",
+	sizeof "Hits a random enemy and puts them into SLEEP status for 3 turns.",
+	//"D3ADL0CK cria um clone seu para receber golpe no seu lugar, engana o adversário e fica invulnerável por 1 turno.",
+	sizeof "D3ADL0CK creates a clone of himself to receive the hit in his place, tricks the enemy and stays invulnerable for 1 turn.",
+
+	// Norma
+	//"Ataca um oponente, realiza 25 de dano piercing e há 50% de chance de causar status BURN por 3 turnos.",
+	sizeof "Attacks an opponent, deals 25 piercing damage and there is 50% chance of inflicting BURN status for 3 turns.",
+	//"Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION. O adversário que atacar N0rma recebe o status\nPOISON por 2 turnos.",
+	sizeof "Summon an ally, guaranteeing 15 points of ABSORPTION defense. The enemy that attacks N0rma receives the status\nPOISON for 2 turns.",
+	//"Acerta todos os adversários com 30 de dano. Só pode ser utilizado enquanto a habilidade Automata Summon estiver ativa.",
+	sizeof "Hits all the enemies dealing 30 damage. Can only be used when the ability Automata Summon is active.",
+	//"Aproveitando o universo não-determinístico, N0rma se esconde num estado protegido e fica invulnerável por 1 turno.",
+	sizeof "Taking advantage of a non-deterministic universe, N0rma hides in a protected state and stays invulnerable for 1 turn.",
+
+	// Hazard
+	//"Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5 pontos de defesa ABSORPTION por cada ataque bem sucedido.",
+	sizeof "Attacks all the enemies and deals 15 damage. Haz4rd receives 5 points of ABSORPTION defense for each attack that succeeded.",
+	//"Cria uma barreira redundante para os aliados. Cada personagem recebe 15 pontos de redução de defesa por 3 turnos.",
+	sizeof "Creates a redundant barrier for the allies. Each character receives 15 points of damage reduction for 3 turns.",
+	//"Cura qualquer status negativo de um aliado.",
+	sizeof "Removes any negative status of an ally.",
+	//"Para escapar de uma situação adversa, Haz4rd utiliza sua técnica de tolerância a falhas para avançar a um estado seguro,\nficando invulnerável por 1 turno.",
+	sizeof "In order to escape an adverse situation, Haz4rd utilizes his technique of fault tolerance to advance to a safe state,\nstaying invulnerable for 1 turn.",
+
+	// Qwerty
+	//"Qwerty altera sua forma física e ganha redução de dano de 40 pontos por 4 turnos.",
+	sizeof "Qwerty alters his physical form and obtains 40 damage reduction for 4 turns.",
+	//"Controla um inimigo por dois turnos. DELETE pode ser usado no adversário controlado.",
+	sizeof "Controls an enemy for two turns. DELETE can be used in the enemy controlled.",
+	//"Mata instantaneamente qualquer adversário que recebe este golpe, desde que esteja sob efeito de CTRL.",
+	sizeof "Kills any enemy that gets hit by this ability instantly, inasmuch as they are under the effect of CTRL.",
+	//"Em meio ao perigo, Qwerty utiliza seus instintos para escapar da batalha e fica invulnerável por 1 turno.",
+	sizeof "Among danger, Qwerty utilizes his instincts to escape the battle and stays invulnerable for 1 turn.",
+
+	// Big O
+	//"Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.\nSe o alvo já possui status BURN, este sofre 10 de dano crushing adicional.",
+	sizeof "Attacks the opponent with less HP and deals 20 damage. For 2 turns, the target stays with BURN status.\nIf the target is already in BURN status, they suffer an additional 10 crushing damage.",
+	//"Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia\ne atribui status FROZEN por 2 turnos.",
+	sizeof "If utilzed in an enemy, generates BURN status for 3 turns. If, in an ally, restores 25 energy and attributes them with FROZEN status for 2 turns.",
+	//"No próximo turno, recebe 4 orbs de energia: uma de cada categoria.",
+	sizeof "In the next turn, receive 4 orbs of energy: one of each category.",
+	//"=Big-O= cria uma ilusão nos adversários, possibilitando uma fuga estratégica que o torna invulnerável por 1 turno.",
+	sizeof "=Big-O= creates an illusion for the enemies, allowing an strategic escape that makes him invulnerable for 1 turn.",
+
+	// New
+	//"Ataca um oponente e realiza 25 de dano. New() recebe redução de dano de 10 pontos no próximo turno.",
+	sizeof "Attacks an opponent and deals 25 damage. New() receives 10 damage reduction points in the next turn.",
+	//"Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque que não seja UNIQUE nem exija uma\ntécnica de preparação, sua habilidade será copiada e poderá ser usada por New() também.",
+	sizeof "Selects and enemy and if, in the next turn, they utilize an ability that is'nt UNIQUE and does not require\na preparation technique, their ability is copied and may be used by New() also.",
+	//"Cura todos os status negativos de um aliado.",
+	sizeof "Removes any negative status of an ally.",
+	//"Alterando sua estrutura física de forma dinâmica, New() fica invulnerável por 1 turno.",
+	sizeof "Altering her basic structure in a dynamic way, New() stays invulnerable for 1 turn.",
+
+	// Clockboy
+	//"Desfera 20 de dano a um adversário. Atribui status PARALYZE por 2 turnos.",
+	sizeof "Deals 20 damage to an enemy. Attributes the PARALYZE status for 2 turns.",
+	//"Durante 2 turnos, nenhum golpe de Cl0ckB0y sofre COUNTER.",
+	sizeof "During 2 turns, any of the Cl0ckB0y's abilities suffer COUNTER.",
+	//"Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e seus ataques causam 500% a mais de dano.",
+	sizeof "Cl0ckb0y stays invulnerable for 2 turns, loses 50% of his energy and his abilities deal 500% more damage.",
+	//"Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno."
+	sizeof "Assuming that the battle got into a damage condition, Cl0ckB0y makes a conditional jump that makes him invulnerable for 1 turn."
+};
+
+char** char_descriptions = 0;
+int* char_descriptions_length = 0;
+
+char* char_descriptions_pt[NUM_CHARS] = {
 	"O vilão que nunca tem suas condições atendidas!",
 	"O super herói mais otimista possível!",
 	"Possui um papagaio chamado Cracken.",
@@ -335,7 +582,7 @@ char* char_descriptions[NUM_CHARS] = {
 	"Nunca se atrasou para o ENEM."
 };
 
-int char_descriptions_length[NUM_CHARS] = {
+int char_descriptions_pt_length[NUM_CHARS] = {
 	sizeof "O vilão que nunca tem suas condições atendidas!",
 	sizeof "O super herói mais otimista possível!",
 	sizeof "Possui um papagaio chamado Cracken.",
@@ -348,6 +595,36 @@ int char_descriptions_length[NUM_CHARS] = {
 	sizeof "Temperamental, complexo de se relacionar.",
 	sizeof "Elegante, cheia de classe.",
 	sizeof "Nunca se atrasou para o ENEM."
+};
+
+char* char_descriptions_en[NUM_CHARS] = {
+	"The villan that never has his conditions met!",
+	"The most optimistic superhero!",
+	"Has a parrot called Cracken.",
+	"Photogenic, loves cameras and always walk through the shadows.",
+	"In a systematic search to find the starring path.",
+	"Graduated in law, master of processes.",
+	"A machine in art of combat: simple and effective.",
+	"Catastrophe codename.",
+	"I/OLO",
+	"Moody, complex to have a relationship.\n",
+	"Elegant, filled with class.",
+	"Was never late to ENEM."
+};
+
+int char_descriptions_en_length[NUM_CHARS] = {
+	sizeof "The villan that never has his conditions met!",
+	sizeof "The most optimistic superhero!",
+	sizeof "Has a parrot called Cracken.",
+	sizeof "Photogenic, loves cameras and always walk through the shadows.",
+	sizeof "In a systematic search to find the starring path.",
+	sizeof "Graduated in law, master of processes.",
+	sizeof "A machine in art of combat: simple and effective.",
+	sizeof "Catastrophe codename.",
+	sizeof "I/OLO",
+	sizeof "Moody, complex to have a relationship.\n",
+	sizeof "Elegant, filled with class.",
+	sizeof "Was never late to ENEM."
 };
 
 int skill_costs[NUM_SKILLS * NUM_CHARS][ORB_NUMBER] = {
@@ -534,11 +811,10 @@ hm::vec4 darker_gray(0.6f, 0.6f, 0.6f, 0.0f);
 hm::vec4 cyan(0.0f, 1.0f, 1.0f, 1.0f);
 hm::vec4 ally_hp_bar_full_color(0, 1, 1, 1);
 hm::vec4 ally_hp_bar_empty_color(0, 0.3f, 0.3f, 1.0f);
-hm::vec4 enem_hp_bar_full_color(1, 0.3529f, 0, 1.0f);
-hm::vec4 enem_hp_bar_empty_color(0.61f, 0.21f, 0.0f, 1.0f);
-
-//hm::vec4 enem_hp_bar_full_color(1, 0, 0.4f, 1.0f);			//#ff0066
-//hm::vec4 enem_hp_bar_empty_color(0.6f, 0.0f, 0.2392f, 1.0f);	// #99003d
+//hm::vec4 enem_hp_bar_full_color(1, 0.3529f, 0, 1.0f);
+//hm::vec4 enem_hp_bar_empty_color(0.61f, 0.21f, 0.0f, 1.0f);
+hm::vec4 enem_hp_bar_full_color(1, 0, 0.4f, 1.0f);			//#ff0066
+hm::vec4 enem_hp_bar_empty_color(0.6f, 0.0f, 0.2392f, 1.0f);	// #99003d
 
 static SOCKET * connection;
 static client_info * player;
@@ -1294,6 +1570,9 @@ void init_application()
 	layout_change_orb_amount(ORB_ALL, 1);
 #endif
 
+	char_descriptions = char_descriptions_en;
+	char_descriptions_length = char_descriptions_en_length;
+
 	// init console chat
 	chat_window = chat.init_chat();
 	chat_window->setActive(false);
@@ -1524,6 +1803,8 @@ void update_game_mode(double frametime)
 					combat_state.skill_info_image->setBorderColor(hm::vec4(greener_cyan));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
+					layout_set_char_orb_types_description((Character_ID)i, combat_state.skill_info_group->getLabels()[0]);
+					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
 					break;
 				} else {
@@ -1541,7 +1822,8 @@ void update_game_mode(double frametime)
 							for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
 								combat_state.skill_costs[n]->m_render = false;
 							}
-							for (int n = 0, orb_index = 0; n < ORB_NUMBER; ++n) {
+							// Update skill costs on layout
+							for (int n = ORB_NUMBER - 1, orb_index = 0; n >= 0; --n) {
 								int cost = skill_costs[skill_index][n];
 								while (cost > 0) {
 									combat_state.skill_costs[orb_index]->m_render = true;
@@ -1564,6 +1846,8 @@ void update_game_mode(double frametime)
 					combat_state.skill_info_image->setBorderColor(hm::vec4(enem_hp_bar_full_color));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
+					layout_set_char_orb_types_description((Character_ID)i, combat_state.skill_info_group->getLabels()[0]);
+					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
 					break;
 				}
@@ -1576,7 +1860,7 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
-			combat_state.skill_info_group->m_render = is_hovering_skill;
+			combat_state.skill_info_group->m_render = is_hovering_skill | is_hovering_char;
 
 #if MULTIPLAYER
 			if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
@@ -1788,75 +2072,94 @@ static void put_space(int* length, char* buffer) {
 
 #define PUT_STR(STR, BUFFER, LEN) strcpy(BUFFER + LEN, STR); LEN += sizeof(STR) - 1
 
+static char skill_group_layout_label[512] = {0};
+static void layout_set_char_orb_types_description(Character_ID id, linked::Label* label) {
+	int length = 0;
+	switch (id) {
+		case CHAR_ZERO:				 PUT_STR("SOFT, VR, BIOS", skill_group_layout_label, length); break;
+		case CHAR_ONE:				 PUT_STR("HARD, VR, BIOS", skill_group_layout_label, length); break;
+		case CHAR_SERIAL_KEYLLER:	 PUT_STR("HARD, SOFT", skill_group_layout_label, length); break;
+		case CHAR_RAY_TRACEY:		 PUT_STR("VR", skill_group_layout_label, length); break;
+		case CHAR_A_STAR:			 PUT_STR("BIOS,	VR", skill_group_layout_label, length); break;
+		case CHAR_DEADLOCK:			 PUT_STR("SOFT, ", skill_group_layout_label, length); break;
+		case CHAR_NORMA:			 PUT_STR("NULL", skill_group_layout_label, length); break;
+		case CHAR_HAZARD:			 PUT_STR("BIOS, HARD", skill_group_layout_label, length); break;
+		case CHAR_QWERTY:			 PUT_STR("HARD", skill_group_layout_label, length); break;
+		case CHAR_BIG_O:			 PUT_STR("HARD, VR", skill_group_layout_label, length); break;
+		case CHAR_NEW:				 PUT_STR("SOFT, BIOS", skill_group_layout_label, length); break;
+		case CHAR_CLOCKBOY:			 PUT_STR("BIOS", skill_group_layout_label, length); break;
+	}
+	label->setText((u8*)skill_group_layout_label, length + 1);
+}
+
 static void layout_set_skill_group_from_skill(int skill_index, linked::Label* label) {
-	static char buffer[512] = {0};
 	int length = 0;
 	bool insert_space = false;
 
 	switch (skill_groups[skill_index].type) {
 	case SKILL_TYPE_NONE: break;
-	case SKILL_TYPE_PHYSICAL:	PUT_STR("PHYSICAL", buffer, length); insert_space = true; break;
-	case SKILL_TYPE_MENTAL:		PUT_STR("MENTAL", buffer, length);   insert_space = true; break;
-	case SKILL_TYPE_VIRTUAL:	PUT_STR("VIRTUAL", buffer, length);  insert_space = true; break;
+	case SKILL_TYPE_PHYSICAL:	PUT_STR("PHYSICAL", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_TYPE_MENTAL:		PUT_STR("MENTAL", skill_group_layout_label, length);   insert_space = true; break;
+	case SKILL_TYPE_VIRTUAL:	PUT_STR("VIRTUAL", skill_group_layout_label, length);  insert_space = true; break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].mode) {
 	case SKILL_MODE_NONE: break;
-	case SKILL_MODE_MELEE:  if (insert_space) put_space(&length, buffer); PUT_STR("MELEE", buffer, length);  insert_space = true;  break;
-	case SKILL_MODE_RANGED: if (insert_space) put_space(&length, buffer); PUT_STR("RANGED", buffer, length); insert_space = true;  break;
+	case SKILL_MODE_MELEE:  if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("MELEE", skill_group_layout_label, length);  insert_space = true;  break;
+	case SKILL_MODE_RANGED: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("RANGED", skill_group_layout_label, length); insert_space = true;  break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].category) {
 	case SKILL_CATEGORY_NORMAL: break;
-	case SKILL_CATEGORY_COUNTER: if (insert_space) put_space(&length, buffer); PUT_STR("COUNTER", buffer, length); insert_space = true; break;
-	case SKILL_CATEGORY_STATUS:  if (insert_space) put_space(&length, buffer); PUT_STR("STATUS", buffer, length);  insert_space = true; break;
+	case SKILL_CATEGORY_COUNTER: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("COUNTER", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_CATEGORY_STATUS:  if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("STATUS", skill_group_layout_label, length);  insert_space = true; break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].condition) {
 	case SKILL_CONDITION_NONE:
 	case SKILL_CONDITION_NORMAL: break;
-	case SKILL_CONDITION_BURN: if (insert_space) put_space(&length, buffer); PUT_STR("BURN", buffer, length); insert_space = true; break;
-	case SKILL_CONDITION_FREEZE: if (insert_space) put_space(&length, buffer); PUT_STR("FREEZE", buffer, length); insert_space = true; break;
-	case SKILL_CONDITION_POISON: if (insert_space) put_space(&length, buffer); PUT_STR("POISON", buffer, length); insert_space = true; break;
-	case SKILL_CONDITION_PARALYZE: if (insert_space) put_space(&length, buffer); PUT_STR("PARALYZE", buffer, length); insert_space = true; break;
-	case SKILL_CONDITION_SLEEP: if (insert_space) put_space(&length, buffer); PUT_STR("SLEEP", buffer, length); insert_space = true; break;
+	case SKILL_CONDITION_BURN: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("BURN", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_CONDITION_FREEZE: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("FREEZE", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_CONDITION_POISON: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("POISON", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_CONDITION_PARALYZE: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("PARALYZE", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_CONDITION_SLEEP: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("SLEEP", skill_group_layout_label, length); insert_space = true; break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].damage) {
 	case SKILL_DMG_NONE: break;
-	case SKILL_DMG_NORMAL: if (insert_space) put_space(&length, buffer); PUT_STR("DMG NORMAL", buffer, length); insert_space = true; break;
-	case SKILL_DMG_PIERCING: if (insert_space) put_space(&length, buffer); PUT_STR("PIERCING", buffer, length); insert_space = true; break;
-	case SKILL_DMG_CRUSHING: if (insert_space) put_space(&length, buffer); PUT_STR("CRUSHING", buffer, length); insert_space = true; break;
+	case SKILL_DMG_NORMAL: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("DMG NORMAL", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DMG_PIERCING: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("PIERCING", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DMG_CRUSHING: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("CRUSHING", skill_group_layout_label, length); insert_space = true; break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].defense) {
 	case SKILL_DEF_NONE: break;
-	case SKILL_DEF_REDUCTION: if (insert_space) put_space(&length, buffer); PUT_STR("REDUCTION", buffer, length); insert_space = true; break;
-	case SKILL_DEF_ABSORPTION: if (insert_space) put_space(&length, buffer); PUT_STR("ABSORPTION", buffer, length); insert_space = true; break;
-	case SKILL_DEF_RELECTION: if (insert_space) put_space(&length, buffer); PUT_STR("REFLECTION", buffer, length); insert_space = true; break;
-	case SKILL_DEF_INVULNERABILITY: if (insert_space) put_space(&length, buffer); PUT_STR("INVUL", buffer, length); insert_space = true; break;
+	case SKILL_DEF_REDUCTION: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("REDUCTION", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DEF_ABSORPTION: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("ABSORPTION", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DEF_RELECTION: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("REFLECTION", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DEF_INVULNERABILITY: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("INVUL", skill_group_layout_label, length); insert_space = true; break;
 	default: break;
 	}
 
 	switch (skill_groups[skill_index].duration) {
 	case SKILL_DURATION_NONE: break;
-	case SKILL_DURATION_STATIC: if (insert_space) put_space(&length, buffer); PUT_STR("STATIC", buffer, length); insert_space = true; break;
-	case SKILL_DURATION_CONTROL: if (insert_space) put_space(&length, buffer); PUT_STR("CONTROL", buffer, length); insert_space = true; break;
-	case SKILL_DURATION_CONSTANT: if (insert_space) put_space(&length, buffer); PUT_STR("CONSTANT", buffer, length); insert_space = true; break;
+	case SKILL_DURATION_STATIC: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("STATIC", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DURATION_CONTROL: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("CONTROL", skill_group_layout_label, length); insert_space = true; break;
+	case SKILL_DURATION_CONSTANT: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("CONSTANT", skill_group_layout_label, length); insert_space = true; break;
 	}
 
 	switch (skill_groups[skill_index].unique) {
 	case SKILL_NOT_UNIQUE: break;
-	case SKILL_UNIQUE: if (insert_space) put_space(&length, buffer); PUT_STR("UNIQUE", buffer, length); break;
+	case SKILL_UNIQUE: if (insert_space) put_space(&length, skill_group_layout_label); PUT_STR("UNIQUE", skill_group_layout_label, length); break;
 	default: break;
 	}
 
-	label->setText((u8*)buffer, length + 1);
+	label->setText((u8*)skill_group_layout_label, length + 1);
 }
 
 static void layout_set_cooldown_from_skill(int skill_index, linked::Label* label) {
@@ -1962,6 +2265,8 @@ static void layout_set_enemy_hp(int enemy_index, int max_hp, int hp_to_set)
 	hp_label->setText((u8*)hp_buffer[enemy_index], count + 1);
 }
 
+// layout_set_enemy_hp &  layout_set_ally_hp must be set before updating combat_state always
+// in order to enable animation on hp bar
 static void layout_update_hp_animations(r32 delta) {
 	const r32 seconds_to_animate = 0.8f;
 	delta /= seconds_to_animate;

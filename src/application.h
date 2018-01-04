@@ -255,6 +255,7 @@ static void layout_set_ally_image_opacity(s32 index, r32 percentage, hm::vec4 co
 static void layout_update_endturn_button();
 static void layout_apply_status_ally(s32 index, s32 stat_index, Texture* status_image);
 static void layout_apply_status_enemy(s32 index, s32 stat_index, Texture* status_image);
+static void layout_set_char_orb_types_description(Character_ID id, linked::Label* label);
 
 static void layout_set_exchange_modal_quantity(bool orb_left, Orb_ID orb_id, s32 quantity);
 static void layout_set_exchange_modal_upper_orbs(Orb_ID id, s32 index);

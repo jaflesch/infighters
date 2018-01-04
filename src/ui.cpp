@@ -506,7 +506,6 @@ static void layout_set_sacrifice_modal_quantity(bool orb_left, Orb_ID orb_id, s3
 	}
 }
 
-
 static void init_sacrifice_orbs_modal() {
 	using namespace linked;
 
@@ -945,7 +944,7 @@ void init_combat_mode()
 	}
 
 	{
-		float orbs_size = 64.0f;
+		float orbs_size = 48.0f;
 
 		hm::vec4 combat_info_bar_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 0.8f);
 		linked::Window* combat_bottom_info = new linked::Window(window_info.width, 200, hm::vec2(0, 660), combat_info_bar_color, 0, 0, linked::W_BORDER | linked::W_UNFOCUSABLE);
@@ -957,23 +956,23 @@ void init_combat_mode()
 		multiple_orb_button->setAllBGTexture(multiple_orbs_texture);
 		orbs_div->getButtons().push_back(multiple_orb_button);
 
-		linked::Button* hard_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* hard_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 14) + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		hard_orb_button->setAllBGTexture(orb_textures[0]);
 		orbs_div->getButtons().push_back(hard_orb_button);
 
-		linked::Button* soft_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 2 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* soft_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 14) * 2 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		soft_orb_button->setAllBGTexture(orb_textures[1]);
 		orbs_div->getButtons().push_back(soft_orb_button);
 
-		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 3 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* vr_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 14) * 3 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		vr_orb_button->setAllBGTexture(orb_textures[2]);
 		orbs_div->getButtons().push_back(vr_orb_button);
 
-		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 4 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* bios_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 14) * 4 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		bios_orb_button->setAllBGTexture(orb_textures[3]);
 		orbs_div->getButtons().push_back(bios_orb_button);
 
-		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 10) * 5 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
+		linked::Button* exchange_orb_button = new linked::Button(*orbs_div, 0, hm::vec2((orbs_size + 14) * 5 + 18, 0), (int)orbs_size, (int)orbs_size, hm::vec4(0, 0, 0, 1), 0);
 		Texture* xchg_orb_texture = new Texture("../../../res/orbs/exchange_orb.png");
 		exchange_orb_button->setAllBGTexture(xchg_orb_texture);
 		hm::vec4 exchange_orb_button_hovered_bgcolor(0, 1, 1, 0.7f);
@@ -985,28 +984,28 @@ void init_combat_mode()
 
 		r32 orb_pos_offset = 0;
 		linked::Label* multiple_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
-		orb_pos_offset = 64.0f / 2.0f - multiple_orb_label->getTextWidth() / 2.0f;
+		orb_pos_offset = 48.0f / 2.0f - multiple_orb_label->getTextWidth() / 2.0f;
 		hm::vec2 multiple_orb_label_position(orb_pos_offset, 74);
 		multiple_orb_label->setPosition(multiple_orb_label_position);
 		orbs_div->getLabels().push_back(multiple_orb_label);
 		combat_state.all_orbs_label = multiple_orb_label;
 
-		r32 base_next_orb = (orbs_size + 10) + 18;
+		r32 base_next_orb = (orbs_size + 14) + 18;
 		linked::Label* hard_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		hard_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(hard_orb_label);
 		combat_state.orb_labels[ORB_HARD] = hard_orb_label;
-		base_next_orb = (orbs_size + 10) * 2 + 18;
+		base_next_orb = (orbs_size + 14) * 2 + 18;
 		linked::Label* soft_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		soft_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(soft_orb_label);
 		combat_state.orb_labels[ORB_SOFT] = soft_orb_label;
-		base_next_orb = (orbs_size + 10) * 3 + 18;
+		base_next_orb = (orbs_size + 14) * 3 + 18;
 		linked::Label* vr_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		vr_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(vr_orb_label);
 		combat_state.orb_labels[ORB_VR] = vr_orb_label;
-		base_next_orb = (orbs_size + 10) * 4 + 18;
+		base_next_orb = (orbs_size + 14) * 4 + 18;
 		linked::Label* bios_orb_label = new linked::Label(*orbs_div, (u8*)"0", sizeof("0"), hm::vec2(0, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		bios_orb_label->setPosition(hm::vec2(base_next_orb + orb_pos_offset, 74));
 		orbs_div->getLabels().push_back(bios_orb_label);
@@ -1043,15 +1042,15 @@ void init_combat_mode()
 		skill_desc_div->m_render = false;
 
 		float orb_size = 32.0f;
-		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_1 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1220.0f, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_1);
-		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_2 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1220.0f + (orb_size + 5), skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_2);
-		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_3 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1220.0f + (orb_size + 5) * 2, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_3);
-		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_4 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1220.0f + (orb_size + 5) * 3, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_4);
-		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1300.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
+		linked::WindowDiv* skill_cost_div_5 = new linked::WindowDiv(*combat_bottom_info, (int)orb_size, (int)orb_size, 0, 0, hm::vec2(1220.0f + (orb_size + 5) * 4, skill_desc_height), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
 		combat_bottom_info->divs.push_back(skill_cost_div_5);
 
 		skill_cost_div_1->m_render = false;
@@ -1060,11 +1059,11 @@ void init_combat_mode()
 		skill_cost_div_4->m_render = false;
 		skill_cost_div_5->m_render = false;
 
-		combat_state.skill_costs[0] = skill_cost_div_1;
-		combat_state.skill_costs[1] = skill_cost_div_2;
+		combat_state.skill_costs[0] = skill_cost_div_5;
+		combat_state.skill_costs[1] = skill_cost_div_4;
 		combat_state.skill_costs[2] = skill_cost_div_3;
-		combat_state.skill_costs[3] = skill_cost_div_4;
-		combat_state.skill_costs[4] = skill_cost_div_5;
+		combat_state.skill_costs[3] = skill_cost_div_2;
+		combat_state.skill_costs[4] = skill_cost_div_1;
 
 		combat_state.skill_info_image = skill_image_div;
 		//combat_state.skill_info_image_border = skill_image_div_border;
