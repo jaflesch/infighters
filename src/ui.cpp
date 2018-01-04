@@ -467,6 +467,11 @@ void init_combat_mode()
 		}
 
 		// End turn button
+		gw.end_turn_button_player_turn = new Texture("../../../res/textures/endturn_button_ally_normal.png");
+		gw.end_turn_button_enemy_turn = new Texture("../../../res/textures/endturn_button_enemy_normal.png");
+		gw.end_turn_button_player_turn_hover = new Texture("../../../res/textures/endturn_button_ally_hover.png");
+		gw.end_turn_button_enemy_turn_hover = new Texture("../../../res/textures/endturn_button_enemy_hover.png");
+
 		linked::WindowDiv* end_turn = new linked::WindowDiv(*player_name, 200, 45, 0, 0, hm::vec2(0, 20.0f), hm::vec4(1, 0, 0, 0), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP | linked::DIV_CENTER_X);
 		linked::Label* end_turn_label = new linked::Label(*end_turn, (u8*)"END TURN", sizeof "END TURN", hm::vec2(55.0f, 12.0f), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_24, 0, 0);
 		hm::vec2 end_turn_label_pos((200.0f - end_turn_label->getTextWidth()) / 2.0f, 10.0f);

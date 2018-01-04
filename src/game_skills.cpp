@@ -484,7 +484,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			printf("copied skill of id %d\n", id);
 			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
 				skill_state_ally.inheritance_copy = id;
-				skill_state_ally.inheritance_duration = 1;
+				skill_state_ally.inheritance_duration = 2;
 				linked::Button* b = gw.allies_skills[skill_counter_enemy.inheritance_new_index * NUM_SKILLS + 1]->divs[0]->getButtons()[0];
 				b->setAllBGTexture(skill_textures[id]);
 			}
@@ -514,7 +514,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			printf("copied skill of id %d\n", id);
 			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
 				skill_state_enemy.inheritance_copy = id;
-				skill_state_enemy.inheritance_duration = 1;
+				skill_state_enemy.inheritance_duration = 2;
 			}
 		}
 	}

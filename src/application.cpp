@@ -540,8 +540,6 @@ hm::vec4 enem_hp_bar_empty_color(0.61f, 0.21f, 0.0f, 1.0f);
 //hm::vec4 enem_hp_bar_full_color(1, 0, 0.4f, 1.0f);			//#ff0066
 //hm::vec4 enem_hp_bar_empty_color(0.6f, 0.0f, 0.2392f, 1.0f);	// #99003d
 
-hm::vec4 enemy_color(1, 0.71f, 0.29f, 1.0f);
-
 static SOCKET * connection;
 static client_info * player;
 
@@ -1409,7 +1407,7 @@ void update_game_mode(double frametime)
 					//printf("Enemy %d hovered!\n", i);
 					int char_index = char_sel_state.enemy_selections[i];
 					combat_state.skill_info_image->setBackgroundTexture(char_textures[char_index]);
-					combat_state.skill_info_image->setBorderColor(hm::vec4(enemy_color));
+					combat_state.skill_info_image->setBorderColor(hm::vec4(enem_hp_bar_full_color));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
 					is_hovering_char = true;
@@ -1833,15 +1831,12 @@ static void layout_update_endturn_button() {
 	linked::Label* end_turn_label = combat_state.end_turn_button->getLabel();
 	if (combat_state.player_turn) {
 		end_turn_label->setText((u8*)"END TURN", sizeof("END TURN"));
-		combat_state.end_turn_button->setNormalBGColor(greener_cyan - hm::vec4(0.2f, 0.2f, 0.2f, 0.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(greener_cyan - hm::vec4(0.4f, 0.35f, 0.4f, 0.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.4f, 0.65f, 0.45f, 1.0f));
+		combat_state.end_turn_button->setHoveredBGTexture(gw.end_turn_button_player_turn_hover);
+		combat_state.end_turn_button->setHeldBGTexture(gw.end_turn_button_player_turn_hover);
+		combat_state.end_turn_button->setNormalBGTexture(gw.end_turn_button_player_turn);
 	} else {
 		end_turn_label->setText((u8*)"ENEMY TURN", sizeof("ENEMY TURN"));
-		combat_state.end_turn_button->setNormalBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHoveredBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		combat_state.end_turn_button->setHeldBGColor(hm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		combat_state.end_turn_button->setAllBGTexture(gw.end_turn_button_enemy_turn);
 	}
 
 	end_turn_label->setPosition(hm::vec2((combat_state.end_turn_button->getWidth() - end_turn_label->getTextWidth()) / 2.0f, 10.0f));
