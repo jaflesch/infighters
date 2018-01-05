@@ -350,6 +350,12 @@ void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration
 	combat_state->player.status[target_index] |= status;
 	combat_state->player.status_duration[target_index][status] = duration;
 
+	for (int i = 0; i < MAX_STATUS; ++i) {
+		if (g_layout_status.ally_status[target_index][i] == status) {
+			return;
+		}
+	}
+
 	// Layout
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (g_layout_status.ally_status[target_index][i] == SKILL_CONDITION_NONE) {
@@ -487,6 +493,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			printf("enemy countered by inheritance");
 			printf("copied skill of id %d\n", id);
 			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
+				skill_state_ally.cooldown_counter[SKILL_INHERITANCE] = 0;
 				skill_state_ally.inheritance_copy = id;
 				skill_state_ally.inheritance_duration = 2;
 				linked::Button* b = gw.allies_skills[skill_counter_enemy.inheritance_new_index * NUM_SKILLS + 1]->divs[0]->getButtons()[0];
@@ -840,7 +847,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.
 			*/
 			if (from_enemy) {
-				if (on_enemy) {
+				if (!on_enemy) {
 					apply_status_to_ally(target_index, SKILL_CONDITION_BURN, 3, combat_state);
 				} else {
 					s32 newhp = MIN(combat_state->enemy.hp[target_index] + 25, combat_state->enemy.max_hp[target_index]);
@@ -849,7 +856,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					apply_status_to_enemy(target_index, SKILL_CONDITION_FREEZE, 2, combat_state);
 				}
 			} else {
-				if (on_enemy) {
+				if (!on_enemy) {
 					apply_status_to_enemy(target_index, SKILL_CONDITION_BURN, 3, combat_state);
 				} else {
 					s32 newhp = MIN(combat_state->player.hp[target_index] + 25, combat_state->player.max_hp[target_index]);
@@ -946,6 +953,24 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		} break;
 	}
 	return 0;
+}
+
+void update_negative_status_ally() {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		//Character_ID id = (Character_ID)char_sel_state.selections[i];
+		if (combat_state.player.status[i] & SKILL_CONDITION_BURN) {
+			deal_damage_to_target_ally(i, -1, 5, SKILL_DMG_CRUSHING, (Skill_ID)0, &combat_state);
+		}
+	}
+}
+
+void update_negative_status_enemy() {
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		//Character_ID id = (Character_ID)char_sel_state.selections[i];
+		if (combat_state.enemy.status[i] & SKILL_CONDITION_BURN) {
+			deal_damage_to_target_enemy(i, -1, 5, SKILL_DMG_CRUSHING, (Skill_ID)0, &combat_state);
+		}
+	}
 }
 
 void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
@@ -1062,8 +1087,14 @@ void update_status_end_enemy_turn(Combat_State* combat_state) {
 
 	for (int i = 0; i < NUM_ENEMIES; ++i) {
 		for (int j = SKILL_CONDITION_BURN; j < SKILL_CONDITION_NUMBER; j <<= 1) {
-			if (combat_state->enemy.status_duration[i][j] > 0)
+			if (combat_state->enemy.status_duration[i][j] > 0) {
 				combat_state->enemy.status_duration[i][j] -= 1;
+				if (j == SKILL_CONDITION_BURN) {
+					deal_damage_to_target_enemy(i, -1, 5, SKILL_DMG_CRUSHING, (Skill_ID)0, combat_state);
+				} else if (j == SKILL_CONDITION_POISON) {
+					deal_damage_to_target_enemy(i, -1, 7, SKILL_DMG_NORMAL, (Skill_ID)0, combat_state);
+				}
+			}
 			if (combat_state->enemy.status_duration[i][j] == 0) {
 				remove_status_from_enemy(i, (Skill_Condition)j, combat_state);
 			}
@@ -1074,8 +1105,14 @@ void update_status_end_enemy_turn(Combat_State* combat_state) {
 void update_status_end_turn(Combat_State* combat_state) {
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		for (int j = SKILL_CONDITION_BURN; j < SKILL_CONDITION_NUMBER; j <<= 1) {
-			if (combat_state->player.status_duration[i][j] > 0)
+			if (combat_state->player.status_duration[i][j] > 0) {
 				combat_state->player.status_duration[i][j] -= 1;
+				if (j == SKILL_CONDITION_BURN) {
+					deal_damage_to_target_ally(i, -1, 5, SKILL_DMG_CRUSHING, (Skill_ID)0, combat_state);
+				} else if (j == SKILL_CONDITION_POISON) {
+					deal_damage_to_target_ally(i, -1, 7, SKILL_DMG_NORMAL, (Skill_ID)0, combat_state);
+				}
+			}
 			if (combat_state->player.status_duration[i][j] == 0) {
 				remove_status_from_ally(i, (Skill_Condition)j, combat_state);
 			}

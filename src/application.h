@@ -339,7 +339,9 @@ struct Combat_State {
 	// Gameplay
 	bool player_turn;
 	int orbs_amount[ORB_NUMBER];
+	int orbs_amount_temp_added[ORB_NUMBER];
 	int total_orbs;
+	int total_orbs_temp_added;
 	int total_null_orbs_in_temp_use;
 
 	Player player;

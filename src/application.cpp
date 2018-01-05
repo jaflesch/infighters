@@ -696,7 +696,7 @@ int skill_cooldowns[NUM_SKILLS * NUM_CHARS] = {
 	0, 0, 5, 4, // zero
 	0, 1, 4, 4, // one
 	0, 1, 3, 4, // serial
-	1, 3, 1, 4, // ray
+	1, 3, 2, 4, // ray
 	0, 0, 5, 4, // astar
 	0, 1, 2, 4,	// deadlock
 	0, 3, 1, 4, // norma
@@ -865,7 +865,8 @@ static void temporary_modify_orbs(Skill_ID skill_used, s32 add);
 static void reset_targets_animation();
 
 static void button_end_turn(void* arg) {
-
+	if (combat_state.player.targeting)
+		return;
 	if (combat_state.player.targeting) {
 		Skill_ID skill_used = combat_state.player.targeting_info.skill_used;
 		temporary_modify_orbs(skill_used, 1);
@@ -924,6 +925,7 @@ static void button_callback_exchange_orb_confirm(void* arg) {
 	layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
 
 	button_callback_exchange_orb_cancel(0);
+	layout_update_cooldowns(true);
 }
 static void button_callback_exchange_orb_arrow_left(void* arg) {
 	printf("Exchange Arrow Left\n");
@@ -1017,6 +1019,8 @@ static void button_callback_exchange_orb(void* arg) {
 		gw.exchange_orb_ui->arrows_left[i]->setActive(false, false);
 		if(combat_state.orbs_amount[i] > 0)
 			gw.exchange_orb_ui->arrows_right[i]->setActive(true);
+		else
+			gw.exchange_orb_ui->arrows_right[i]->setActive(false, false);
 	}
 	for (int i = 0; i < 3; ++i) {
 		layout_set_exchange_modal_upper_orbs(ORB_NONE, (Orb_ID)i);
@@ -1243,17 +1247,17 @@ static void combat_state_reset_all_targets() {
 }
 
 static bool has_enough_orbs(Skill_ID skill_used) {
-	s32 total_orbs = combat_state.total_orbs;
+	s32 total_orbs = combat_state.total_orbs - combat_state.total_orbs_temp_added;
 	for (int i = 0; i < ORB_NUMBER - 1; ++i) {
 		total_orbs -= skill_costs[skill_used][i];
-		if (skill_costs[skill_used][i] > combat_state.orbs_amount[i]) {
+		if (skill_costs[skill_used][i] > combat_state.orbs_amount[i] - combat_state.orbs_amount_temp_added[i]) {
 			return false;
 		}
 	}
 	s32 null_orb_cost = skill_costs[skill_used][ORB_NULL];
 	if (null_orb_cost > 0) {
 		if (total_orbs - combat_state.total_null_orbs_in_temp_use < null_orb_cost) {
-			printf("Not enough orbs to sacrifice\n");
+			//printf("Not enough orbs to sacrifice\n");
 			return false;
 		}
 	}
@@ -1266,6 +1270,9 @@ static void temporary_modify_orbs(Skill_ID skill_used, s32 add) {
 		s32 cost = skill_costs[skill_used][i];
 		combat_state.orbs_amount[i] += add * cost;
 		combat_state.total_orbs += add * cost;
+		combat_state.orbs_amount_temp_added[i] += add * cost;
+		combat_state.total_orbs_temp_added += add * cost;
+
 		layout_change_orb_amount((Orb_ID)i, combat_state.orbs_amount[i]);
 
 		layout_change_orb_amount(ORB_ALL, combat_state.total_orbs);
@@ -1558,16 +1565,20 @@ void init_application()
 	init_combat_mode();
 
 #if 1
-	combat_state.orbs_amount[ORB_HARD] = 2;
+	for(int i = 0; i < ORB_NUMBER; ++i)
+		combat_state.orbs_amount_temp_added[i] = 0;
+	combat_state.total_orbs_temp_added = 0;
+
+	combat_state.orbs_amount[ORB_HARD] = 8;
 	combat_state.orbs_amount[ORB_SOFT] = 3;
 	combat_state.orbs_amount[ORB_VR] = 4;
-	combat_state.orbs_amount[ORB_BIOS] = 5;
-	combat_state.total_orbs = 5 + 2 + 3 + 4;
-	layout_change_orb_amount(ORB_HARD, 2);
+	combat_state.orbs_amount[ORB_BIOS] = 0;
+	combat_state.total_orbs = 8 + 3 + 4 + 0;
+	layout_change_orb_amount(ORB_HARD, 8);
 	layout_change_orb_amount(ORB_SOFT, 3);
 	layout_change_orb_amount(ORB_VR, 4);
-	layout_change_orb_amount(ORB_BIOS, 5);
-	layout_change_orb_amount(ORB_ALL, 5 + 2 + 3 + 4);
+	layout_change_orb_amount(ORB_BIOS, 0);
+	layout_change_orb_amount(ORB_ALL, 8 + 3 + 4 + 0);
 #else
 	combat_state.orbs_amount[ORB_HARD] = 1;
 	combat_state.orbs_amount[ORB_SOFT] = 0;
@@ -1668,6 +1679,12 @@ void end_turn() {
 		sacrifice_orbs_start();
 		return;
 	}
+
+	for (int i = 0; i < ORB_NUMBER; ++i) {
+		combat_state.orbs_amount_temp_added[i] = 0;
+	}
+	combat_state.total_orbs_temp_added = 0;
+
 	// apply skills
 	apply_skills_and_send();
 	printf("\nEND TURN\n");
@@ -1808,6 +1825,8 @@ void update_game_mode(double frametime)
 
 			layout_update_cooldowns();
 
+			static bool last_hovered_char = true;
+
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
 			for (int i = 0; i < NUM_ALLIES; ++i) {
@@ -1822,6 +1841,7 @@ void update_game_mode(double frametime)
 					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
+					last_hovered_char = true;
 					break;
 				} else {
 					for (int k = 0; k < NUM_SKILLS; ++k) {
@@ -1848,6 +1868,7 @@ void update_game_mode(double frametime)
 								}
 							}
 							is_hovering_skill = true;
+							last_hovered_char = false;
 							break;
 						}
 					}
@@ -1866,14 +1887,11 @@ void update_game_mode(double frametime)
 					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
+					last_hovered_char = true;
 					break;
 				}
 			}
-			if (!is_hovering_skill) {
-				for (int i = 0; i < ORB_NUMBER; ++i) {
-					combat_state.skill_costs[i]->m_render = false;
-				}
-			}
+			
 			//combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
 			//combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
 			//combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
@@ -1883,6 +1901,16 @@ void update_game_mode(double frametime)
 
 			if (is_hovering_skill | is_hovering_char)
 				render_info = true;
+
+			if (!is_hovering_skill) {
+				for (int i = 0; i < ORB_NUMBER; ++i) {
+					if (combat_state.skill_costs[i]->getBackgroundTexture() && !last_hovered_char) {
+						combat_state.skill_costs[i]->m_render = render_info;
+					}
+					else
+						combat_state.skill_costs[i]->m_render = false;
+				}
+			}
 
 			combat_state.skill_info_image->m_render = render_info;
 			combat_state.skill_info_title->m_render = render_info;
@@ -2016,13 +2044,40 @@ void input()
 
 			skill_desc = skill_desc_pt;
 			skill_desc_length = skill_desc_pt_length;
+			gw.language = LANGUAGE_PT;
 		} else {
 			char_descriptions = char_descriptions_en;
 			char_descriptions_length = char_descriptions_en_length;
 
 			skill_desc = skill_desc_en;
 			skill_desc_length = skill_desc_en_length;
+			gw.language = LANGUAGE_EN;
 		}
+	}
+
+	static int turn = 0;
+
+	if (keyboard_state.key_event[VK_F4]) {
+		keyboard_state.key_event[VK_F4] = false;
+		switch (turn) {
+			case 0: {
+				execute_skill(SKILL_DUAL_SIMPLEX, 0, 0, &combat_state, true, false);
+				execute_skill(SKILL_FALSE_RUSH, 2, 2, &combat_state, true, false);
+			}break;
+			case 1: {
+				execute_skill(SKILL_TRUTH_SLASH, 2, 1, &combat_state, true, false);
+				execute_skill(SKILL_REQUIEM_ZERO, 2, 2, &combat_state, true, true);
+			}break;
+			case 2: {
+				execute_skill(SKILL_FALSE_RUSH, 0, 2, &combat_state, true, false);
+				execute_skill(SKILL_BEST_BOUND_FIST, 0, 0, &combat_state, true, false);
+			}break;
+			case 3: {
+				execute_skill(SKILL_FALSE_RUSH, 0, 2, &combat_state, true, false);
+			}break;
+		}
+		turn++;
+		end_turn();
 	}
 }
 
@@ -2366,7 +2421,7 @@ static void layout_update_cooldowns(bool update_to_full_opacity) {
 					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setOpacity(1.0f);
 					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setAllBGColor(hm::vec4(0x0f112aff));
 				}
-				if (!has_enough_orbs(Skill_ID(i * NUM_SKILLS + j))) {
+				if (!has_enough_orbs(skill_index)) {
 					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setOpacity(0.25f);
 				}
 			}
