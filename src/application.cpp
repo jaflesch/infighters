@@ -1190,12 +1190,20 @@ static void reset_targets() {
 	}
 }
 
+static bool is_on_cooldown(Skill_ID skill_used) {
+	if (skill_state_ally.cooldown_counter[skill_used] > 0)
+		return true;
+	return false;
+}
+
 static void reset_selections() {
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		for (int j = 0; j < NUM_SKILLS; ++j) {
 			linked::Button* b = gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0];
 			b->setActive(true);
-			b->setOpacity(1.0f);
+			if (!is_on_cooldown((Skill_ID)(i * NUM_SKILLS + j))) {
+				b->setOpacity(1.0f);
+			}
 			if (b->getIsToggled())
 				b->toggle();
 		}
@@ -1289,7 +1297,7 @@ static void button_skill(void* arg) {
 	bool is_toggled = eba->this_button->getIsToggled();
 
 	if (!is_toggled && eba->this_button->getActive() && !combat_state.player.targeting) {
-		if (!has_enough_orbs(skill_used)) {
+		if (!has_enough_orbs(skill_used) || is_on_cooldown(skill_used)) {
 			return;
 		} else {
 			temporary_modify_orbs(skill_used, -1);
@@ -1660,7 +1668,6 @@ void end_turn() {
 		sacrifice_orbs_start();
 		return;
 	}
-
 	// apply skills
 	apply_skills_and_send();
 	printf("\nEND TURN\n");
@@ -1691,6 +1698,7 @@ void end_turn() {
 	
 	printf("SWITCH TURN\n");
 	layout_update_endturn_button();
+	layout_update_cooldowns(true);
 }
 
 void update_game_mode(double frametime)
@@ -1798,6 +1806,7 @@ void update_game_mode(double frametime)
 				}
 			}
 
+			layout_update_cooldowns();
 
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
@@ -1809,7 +1818,8 @@ void update_game_mode(double frametime)
 					combat_state.skill_info_image->setBorderColor(hm::vec4(greener_cyan));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
-					layout_set_char_orb_types_description((Character_ID)i, combat_state.skill_info_group->getLabels()[0]);
+					Character_ID hover_char_id = (Character_ID)char_sel_state.selections[i];
+					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
 					break;
@@ -1852,7 +1862,8 @@ void update_game_mode(double frametime)
 					combat_state.skill_info_image->setBorderColor(hm::vec4(enem_hp_bar_full_color));
 					combat_state.skill_info_title->getLabels()[0]->setText((u8*)char_names[char_index], char_names_length[char_index]);
 					combat_state.skill_info_desc->getLabels()[0]->setText((u8*)char_descriptions[char_index], char_descriptions_length[char_index]);
-					layout_set_char_orb_types_description((Character_ID)i, combat_state.skill_info_group->getLabels()[0]);
+					Character_ID hover_char_id = (Character_ID)char_sel_state.enemy_selections[i];
+					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
 					break;
@@ -1863,10 +1874,20 @@ void update_game_mode(double frametime)
 					combat_state.skill_costs[i]->m_render = false;
 				}
 			}
-			combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
-			combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
-			combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
-			combat_state.skill_info_group->m_render = is_hovering_skill | is_hovering_char;
+			//combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
+			//combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
+			//combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
+			//combat_state.skill_info_group->m_render = is_hovering_skill | is_hovering_char;
+
+			static bool render_info = false;
+
+			if (is_hovering_skill | is_hovering_char)
+				render_info = true;
+
+			combat_state.skill_info_image->m_render = render_info;
+			combat_state.skill_info_title->m_render = render_info;
+			combat_state.skill_info_desc->m_render = render_info;
+			combat_state.skill_info_group->m_render = render_info;
 
 #if MULTIPLAYER
 			if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
@@ -1986,57 +2007,23 @@ void input()
 		keyboard_state.key_event[VK_F2] = false;
 		end_turn();
 	}
-#if 0
-	if (keyboard_state.key_event['P']) {
-		keyboard_state.key_event['P'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_ally(0, SKILL_CONDITION_PARALYZE, &combat_state);
+	if (keyboard_state.key_event[VK_F3]) {
+		keyboard_state.key_event[VK_F3] = false;
+
+		if (gw.language == LANGUAGE_EN) {
+			char_descriptions = char_descriptions_pt;
+			char_descriptions_length = char_descriptions_pt_length;
+
+			skill_desc = skill_desc_pt;
+			skill_desc_length = skill_desc_pt_length;
 		} else {
-			//apply_status_to_enemy(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
-			apply_status_to_ally(0, SKILL_CONDITION_PARALYZE, 1, &combat_state);
+			char_descriptions = char_descriptions_en;
+			char_descriptions_length = char_descriptions_en_length;
+
+			skill_desc = skill_desc_en;
+			skill_desc_length = skill_desc_en_length;
 		}
 	}
-	if (keyboard_state.key_event['B']) {
-		keyboard_state.key_event['B'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_BURN, &combat_state);
-		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_BURN, 1, &combat_state);
-		}
-	}
-	if (keyboard_state.key_event['F']) {
-		keyboard_state.key_event['F'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_FREEZE, &combat_state);
-		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_FREEZE, 1, &combat_state);
-		}
-	}
-	if (keyboard_state.key_event['I']) {
-		keyboard_state.key_event['I'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_POISON, &combat_state);
-		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_POISON, 1, &combat_state);
-		}
-	}
-	if (keyboard_state.key_event['S']) {
-		keyboard_state.key_event['S'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_SLEEP, &combat_state);
-		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_SLEEP, 1, &combat_state);
-		}
-	}
-	if (keyboard_state.key_event['T']) {
-		keyboard_state.key_event['T'] = false;
-		if (keyboard_state.key[VK_SHIFT]) {
-			remove_status_from_enemy(0, SKILL_CONDITION_STUN, &combat_state);
-		} else {
-			apply_status_to_enemy(0, SKILL_CONDITION_STUN, 1, &combat_state);
-		}
-	}
-#endif
 }
 
 // Layout functions
@@ -2081,7 +2068,6 @@ static void put_space(int* length, char* buffer) {
 static char skill_group_layout_label[512] = {0};
 static void layout_set_char_orb_types_description(Character_ID id, linked::Label* label) {
 	int length = 0;
-	id = (Character_ID)char_sel_state.selections[id];
 	switch (id) {
 		case CHAR_ZERO:				 PUT_STR("SOFT, VR, BIOS", skill_group_layout_label, length); break;
 		case CHAR_ONE:				 PUT_STR("HARD, VR, BIOS", skill_group_layout_label, length); break;
@@ -2366,4 +2352,31 @@ static void layout_apply_status_enemy(s32 target_index, s32 stat_index, Texture*
 	if (!status_image) {
 		gw.enemies_info[target_index]->divs[2]->getButtons()[stat_index]->setAllBGColor(hm::vec4(1, 1, 1, 0));
 	}
+}
+
+static void layout_update_cooldowns(bool update_to_full_opacity) {
+
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int j = 0; j < NUM_SKILLS; ++j) {
+			linked::Label* label = gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getLabels()[0];
+			Skill_ID skill_index = (Skill_ID)((int)char_sel_state.selections[i] * NUM_SKILLS + j);
+			if (skill_state_ally.cooldown_counter[skill_index] == 0) {
+				label->getText()[0] = ' ';
+				if (update_to_full_opacity) {
+					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setOpacity(1.0f);
+					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setAllBGColor(hm::vec4(0x0f112aff));
+				}
+				if (!has_enough_orbs(Skill_ID(i * NUM_SKILLS + j))) {
+					gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setOpacity(0.25f);
+				}
+			}
+			else {
+				label->getText()[0] = skill_state_ally.cooldown_counter[skill_index] + 0x30;
+				gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setOpacity(0.25f);
+				//0x0f112aff
+				gw.allies_skills[i * NUM_SKILLS + j]->divs[0]->getButtons()[0]->setAllBGColor(hm::vec4(0x0f112ac8));
+			}
+		}
+	}
+
 }

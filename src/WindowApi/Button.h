@@ -91,7 +91,9 @@ public:
 	static bool getClicked() { return clicked; }
 	void setClickedCallback(void(*callback)(void*));
 	inline const hm::vec2 getPosition() const { return this->m_position; }
-	inline void setOpacity(float opacity) { this->opacity = opacity; }
+	inline void setOpacity(float opacity) { 
+		this->opacity = opacity;
+	}
 	inline float getOpacity() const { return this->opacity; }
 	inline void setIsToggle(bool value) { this->m_is_toggle = value; }
 	inline void toggle() { this->m_toggled = !this->m_toggled; }

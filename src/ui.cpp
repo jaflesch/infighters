@@ -266,7 +266,7 @@ void init_char_information_mode()
 	char_info_window_bot->divs.push_back(s_div3);
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_info_window_bot, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* esc_texture = new Texture("../../../res/textures/esc.png");
+	Texture* esc_texture = new Texture("../../../res/keys/esc.png");
 	back_div->setBackgroundTexture(esc_texture);
 	char_info_window_bot->divs.push_back(back_div);
 
@@ -832,6 +832,10 @@ void init_combat_mode()
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeX(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderSizeY(1.0f);
 			gw.allies_skills[i * NUM_SKILLS + k]->setBorderColor(ally_hp_bar_full_color);
+			u8* text = (u8*)calloc(1, sizeof(u8));
+			text[0] = '1';
+			linked::Label* skill_cooldown_label = new linked::Label(*skill_div, text, 2, hm::vec2(30, 16), cyan, FONT_OSWALD_REGULAR_38, 0, 0);
+			skill_div->getLabels().push_back(skill_cooldown_label);
 			linked::Button* skill_button = new linked::Button(*skill_div, 0, hm::vec2(0, 0), (int)skill_img_size, (int)skill_img_size, hm::vec4(0, 1, 1, 1), k);
 			skill_button->button_info.data = (void*)i;
 			skill_button->button_info.id = k;

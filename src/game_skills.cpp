@@ -13,7 +13,8 @@ struct Skill_State {
 
 	Skill_ID inheritance_copy = SKILL_NONE;
 
-	Skill_ID cooldowns[SKILL_NUMBER];
+	int cooldowns[SKILL_NUMBER];
+	int cooldown_counter[SKILL_NUMBER];
 };
 
 struct Skill_Counter {
@@ -458,6 +459,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	}
 
 	Skill_Target needs_targets = skill_need_targeting(id, combat_state);
+
+	skill_state->cooldown_counter[id] = skill_cooldowns[id] + 1;
 
 	// Counter
 	if (from_enemy) {
@@ -946,6 +949,11 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 }
 
 void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
+	for (int i = 0; i < SKILL_NUMBER; ++i) {
+		if(skill_state_enemy.cooldown_counter[i] > 0)
+			skill_state_enemy.cooldown_counter[i] --;
+	}
+
 	if (skill_state_enemy.requiem_duration > 0)
 		skill_state_enemy.requiem_duration -= 1;
 	if (skill_state_enemy.axiom_one_duration > 0)
@@ -987,6 +995,11 @@ void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 }
 
 void update_skill_state_end_turn(Combat_State* combat_state) {
+	for (int i = 0; i < SKILL_NUMBER; ++i) {
+		if(skill_state_ally.cooldown_counter[i] > 0)
+			skill_state_ally.cooldown_counter[i] --;
+	}
+
 	if (skill_state_ally.requiem_duration > 0)
 		skill_state_ally.requiem_duration -= 1;
 	if (skill_state_ally.axiom_one_duration > 0)

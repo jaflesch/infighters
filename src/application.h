@@ -264,6 +264,8 @@ static void layout_set_sacrifice_modal_quantity(bool orb_left, Orb_ID orb_id, s3
 
 static void layout_update_hp_animations(r32 delta);
 
+static void layout_update_cooldowns(bool update_to_full_opacity = false);
+
 // Gameplay structures
 #define NUM_CHARS 12
 #define NUM_SKILLS 4
@@ -397,7 +399,15 @@ struct Sacrifice_Orbs_UI {
 	Texture* empty_skill_texture;
 };
 
+enum Language {
+	LANGUAGE_PT = 0,
+	LANGUAGE_EN,
+	LANGUAGE_NUMBER
+};
+
 struct Game_Windows {
+	Language language;
+
 	// background window
 	linked::Window* bgwindow;
 	Texture* bg_logo;
