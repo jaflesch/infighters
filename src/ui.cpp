@@ -119,7 +119,7 @@ void init_char_selection_mode()
 	char_selected_window->divs.push_back(s_div3);
 
 	linked::WindowDiv* info_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(600.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* space_texture = new Texture("../../../res/textures/spacebar.png");
+	Texture* space_texture = new Texture("../../../res/keys/spacebar.png");
 	info_div->setBackgroundTexture(space_texture);
 	char_selected_window->divs.push_back(info_div);
 
@@ -129,7 +129,7 @@ void init_char_selection_mode()
 	info_label_div->getLabels().push_back(info_label);
 
 	linked::WindowDiv* confirm_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(740.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* enter_texture = new Texture("../../../res/textures/enter.png");
+	Texture* enter_texture = new Texture("../../../res/keys/enter.png");
 	confirm_div->setBackgroundTexture(enter_texture);
 	char_selected_window->divs.push_back(confirm_div);
 
@@ -139,7 +139,7 @@ void init_char_selection_mode()
 	confirm_label_div->getLabels().push_back(confirm_label);
 
 	linked::WindowDiv* back_div = new linked::WindowDiv(*char_selected_window, 24, 24, 0, 0, hm::vec2(840.0f, 20.0f + 140.0f), hm::vec4(1, 0, 0, 1), linked::DIV_ANCHOR_LEFT | linked::DIV_ANCHOR_TOP);
-	Texture* esc_texture = new Texture("../../../res/textures/esc.png");
+	Texture* esc_texture = new Texture("../../../res/keys/esc.png");
 	back_div->setBackgroundTexture(esc_texture);
 	char_selected_window->divs.push_back(back_div);
 

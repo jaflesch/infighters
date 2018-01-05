@@ -2081,6 +2081,7 @@ static void put_space(int* length, char* buffer) {
 static char skill_group_layout_label[512] = {0};
 static void layout_set_char_orb_types_description(Character_ID id, linked::Label* label) {
 	int length = 0;
+	id = (Character_ID)char_sel_state.selections[id];
 	switch (id) {
 		case CHAR_ZERO:				 PUT_STR("SOFT, VR, BIOS", skill_group_layout_label, length); break;
 		case CHAR_ONE:				 PUT_STR("HARD, VR, BIOS", skill_group_layout_label, length); break;
