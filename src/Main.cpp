@@ -58,6 +58,43 @@ extern Font_ID fonts[32];
 #define OSWALD_LIGHT "../../../res/fonts/Oswald-Light.ttf"
 #define OSWALD_BOLD "../../../res/fonts/Oswald-Bold.ttf"
 
+Mesh* wmesh = 0;
+
+const char vshader_1[] = R"(
+	#version 330 core
+	layout(location = 0) in vec3 vertex;
+	layout(location = 1) in vec4 v_color;
+	layout(location = 2) in vec2 tcoords;
+
+	out vec2 texcoords;
+	out vec4 out_color;
+
+	uniform mat4 projection = mat4(1.0);
+
+	void main(){
+		gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+		texcoords = tcoords;
+		out_color = v_color;
+	}
+)";
+
+const char fshader_1[] = R"(
+	#version 330 core
+	in vec2 texcoords;
+	in vec4 out_color;
+	out vec4 color;
+
+	uniform sampler2D text;
+
+	void main(){
+		vec4 sampled = texture(text, texcoords);
+		//color = vec4(texcoords, 0.0, 1.0);
+		color = sampled;
+	}
+)";
+
+u32 ffshader = 0;
+
 void application_state_init()
 {
 	linked::Window::linkedWindowInit();
@@ -85,6 +122,10 @@ void application_state_init()
 	fonts[FONT_OSWALD_BOLD_16] = load_font(OSWALD_BOLD, 16, false);
 	fonts[FONT_OSWALD_BOLD_18] = load_font(OSWALD_BOLD, 18, false);
 
+	ffshader = engine::shader_load(vshader_1, fshader_1, sizeof(vshader_1) - 1, sizeof(fshader_1) - 1);
+	glUseProgram(ffshader);
+	wmesh = new Mesh(new Quad(hm::vec3(0, 0, 0), 1.0f, 1.0f));
+
 	init_application();
 	glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 	glDisable(GL_CULL_FACE);
@@ -92,10 +133,26 @@ void application_state_init()
 
 void application_state_update(double frametime)
 {
+	int original_width = window_info.width;
+	int original_height = window_info.height;
+	window_info.width = 1600;
+	window_info.height = 900;
+	glViewport(0, 0, 1600, 900);
+	bind_framebuffer();
 	update_and_render(frametime);
 	
 	linked::Window::updateWindows();
 	linked::Window::renderWindows();
+
+	window_info.width = original_width;
+	window_info.height = original_height;
+
+	glViewport(0, 0, original_width, original_height);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(ffshader);
+	bind_framebuffer_texture();
+	glClear(GL_DEPTH_BUFFER_BIT);
+	wmesh->render();
 }
 
 #ifdef _WIN64
@@ -182,17 +239,10 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 					g_chat->previous_history();
 				}
 			} break;
-			case WM_MOUSEMOVE: {
-				mouse_state.x = GET_X_LPARAM(msg.lParam);
-				mouse_state.y = GET_Y_LPARAM(msg.lParam);
-
-			} break;
 			case WM_LBUTTONDOWN: {
 				int x = GET_X_LPARAM(msg.lParam);
 				int y = GET_Y_LPARAM(msg.lParam);
 				mouse_state.is_captured = true;
-				mouse_state.x_left = x;
-				mouse_state.y_left = y;
 				SetCapture(GetActiveWindow());
 			} break;
 			case WM_LBUTTONUP: {

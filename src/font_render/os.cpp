@@ -24,8 +24,10 @@ LRESULT CALLBACK window_proc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam
 	case WM_MOUSEMOVE: {
 		int width = window_info.width;
 		int height = window_info.height;
-		int x = GET_X_LPARAM(lparam);
-		int y = GET_Y_LPARAM(lparam);
+		r32 x_ratio = 1600.0f / (r32)window_info.width;
+		r32 y_ratio = 900.0f / (r32)window_info.height;
+		int x = (int)((r32)GET_X_LPARAM(lparam) * x_ratio);
+		int y = (int)((r32)GET_Y_LPARAM(lparam) * y_ratio);
 
 		const float aspect = (float)width / height;
 		float screenX = ((float)x * 2 / width - 1.0f);

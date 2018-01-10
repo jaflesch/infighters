@@ -410,6 +410,8 @@ enum Language {
 struct Game_Windows {
 	Language language;
 
+	u32 framebuffer;
+	u32 framebuffer_texture;
 	// background window
 	linked::Window* bgwindow;
 	Texture* bg_logo;
@@ -460,3 +462,6 @@ struct Game_Windows {
 
 void change_game_mode(Game_Mode mode);
 void end_turn();
+
+void bind_framebuffer();
+void bind_framebuffer_texture();

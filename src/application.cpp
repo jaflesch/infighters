@@ -1531,9 +1531,42 @@ void init_combat_state() {
 	}
 }
 
+void bind_framebuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, gw.framebuffer);
+}
+
+void bind_framebuffer_texture() {
+	glBindTexture(GL_TEXTURE_2D, gw.framebuffer_texture);
+}
+
 void init_application()
 {
 	using namespace linked;
+
+	u32 FrameBuffer;
+	glGenFramebuffers(1, &FrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, FrameBuffer);
+
+	glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glEnable(GL_DEPTH_TEST);
+
+	gw.framebuffer = FrameBuffer;
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1600, 900, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	gw.framebuffer_texture = texture;
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Initialize game mode
 	ggs.mode = MODE_NONE;
