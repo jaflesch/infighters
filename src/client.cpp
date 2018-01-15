@@ -363,7 +363,7 @@ Character_ID char_to_charID(char buffer) {
 }
 
 char num_to_char(int num) {
-	char c;
+	char c = 0;
 
 	switch (num) {
 	case 0:

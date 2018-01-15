@@ -14,12 +14,12 @@
 
 #define DEFAULT_BUFLEN 512
 //#define IP_MACHING_SERVER "201.21.40.208"			// ip do server q faz o matching
-#define IP_MACHING_SERVER "192.168.1.4"			// ip do server q faz o matching
+#define IP_MACHING_SERVER "127.0.0.1"			// ip do server q faz o matching
 #define MATCHING_PORT 44443						// porta da conexao pro matching
 #define MATCHING_PORT_L "44443"			
 #define GAME_PORT 44444							// porta do jogo
 #define GAME_PORT_L "44444"
-#define MULTIPLAYER 1
+#define MULTIPLAYER 0
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
