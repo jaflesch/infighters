@@ -76,6 +76,13 @@ LRESULT CALLBACK window_proc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam
 		window_info.height = r.bottom - r.top;
 		glViewport(0, 0, window_info.width, window_info.height);
 	} break;
+	case WM_GETMINMAXINFO: {
+		MINMAXINFO* minmax = (MINMAXINFO*)lparam;
+		minmax->ptMaxSize.x = 1920;
+		minmax->ptMaxSize.y = 1080;
+		minmax->ptMaxTrackSize.x = 1920;
+		minmax->ptMaxTrackSize.y = 1080;
+	}break;
 	case WM_DROPFILES: {
 		char buffer[512];
 		HDROP hDrop = (HDROP)wparam;
