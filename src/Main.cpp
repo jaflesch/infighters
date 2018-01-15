@@ -181,7 +181,10 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	}
 
 	glewExperimental = true;
-	init_opengl(&window_info);
+	if (init_opengl(&window_info) == -1) {
+		return -1;
+	}
+
 	if (glewInit() != GLEW_OK)
 	{
 		print("Error loading Glew\n");

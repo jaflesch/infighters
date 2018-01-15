@@ -133,6 +133,10 @@ s32 init_opengl(Window_Info* window_info)
 	};
 	HGLRC(WINAPI* wglCreateContextAttribsARB)(HDC hDC, HGLRC hShareContext, int *attribList);
 	wglCreateContextAttribsARB = (HGLRC(WINAPI*)(HDC, HGLRC, int *))wglGetProcAddress("wglCreateContextAttribsARB");
+	if (wglCreateContextAttribsARB == 0) {
+		MessageBoxA(0, "No OpenGL drivers bro.", "OpenGL Error", 0);
+		return -1;
+	}
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(temp_context);
 	window_info->rendering_context = wglCreateContextAttribsARB(window_info->device_context, 0, attribs);
