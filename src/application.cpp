@@ -822,6 +822,74 @@ hm::vec4 enem_hp_bar_empty_color(0.6f, 0.0f, 0.2392f, 1.0f);	// #99003d
 static SOCKET * connection;
 static client_info * player;
 
+//#include "gamepad.cpp"
+
+//xbox controller support
+/*
+static const char* button_names[] = {
+"d-pad up",
+"d-pad down",
+"d-pad left",
+"d-pad right",
+"start",
+"back",
+"left thumb",
+"right thumb",
+"left shoulder",
+"right shoulder",
+"???",
+"???",
+"A",
+"B",
+"X",
+"Y"
+};
+
+static int line = 0;
+
+static void update(GAMEPAD_DEVICE dev) {
+float lx, ly, rx, ry;
+
+if (!GamepadIsConnected(dev)) {
+//printw("%d) n/a\n", dev);
+return;
+}
+
+GamepadStickNormXY(dev, STICK_LEFT, &lx, &ly);
+GamepadStickNormXY(dev, STICK_RIGHT, &rx, &ry);
+
+/*
+printw("%d) L:(%+.3f,%+.3f :: %+.3f,%+.3f) R:(%+.3f, %+.3f :: %+.3f,%+.3f) LT:%+.3f RT:%+.3f ",
+dev,
+lx, ly,
+GamepadStickAngle(dev, STICK_LEFT),
+GamepadStickLength(dev, STICK_LEFT),
+rx, ry,
+GamepadStickAngle(dev, STICK_RIGHT),
+GamepadStickLength(dev, STICK_RIGHT),
+GamepadTriggerLength(dev, TRIGGER_LEFT),
+GamepadTriggerLength(dev, TRIGGER_RIGHT));
+printw("U:%d D:%d L:%d R:%d ",
+GamepadButtonDown(dev, BUTTON_DPAD_UP),
+GamepadButtonDown(dev, BUTTON_DPAD_DOWN),
+GamepadButtonDown(dev, BUTTON_DPAD_LEFT),
+GamepadButtonDown(dev, BUTTON_DPAD_RIGHT));
+printw("A:%d B:%d X:%d Y:%d Bk:%d St:%d ",
+GamepadButtonDown(dev, BUTTON_A),
+GamepadButtonDown(dev, BUTTON_B),
+GamepadButtonDown(dev, BUTTON_X),
+GamepadButtonDown(dev, BUTTON_Y),
+GamepadButtonDown(dev, BUTTON_BACK),
+GamepadButtonDown(dev, BUTTON_START));
+printw("LB:%d RB:%d LS:%d RS:%d\n",
+GamepadButtonDown(dev, BUTTON_LEFT_SHOULDER),
+GamepadButtonDown(dev, BUTTON_RIGHT_SHOULDER),
+GamepadButtonDown(dev, BUTTON_LEFT_THUMB),
+GamepadButtonDown(dev, BUTTON_RIGHT_THUMB));
+
+}
+*/
+
 // Button Callbacks
 static void button_select_character(void* arg) {
 	AudioController::navigationAudio.play();

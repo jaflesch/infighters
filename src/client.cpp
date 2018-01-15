@@ -354,9 +354,57 @@ Character_ID char_to_charID(char buffer) {
 	case 'k': character = CHAR_BIG_O;	break;
 	case 'l': character = CHAR_NEW;	break;
 	case 'm': character = CHAR_CLOCKBOY;	break;
-	default: assert(0); break; // @TODO crash here why?
+	default: character = CHAR_NONE; break; // @TODO crash here why?
 	}
 	return character;
+}
+
+char num_to_char(int num) {
+	char c;
+
+	switch (num) {
+	case 0:
+		c = '0';
+		break;
+	case 1:
+		c = '1';
+		break;
+	case 2:
+		c = '2';
+		break;
+	case -1:
+		c = '-';
+		break;
+	default:
+		printf("Erro no num_to_char: %d\n", num);
+		break;
+	}
+
+	return c;
+}
+
+int char_to_num(char c) {
+	int num;
+
+	switch (c) {
+	case '0':
+		num = 0;
+		break;
+	case '1':
+		num = 1;
+		break;
+	case '2':
+		num = 2;
+		break;
+	case '-':
+		num = -1;
+		break;
+	default:
+		printf("Erro no char_to_num: %c\n", c);
+		break;
+	}
+
+	return num;
 }
 
 int exchange_char_selection(SOCKET* ConnectSocket, client_info * player, Char_Selection_State * characters){
@@ -439,21 +487,15 @@ int send_struct(SOCKET* ConnectSocket, Target target) {
 	
 	
 	for (int k = 0; k < NUM_ENEMIES; ++k) {
-		if (target.enemy_target_index[k] == 0)
-			buffer = '0';
-		else
-			buffer = '1';
+		buffer = num_to_char(target.enemy_target_index[k]);
 		send(*ConnectSocket, &buffer, sizeof(buffer), 0);
-		printf("Enviado (enemy target index %d): %c %d\n\n", k, buffer, target.enemy_target_index[k]);
+		printf("Enviado (enemy target index %d): %d\n\n", k, target.enemy_target_index[k]);
 	}
 
 	for (int k = 0; k < NUM_ALLIES; ++k) {
-		if (target.ally_target_index[k] == 0)
-			buffer = '0';
-		else
-			buffer = '1';
+		buffer = num_to_char(target.ally_target_index[k]);
 		send(*ConnectSocket, &buffer, sizeof(buffer), 0);
-		printf("Enviado (ally target index %d): %c %d\n\n", k, buffer, target.ally_target_index[k]);
+		printf("Enviado (ally target index %d): %d\n\n", k, target.ally_target_index[k]);
 	}
 
 	return 1;
@@ -501,28 +543,6 @@ int receive_struct(SOCKET* ConnectSocket, Target * targets) {
 		printf("Recebido (attacking character): %c\n\n", recvbuf[0]);
 		targets[i].attacking_character = char_to_charID(recvbuf[0]);
 						
-		for (int k = 0; k < NUM_ALLIES; ++k) {
-			iResult = 0;
-			do {
-				iResult += recv(*ConnectSocket, recvbuf, sizeof(char), 0);
-				if (iResult > 0)
-					;//printf("Bytes received: %d\n", iResult);
-				else if (iResult == 0) {
-					printf("Connection closed\n");
-					return 0;
-				}
-				else {
-					//printf("recv failed: %d\n", WSAGetLastError());
-					return 0;
-				}
-			} while (iResult != sizeof(char));
-			if (recvbuf[0] == '0')
-				targets[i].ally_target_index[k] = 0;
-			else
-				targets[i].ally_target_index[k] = -1;
-			printf("Recebido (ally target index %d): %c\n\n", k, recvbuf[0]);
-		}
-
 		for (int k = 0; k < NUM_ENEMIES; ++k) {
 			iResult = 0;
 			do {
@@ -538,11 +558,28 @@ int receive_struct(SOCKET* ConnectSocket, Target * targets) {
 					return 0;
 				}
 			} while (iResult != sizeof(char));
-			if (recvbuf[0] == '0')
-				targets[i].enemy_target_index[k] = 0;
-			else
-				targets[i].enemy_target_index[k] = -1;
-			printf("Recebido (enemy target index %d): %c\n\n", k, recvbuf[0]);
+			targets[i].enemy_target_index[k] = char_to_num(recvbuf[0]);
+			printf("Recebido (enemy target index %d): %c\n\n", k, targets[i].enemy_target_index[k]);
+		}
+
+		for (int k = 0; k < NUM_ALLIES; ++k) {
+			iResult = 0;
+			do {
+				iResult += recv(*ConnectSocket, recvbuf, sizeof(char), 0);
+				if (iResult > 0)
+					;//printf("Bytes received: %d\n", iResult);
+				else if (iResult == 0) {
+					printf("Connection closed\n");
+					return 0;
+				}
+				else {
+					//printf("recv failed: %d\n", WSAGetLastError());
+					return 0;
+				}
+			} while (iResult != sizeof(char));
+
+			targets[i].ally_target_index[k] = char_to_num(recvbuf[0]);
+			printf("Recebido (ally target index %d): %c\n\n", k, targets[i].ally_target_index[k]);
 		}
 	}
 	return 1;
