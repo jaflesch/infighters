@@ -1,3 +1,4 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "client.h"
 
 /* 
@@ -114,13 +115,20 @@ SOCKET* connect(client_info * player) {
 		WSACleanup();
 		return NULL;
 	}
+
+	if (!strcmp(player->opponent_ip, "127.0.0.1")) {
+		char szBuffer[1024];
+		gethostname(szBuffer, sizeof(szBuffer));
+		struct hostent *host = gethostbyname(szBuffer);
+		strcpy(player->opponent_ip, inet_ntoa(*(struct in_addr *)*host->h_addr_list));
+	}
+
+	printf("ip do oponente: %s\n\n", player->opponent_ip);
 	
 	clientService.sin_family = AF_INET;
 	inet_pton(AF_INET, player->opponent_ip, &(clientService.sin_addr.s_addr));			// ip inimigo
 	clientService.sin_port = htons(GAME_PORT);
-
-	printf("ip do oponente: %s\n\n", player->opponent_ip);
-
+	
 	if (player->first) {
 		SOCKET ListenSocket = INVALID_SOCKET;
 		SOCKET * Invalid = (SOCKET*)malloc(sizeof(SOCKET));
