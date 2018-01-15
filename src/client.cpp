@@ -384,7 +384,7 @@ char num_to_char(int num) {
 }
 
 int char_to_num(char c) {
-	int num;
+	int num = 0;
 
 	switch (c) {
 	case '0':
