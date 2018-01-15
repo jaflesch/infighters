@@ -92,6 +92,7 @@
       <AdditionalIncludeDirectories>include;src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>lib</AdditionalLibraryDirectories>
@@ -120,6 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>include;src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -141,6 +143,8 @@
     <ClCompile Include="src\ResourceLoad\ImageLoader.cpp" />
     <ClCompile Include="src\ResourceLoad\Texture.cpp" />
     <ClCompile Include="src\util.cpp" />
+    <ClCompile Include="src\WindowApi\Animation.cpp" />
+    <ClCompile Include="src\WindowApi\AnimationShader.cpp" />
     <ClCompile Include="src\WindowApi\Button.cpp" />
     <ClCompile Include="src\WindowApi\FontRenderer.cpp" />
     <ClCompile Include="src\WindowApi\FontShader.cpp" />
@@ -169,6 +173,8 @@
     <ClInclude Include="src\ResourceLoad\Texture.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\util.h" />
+    <ClInclude Include="src\WindowApi\Animation.h" />
+    <ClInclude Include="src\WindowApi\AnimationShader.h" />
     <ClInclude Include="src\WindowApi\Button.h" />
     <ClInclude Include="src\WindowApi\FontRenderer.h" />
     <ClInclude Include="src\WindowApi\FontShader.h" />

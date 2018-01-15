@@ -1507,6 +1507,8 @@ void init_combat_state() {
 		combat_state.enemy.char_id[i] = (Character_ID)index;
 		combat_state.enemy.max_hp[i] = 100;
 		combat_state.enemy.hp[i] = 100;
+		for(int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j)
+			combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
 	}
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		int index = char_sel_state.selections[i];
@@ -1516,6 +1518,8 @@ void init_combat_state() {
 		combat_state.player.hp[i] = 100;
 		combat_state.player.targeting = false;
 		combat_state.player.targets[i].skill_used = SKILL_NONE;
+		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j)
+			combat_state.player.receiving_skill[i][j] = SKILL_NONE;
 		for(int k = 0; k < NUM_ALLIES; ++k)
 			combat_state.player.targets[i].ally_target_index[k] = -1;
 		for (int k = 0; k < NUM_ALLIES; ++k)
@@ -1567,6 +1571,8 @@ void init_application()
 	gw.framebuffer_texture = texture;
 
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	init_animations();
 
 	// Initialize game mode
 	ggs.mode = MODE_NONE;
@@ -1649,7 +1655,41 @@ void init_application()
 	AudioController::introAudio.play();
 }
 
+static void print_character(Character_ID char_id) {
+	printf("%s", char_names[char_id]);
+}
+
+static void print_skill(Skill_ID skill_id) {
+	printf("%s", skill_names[skill_id]);
+}
+
+static void print_targets() {
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		if (combat_state.player.targets[i].skill_used != SKILL_NONE) {
+			print_character((Character_ID)i);
+			printf(" is attacking using ");
+			print_skill(combat_state.player.targets[i].skill_used);
+			printf(" on");
+			for (int e = 0; e < NUM_ENEMIES; ++e) {
+				if (combat_state.player.targets[i].enemy_target_index[e] != -1) {
+					printf(" [%d][E]", e);
+					print_character((Character_ID)char_sel_state.enemy_selections[e]);
+				}
+			}
+			for (int a = 0; a < NUM_ALLIES; ++a) {
+				if (combat_state.player.targets[i].ally_target_index[a] != -1) {
+					printf(" [%d][A]", a);
+					print_character((Character_ID)char_sel_state.selections[a]);
+				}
+			}
+		}
+		printf("\n");
+	}
+}
+
 static void apply_skills_and_send() {
+	print_targets();
+
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		#if MULTIPLAYER
 			if (combat_state.player_turn) {
@@ -2030,16 +2070,65 @@ void change_game_mode(Game_Mode mode)
 	}
 }
 
+static int global_animating = 0;
+
+void render_overlay(double frametime) {
+	if (ggs.mode != MODE_COMBAT)
+		return;
+	linked::Window::m_animationShader->useShader();
+	linked::Window::m_animationShader->activateAlphaBlend();
+	
+	for (int i = 0; i < NUM_ALLIES; ++i) {
+		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j) {
+			Skill_ID receiving = combat_state.player.receiving_skill[i][j];
+			if (receiving != SKILL_NONE) {
+				if (gw.skills_animations[receiving] == 0) {
+					combat_state.player.receiving_skill[i][j] = SKILL_NONE;
+					return;
+				}
+				hm::vec2 pos = gw.allies[i]->getPosition();
+				linked::Window::m_animationShader->update(pos, gw.skills_animations[receiving]);
+				gw.animation->render();
+				bool ended = gw.skills_animations[receiving]->animate();
+				if (ended) {
+					combat_state.player.receiving_skill[i][j] = SKILL_NONE;
+				}
+				return;
+			}
+		}
+		
+	}
+	for (int i = 0; i < NUM_ENEMIES; ++i) {
+		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j) {
+			Skill_ID receiving = combat_state.enemy.receiving_skill[i][j];
+			if (receiving != SKILL_NONE) {
+				if (gw.skills_animations[receiving] == 0) {
+					combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
+					return;
+				}
+				hm::vec2 pos = gw.enemies[i]->getPosition();
+				linked::Window::m_animationShader->update(pos, gw.skills_animations[receiving]);
+				gw.animation->render();
+				bool ended = gw.skills_animations[receiving]->animate();
+				if (ended) {
+					combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
+				}
+				return;
+			}
+		}
+	}
+	linked::Window::m_animationShader->deactivateAlphaBlend();
+}
+
 void update_and_render(double frametime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	input();
 
 	if (chat.m_active)
 		chat.update();
 
 	update_game_mode(frametime);
-
-	input();
 }
 
 s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool from_enemy = false, bool on_enemy = true);
@@ -2111,6 +2200,24 @@ void input()
 		}
 		turn++;
 		end_turn();
+	}
+
+	if (keyboard_state.key_event['R']) {
+		keyboard_state.key_event['R'] = false;
+		linked::Window::m_animationShader->reloadShader();
+	}
+	if (keyboard_state.key_event['V']) {
+		keyboard_state.key_event['V'] = false;
+		global_animating += 1;
+		while (!gw.skills_animations[global_animating]) {
+			global_animating += 1;
+			if (global_animating >= NUM_SKILLS * NUM_CHARS) {
+				global_animating = 0;
+			}
+		}
+		if (global_animating >= NUM_SKILLS * NUM_CHARS) {
+			global_animating = 0;
+		}
 	}
 }
 

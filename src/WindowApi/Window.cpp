@@ -11,6 +11,7 @@ std::vector<linked::Window*> linked::Window::openedWindows;
 std::vector<linked::Window*> linked::Window::backgroundWindows;
 FontShader* linked::Window::m_textShader = nullptr;
 WindowShader* linked::Window::m_windowShader = nullptr;
+AnimationShader* linked::Window::m_animationShader = nullptr;
 bool linked::Window::update_background = true;
 int linked::Window::id_gen = 0;
 
@@ -79,6 +80,7 @@ void Window::linkedWindowInit()
 {
 	linked::Window::m_textShader = new FontShader(FONT_SHADER_PATH);
 	m_windowShader = new WindowShader(WINDOW_SHADER_PATH);
+	m_animationShader = new AnimationShader(ANIMATION_SHADER_PATH);
 }
 
 void Window::linkedWindowDestroy()

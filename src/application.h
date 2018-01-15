@@ -7,6 +7,7 @@
 #include "WindowApi/Window.h"
 #include "ResourceLoad/Texture.h"
 #include "Audio/AudioController.h"
+#include "WindowApi/Animation.h"
 
 struct Camera {
 	mat4 view_matrix;
@@ -74,6 +75,7 @@ struct IndexedModel3D {
 
 void init_application();
 void update_and_render(double frametime);
+void render_overlay(double frametime);
 void input();
 
 enum Orb_ID {
@@ -333,6 +335,9 @@ struct Player {
 	s32 status_duration[NUM_ALLIES][SKILL_CONDITION_NUMBER];
 
 	s32 cumulative_skill[NUM_ALLIES][SKILL_NUMBER];
+
+	// Skill animation
+	Skill_ID receiving_skill[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
 };
 
 struct Combat_State {
@@ -416,6 +421,8 @@ struct Game_Windows {
 	linked::Window* bgwindow;
 	Texture* bg_logo;
 	Texture* bg_normal;
+	Mesh* animation;
+	Animation* skills_animations[NUM_SKILLS * NUM_CHARS];
 
 	// intro window
 	linked::Window* intro_logo;

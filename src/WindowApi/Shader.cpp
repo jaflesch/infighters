@@ -3,13 +3,26 @@
 #include "../common.h"
 #include <iostream>
 
-Shader::Shader(std::string filename)
+Shader::Shader(std::string filename) : filename(filename)
 {
 	GLuint ShaderProgram = glCreateProgram();
 	ShaderProgram = loadShader(filename.c_str(), ShaderProgram);
 	shader = ShaderProgram;
 
 	glUseProgram(ShaderProgram);
+}
+
+void Shader::reloadShader() 
+{
+	if (shader != (GLuint)-1) {
+		GLuint temp_shader = glCreateProgram();
+		temp_shader = loadShader(filename.c_str(), temp_shader);
+		if (temp_shader != -1) {
+			glDeleteShader(shader);
+			shader = temp_shader;
+			getUniformLocations();
+		}
+	}
 }
 
 Shader::~Shader()

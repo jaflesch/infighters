@@ -14,6 +14,7 @@
 #include "font_render/render_engine.h"
 #include <vector>
 #include "WindowApi/Window.h"
+#include "WindowApi/WindowShader.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 struct Timer
@@ -143,6 +144,8 @@ void application_state_update(double frametime)
 	
 	linked::Window::updateWindows();
 	linked::Window::renderWindows();
+
+	render_overlay(frametime);
 
 	window_info.width = original_width;
 	window_info.height = original_height;

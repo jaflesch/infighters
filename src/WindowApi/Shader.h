@@ -9,6 +9,7 @@ public:
 	Shader(std::string);
 	~Shader();
 	GLuint getShader();
+
 	virtual void useShader();
 	virtual void stopShader();
 	virtual void update();
@@ -18,11 +19,13 @@ public:
 	void deactivateAlphaBlend();
 
 	void setEntity(Entity* e);
+	void reloadShader();
 private:
 	GLuint loadShader(const char*, GLuint);
 	virtual void getUniformLocations();
 protected:
 	GLuint shader;
 	Entity* entity;
+	std::string filename;
 };
 

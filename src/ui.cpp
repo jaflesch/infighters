@@ -1089,3 +1089,118 @@ void init_combat_mode()
 		g_layout_status.status_images[SKILL_CONDITION_STUN] = new Texture("../../../res/status/stun.png");
 	}
 }
+
+static void init_animation_indices(Skill_ID skill) {
+	int maxx = gw.skills_animations[skill]->m_num_cols;
+	int maxy = gw.skills_animations[skill]->m_num_rows;
+	int i = 0;
+	for (int y = maxy - 1; y >= 0; --y) {
+		for (int x = 0; x < maxx; ++x) {
+			gw.skills_animations[skill]->state_offsets[i] = hm::vec2(x, y);
+			++i;
+			if (i >= gw.skills_animations[skill]->m_num_indices)
+				return;
+		}
+	}
+}
+
+void init_animations() {
+	gw.animation = new Mesh(new Quad(hm::vec3(0, 0, 0), 160.0f, 160.0f, 1, 0));
+
+	// Zer0
+	gw.skills_animations[SKILL_FALSE_RUSH] = new Animation("../../../res/skills_animations/zero/false_rush.png", 3, 5, 15, 15);
+	init_animation_indices(SKILL_FALSE_RUSH);
+	gw.skills_animations[SKILL_CONTRADICTION] = new Animation("../../../res/skills_animations/zero/contradiction.png", 1, 5, 5, 30);
+	init_animation_indices(SKILL_CONTRADICTION);
+	gw.skills_animations[SKILL_REQUIEM_ZERO] = new Animation("../../../res/skills_animations/zero/requiem_zero.png", 2, 5, 10, 18);
+	init_animation_indices(SKILL_REQUIEM_ZERO);
+	gw.skills_animations[SKILL_VOID_BARRIER] = new Animation("../../../res/skills_animations/zero/void_barrier.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_VOID_BARRIER);
+
+	// On1
+	gw.skills_animations[SKILL_TRUTH_SLASH] = new Animation("../../../res/skills_animations/one/truth_slash.png", 2, 5, 10, 18);
+	init_animation_indices(SKILL_TRUTH_SLASH);
+	gw.skills_animations[SKILL_TAUTOLOGY] = new Animation("../../../res/skills_animations/one/tautology.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_TAUTOLOGY);
+	gw.skills_animations[SKILL_AXIOM_ONE] = new Animation("../../../res/skills_animations/one/axiom_one.png", 3, 5, 15, 18);
+	init_animation_indices(SKILL_AXIOM_ONE);
+	gw.skills_animations[SKILL_TRUE_ENDURANCE] = new Animation("../../../res/skills_animations/one/true_endurance.png", 2, 5, 10, 20);
+	init_animation_indices(SKILL_TRUE_ENDURANCE);
+
+	// Serial Keyller
+	gw.skills_animations[SKILL_BRUTE_FORCE] = new Animation("../../../res/skills_animations/serial_keyller/brute_force.png", 2, 5, 8, 20);
+	init_animation_indices(SKILL_BRUTE_FORCE);
+	gw.skills_animations[SKILL_BUFFER_OVERFLOW] = new Animation("../../../res/skills_animations/serial_keyller/buffer_overflow.png", 1, 5, 5, 25);
+	gw.skills_animations[SKILL_BUFFER_OVERFLOW]->animate_reverse = true;
+	init_animation_indices(SKILL_BUFFER_OVERFLOW);
+	gw.skills_animations[SKILL_DDOS_ATTACK] = new Animation("../../../res/skills_animations/serial_keyller/ddos_attack.png", 3, 5, 15, 10);
+	init_animation_indices(SKILL_DDOS_ATTACK);
+	gw.skills_animations[SKILL_ENCRYPTION] = new Animation("../../../res/skills_animations/serial_keyller/encryption.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_ENCRYPTION);
+
+	// Ray Tracey
+
+	// A-Star
+	gw.skills_animations[SKILL_Q_PUNCH] = new Animation("../../../res/skills_animations/astar/q_punch.png", 1, 3, 3, 30);
+	init_animation_indices(SKILL_Q_PUNCH);
+	gw.skills_animations[SKILL_PERCEPTRON] = new Animation("../../../res/skills_animations/astar/perceptron.png", 2, 5, 7, 23);
+	init_animation_indices(SKILL_PERCEPTRON);
+	gw.skills_animations[SKILL_NEURAL_NETWORK] = new Animation("../../../res/skills_animations/astar/neural_network.png", 2, 5, 8, 20);
+	init_animation_indices(SKILL_NEURAL_NETWORK);
+	gw.skills_animations[SKILL_HILL_CLIMBING] = new Animation("../../../res/skills_animations/astar/hill_climbing.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_HILL_CLIMBING);
+
+	// Deadlock
+	gw.skills_animations[SKILL_PREEMPTION] = new Animation("../../../res/skills_animations/deadlock/preemption.png", 2, 5, 10, 18);
+	init_animation_indices(SKILL_PREEMPTION);
+	gw.skills_animations[SKILL_MUTEX] = new Animation("../../../res/skills_animations/deadlock/mutex.png", 3, 5, 15, 15);
+	init_animation_indices(SKILL_MUTEX);
+	gw.skills_animations[SKILL_THREAD_SCHEDULING] = new Animation("../../../res/skills_animations/deadlock/thread_scheduling.png", 3, 5, 11, 30);
+	init_animation_indices(SKILL_THREAD_SCHEDULING);
+	gw.skills_animations[SKILL_FORK] = new Animation("../../../res/skills_animations/deadlock/fork.png", 1, 5, 5, 18);
+	init_animation_indices(SKILL_FORK);
+
+	// Norma
+	gw.skills_animations[SKILL_PUMPING_UP] = new Animation("../../../res/skills_animations/norma/pumping_up.png", 4, 5, 20, 10);
+	init_animation_indices(SKILL_PUMPING_UP);
+	gw.skills_animations[SKILL_AUTOMATA_SUMMON] = new Animation("../../../res/skills_animations/norma/automata_summon.png", 3, 5, 15, 15);
+	init_animation_indices(SKILL_AUTOMATA_SUMMON);
+	gw.skills_animations[SKILL_TURING_MACHINE] = new Animation("../../../res/skills_animations/norma/turing_machine.png", 4, 5, 17, 18);
+	init_animation_indices(SKILL_TURING_MACHINE);
+	gw.skills_animations[SKILL_NON_DETERMINISM] = new Animation("../../../res/skills_animations/norma/non_determinism.png", 2, 5, 7, 18);
+	init_animation_indices(SKILL_NON_DETERMINISM);
+
+	// Hazard
+	gw.skills_animations[SKILL_TMR] = new Animation("../../../res/skills_animations/hazard/tmr.png", 2, 5, 10, 18);
+	init_animation_indices(SKILL_TMR);
+	gw.skills_animations[SKILL_REDUNDANCY] = new Animation("../../../res/skills_animations/hazard/redundancy.png", 2, 5, 6, 15);
+	init_animation_indices(SKILL_REDUNDANCY);
+	gw.skills_animations[SKILL_ROLLBACK] = new Animation("../../../res/skills_animations/hazard/rollback.png", 2, 5, 7, 15);
+	init_animation_indices(SKILL_ROLLBACK);
+	gw.skills_animations[SKILL_ROLLFORWARD] = new Animation("../../../res/skills_animations/hazard/rollforward.png", 2, 5, 7, 15);
+	init_animation_indices(SKILL_ROLLFORWARD);
+
+	// Qwerty
+
+	// Big 0
+	gw.skills_animations[SKILL_BEST_BOUND_FIST] = new Animation("../../../res/skills_animations/big_o/best_bound_fist.png", 2, 5, 9, 20);
+	init_animation_indices(SKILL_BEST_BOUND_FIST);
+	gw.skills_animations[SKILL_DUAL_SIMPLEX] = new Animation("../../../res/skills_animations/big_o/dual_simplex.png", 3, 5, 12, 15);
+	init_animation_indices(SKILL_DUAL_SIMPLEX);
+	gw.skills_animations[SKILL_GRAPH_COLORING] = new Animation("../../../res/skills_animations/big_o/graph_coloring.png", 3, 5, 13, 18);
+	init_animation_indices(SKILL_GRAPH_COLORING);
+	gw.skills_animations[SKILL_KNAPSACK_HIDEOUT] = new Animation("../../../res/skills_animations/big_o/knapsack_hideout.png", 1, 5, 5, 18);
+	init_animation_indices(SKILL_KNAPSACK_HIDEOUT);
+
+	// New
+
+	// Clockboy
+	gw.skills_animations[SKILL_CLOCK_PULSE] = new Animation("../../../res/skills_animations/clockboy/clock_pulse.png", 2, 5, 9, 15);
+	init_animation_indices(SKILL_CLOCK_PULSE);
+	gw.skills_animations[SKILL_PIPELINE] = new Animation("../../../res/skills_animations/clockboy/pipeline.png", 3, 5, 12, 18);
+	init_animation_indices(SKILL_PIPELINE);
+	gw.skills_animations[SKILL_OVERCLOCK] = new Animation("../../../res/skills_animations/clockboy/overclock.png", 3, 5, 13, 18);
+	init_animation_indices(SKILL_OVERCLOCK);
+	gw.skills_animations[SKILL_BRANCH_DAMAGE] = new Animation("../../../res/skills_animations/clockboy/branch_prediction.png", 1, 5, 5, 20);
+	init_animation_indices(SKILL_BRANCH_DAMAGE);
+}

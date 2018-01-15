@@ -2,6 +2,7 @@
 #include "Primitive.h"
 #include "WindowShader.h"
 #include "FontShader.h"
+#include "AnimationShader.h"
 #include "FontRenderer.h"
 #include "WindowDiv.h"
 #include "Label.h"
@@ -13,6 +14,7 @@
 
 class Shader;
 class WindowShader;
+class AnimationShader;
 class Mesh;
 class FontRenderer;
 
@@ -48,6 +50,7 @@ class Window
 {
 #define WINDOW_SHADER_PATH "../../../res/shaders/windowapi/window_shader"
 #define FONT_SHADER_PATH "../../../res/shaders/windowapi/font_shader"
+#define ANIMATION_SHADER_PATH "../../../res/shaders/windowapi/animation_shader"
 #define DEFAULT_TITLE_COLOR 0.2f, 0.2f, 0.2f, 1.0f
 #define DEFAULT_BORDER_SIZE 2		// pixels
 #define DEFAULT_BORDER_COLOR 0.0f, 0.0f, 0.0f, 1.0f
@@ -63,6 +66,7 @@ public:
 	static std::vector<Window*> backgroundWindows;
 	static WindowShader* m_windowShader;
 	static FontShader* m_textShader;
+	static AnimationShader* m_animationShader;
 	static void linkedWindowDestroy();
 	static void linkedWindowInit();
 public: 
