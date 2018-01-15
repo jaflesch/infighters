@@ -119,6 +119,8 @@ SOCKET* connect(client_info * player) {
 	inet_pton(AF_INET, player->opponent_ip, &(clientService.sin_addr.s_addr));			// ip inimigo
 	clientService.sin_port = htons(GAME_PORT);
 
+	printf("ip do oponente: %s\n\n", player->opponent_ip);
+
 	if (player->first) {
 		SOCKET ListenSocket = INVALID_SOCKET;
 		SOCKET * Invalid = (SOCKET*)malloc(sizeof(SOCKET));
@@ -190,8 +192,8 @@ SOCKET* connect(client_info * player) {
 		// Connect to server.
 		do {
 			iResult = connect(*ConnectSocket, (SOCKADDR*)&clientService, sizeof(clientService));
-			printf("Player Connected\n\n");
 		} while (iResult == SOCKET_ERROR);				
+		printf("Player Connected\n\n");
 	}
 	
 	return ConnectSocket;
