@@ -21,6 +21,7 @@
 //#endif
 
 #define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -64,7 +65,7 @@ DWORD WINAPI ConectionManager(void* Socket)
 
 	len = sizeof addr;
 	getpeername((SOCKET) ClientSocket, (struct sockaddr*)&addr, &len);
-
+	
 	// deal with both IPv4 and IPv6:
 	if (addr.ss_family == AF_INET) {
 		struct sockaddr_in *s = (struct sockaddr_in *)&addr;
@@ -78,8 +79,15 @@ DWORD WINAPI ConectionManager(void* Socket)
 	}
 
 	//std::cout << "Peer IP address: " << ipstr << std::endl << std::endl;
-
+	
 	strcpy_s(ip.newplayer, ipstr);
+
+	if (!strcmp(ip.newplayer, "127.0.0.1")) {
+		char szBuffer[1024];
+		gethostname(szBuffer, sizeof(szBuffer));
+		struct hostent *host = gethostbyname(szBuffer);
+		strcpy_s(ip.newplayer, inet_ntoa(*(struct in_addr *)*host->h_addr_list));
+	}
 
 	// se o tamanho da fila eh dois -> espera esvaziar
 	while (messageQueue.size() == 2);

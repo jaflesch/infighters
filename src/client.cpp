@@ -116,13 +116,6 @@ SOCKET* connect(client_info * player) {
 		return NULL;
 	}
 
-	if (!strcmp(player->opponent_ip, "127.0.0.1")) {
-		char szBuffer[1024];
-		gethostname(szBuffer, sizeof(szBuffer));
-		struct hostent *host = gethostbyname(szBuffer);
-		strcpy(player->opponent_ip, inet_ntoa(*(struct in_addr *)*host->h_addr_list));
-	}
-
 	printf("ip do oponente: %s\n\n", player->opponent_ip);
 	
 	clientService.sin_family = AF_INET;
