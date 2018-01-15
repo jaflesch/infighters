@@ -1898,8 +1898,6 @@ void update_game_mode(double frametime)
 
 			layout_update_cooldowns();
 
-			static bool last_hovered_char = true;
-
 			bool is_hovering_skill = false;
 			bool is_hovering_char = false;
 			for (int i = 0; i < NUM_ALLIES; ++i) {
@@ -1914,7 +1912,6 @@ void update_game_mode(double frametime)
 					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
-					last_hovered_char = true;
 					break;
 				} else {
 					for (int k = 0; k < NUM_SKILLS; ++k) {
@@ -1941,7 +1938,6 @@ void update_game_mode(double frametime)
 								}
 							}
 							is_hovering_skill = true;
-							last_hovered_char = false;
 							break;
 						}
 					}
@@ -1960,28 +1956,18 @@ void update_game_mode(double frametime)
 					layout_set_char_orb_types_description(hover_char_id, combat_state.skill_info_group->getLabels()[0]);
 					combat_state.skill_info_group->getLabels()[1]->setTextLength(0);
 					is_hovering_char = true;
-					last_hovered_char = true;
 					break;
 				}
 			}
 			
-			//combat_state.skill_info_image->m_render = is_hovering_skill | is_hovering_char;
-			//combat_state.skill_info_title->m_render = is_hovering_skill | is_hovering_char;
-			//combat_state.skill_info_desc->m_render = is_hovering_skill | is_hovering_char;
-			//combat_state.skill_info_group->m_render = is_hovering_skill | is_hovering_char;
-
 			static bool render_info = false;
 
 			if (is_hovering_skill | is_hovering_char)
 				render_info = true;
 
-			if (!is_hovering_skill) {
+			if (is_hovering_char) {
 				for (int i = 0; i < ORB_NUMBER; ++i) {
-					if (combat_state.skill_costs[i]->getBackgroundTexture() && !last_hovered_char) {
-						combat_state.skill_costs[i]->m_render = render_info;
-					}
-					else
-						combat_state.skill_costs[i]->m_render = false;
+					combat_state.skill_costs[i]->m_render = false;
 				}
 			}
 
