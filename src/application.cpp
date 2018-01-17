@@ -1365,6 +1365,12 @@ static void button_skill(void* arg) {
 		if(skill_state_ally.inheritance_copy != SKILL_NONE)
 			skill_used = skill_state_ally.inheritance_copy; // @temp test
 	}
+	if (skill_used == SKILL_TURING_MACHINE) {
+		if (combat_state.player.skill_status[char_id][SKILL_AUTOMATA_SUMMON] == 0) {
+			AudioController::cancelAudio.play();
+			return;
+		}
+	}
 
 	if (combat_state.player.hp <= 0)
 		return;
@@ -1679,13 +1685,13 @@ void init_application()
 	combat_state.orbs_amount[ORB_HARD] = 8;
 	combat_state.orbs_amount[ORB_SOFT] = 3;
 	combat_state.orbs_amount[ORB_VR] = 4;
-	combat_state.orbs_amount[ORB_BIOS] = 0;
-	combat_state.total_orbs = 8 + 3 + 4 + 0;
+	combat_state.orbs_amount[ORB_BIOS] = 10;
+	combat_state.total_orbs = 8 + 3 + 4 + 10;
 	layout_change_orb_amount(ORB_HARD, 8);
 	layout_change_orb_amount(ORB_SOFT, 3);
 	layout_change_orb_amount(ORB_VR, 4);
-	layout_change_orb_amount(ORB_BIOS, 0);
-	layout_change_orb_amount(ORB_ALL, 8 + 3 + 4 + 0);
+	layout_change_orb_amount(ORB_BIOS, 10);
+	layout_change_orb_amount(ORB_ALL, 8 + 3 + 4 + 10);
 #else
 	combat_state.orbs_amount[ORB_HARD] = 1;
 	combat_state.orbs_amount[ORB_SOFT] = 0;
@@ -2124,8 +2130,6 @@ void change_game_mode(Game_Mode mode)
 	}
 }
 
-static int global_animating = 0;
-
 void render_overlay(double frametime) {
 	if (ggs.mode != MODE_COMBAT)
 		return;
@@ -2262,16 +2266,13 @@ void input()
 	}
 	if (keyboard_state.key_event['V']) {
 		keyboard_state.key_event['V'] = false;
-		global_animating += 1;
-		while (!gw.skills_animations[global_animating]) {
-			global_animating += 1;
-			if (global_animating >= NUM_SKILLS * NUM_CHARS) {
-				global_animating = 0;
-			}
-		}
-		if (global_animating >= NUM_SKILLS * NUM_CHARS) {
-			global_animating = 0;
-		}
+		//apply_skill_status_to_ally(0, SKILL_TAUTOLOGY, 2, &combat_state);
+		apply_skill_status_to_ally(0, SKILL_REQUIEM_ZERO, 4, &combat_state);
+	}
+	if (keyboard_state.key_event['X']) {
+		keyboard_state.key_event['X'] = false;
+		//remove_skill_status_from_ally(0, SKILL_TAUTOLOGY, &combat_state);
+		remove_skill_status_from_ally(0, SKILL_REQUIEM_ZERO, &combat_state);
 	}
 }
 
@@ -2299,12 +2300,14 @@ static void layout_enemy_die(u32 enemy_index) {
 	assert(enemy_index <= NUM_ENEMIES);
 	gw.enemies_indicator[enemy_index]->setBackgroundTexture(orb_dead_enemy);
 	layout_set_enemy_image_opacity(enemy_index, 0.5f, hm::vec4(0,0,0,1));
+	layout_remove_all_status_from_enemy(enemy_index, &combat_state);
 }
 
 static void layout_ally_die(u32 ally_index) {
 	assert(ally_index <= NUM_ALLIES);
 	gw.allies_indicator[ally_index]->setBackgroundTexture(orb_dead_ally);
 	layout_set_ally_image_opacity(ally_index, 0.5f, hm::vec4(0, 0, 0, 1));
+	layout_remove_all_status_from_ally(ally_index, &combat_state);
 }
 
 static void put_space(int* length, char* buffer) {

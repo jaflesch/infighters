@@ -115,6 +115,7 @@ enum Skill_Condition {
 	SKILL_CONDITION_PARALYZE	= FLAG(4),
 	SKILL_CONDITION_SLEEP		= FLAG(5),
 	SKILL_CONDITION_STUN		= FLAG(6),
+	SKILL_CONDITION_SKILL_STATUS,
 	SKILL_CONDITION_NUMBER,
 };
 enum Skill_Damage {
@@ -333,6 +334,8 @@ struct Player {
 
 	u32 status[NUM_ALLIES];				// Skill_Condition or'd together
 	s32 status_duration[NUM_ALLIES][SKILL_CONDITION_NUMBER];
+
+	s32 skill_status[NUM_ALLIES][NUM_SKILLS * NUM_CHARS];	// Duration
 
 	s32 cumulative_skill[NUM_ALLIES][SKILL_NUMBER];
 
