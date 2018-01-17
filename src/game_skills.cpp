@@ -214,20 +214,16 @@ static bool is_enemy_targetable_by_skill(Skill_ID skill, s32 enemy_index, Combat
 	return true;
 }
 
+Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state);
+
 static bool is_ally_targetable_by_skill(Skill_ID skill, s32 ally_index, Combat_State* combat_state) {
 	if (combat_state->player.hp[ally_index] <= 0) return false;
-	if (combat_state->player.reduction[ally_index] & SKILL_DEF_INVULNERABILITY) {
-		if (skill == SKILL_BRUTE_FORCE)
-			return true;
-		if (skill_groups[skill].type & combat_state->player.reduction_type[ally_index])
-			return false;
-	}
-	if (skill == SKILL_PERCEPTRON) {
-		if (combat_state->player.skill_status[ally_index][SKILL_NEURAL_NETWORK] == 0) {
-			return false;
-		}
-	}
-	return true;
+	if (skill == SKILL_ROLLBACK || skill == SKILL_DUAL_SIMPLEX || skill == SKILL_OVERRIDE)
+		return true;
+	Skill_Target target = skill_need_targeting(skill, combat_state);
+	if (target.self)
+		return true;
+	return false;
 }
 
 Skill_Target skill_need_targeting(Skill_ID id, Combat_State* combat_state) {
@@ -688,6 +684,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	switch (id) {
 		// Zero
 		case SKILL_FALSE_RUSH: {
+			AudioController::false_rush.play();
 			// if requiem is still active, affect all enemies (AoE)
 			if (skill_state->requiem_duration > 0) {
 				int num_targets = (from_enemy) ? NUM_ENEMIES : NUM_ALLIES;
@@ -709,6 +706,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 				skill_counter_ally.contradiction_target = target_index;
 				skill_counter_ally.contradiction_zero_index = source_index;
 			} else {
+				AudioController::contradiction.play();
 				apply_skill_status_to_enemy(target_index, id, 2, combat_state);
 				skill_counter_enemy.contradiction_target = target_index;
 				skill_counter_enemy.contradiction_zero_index = source_index;
@@ -716,8 +714,9 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_REQUIEM_ZERO: {
 			skill_state->requiem_duration = 3 + 1;
-			apply_skill_status_to_ally(0, SKILL_REQUIEM_ZERO, 3 * 2 + 1, combat_state);
 			if (!from_enemy) {
+				AudioController::requiem_zero.play();
+				apply_skill_status_to_ally(0, SKILL_REQUIEM_ZERO, 3 * 2 + 1, combat_state);
 				//apply_skill_status_to_ally(source_index, id, 3 + 1, combat_state);
 				push_skill_animation(false, source_index, id, combat_state);
 			}
@@ -725,6 +724,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// One
 		case SKILL_TRUTH_SLASH: {
+			AudioController::truth_slash.play();
 			deal_damage_to_target(target_index, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
@@ -733,15 +733,18 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			if (from_enemy) {
 				skill_counter_ally.tautology_target = target_index;
 			} else {
+				AudioController::tautology.play();
 				apply_skill_status_to_enemy(target_index, id, 1 * 2, combat_state);
 				skill_counter_enemy.tautology_target = target_index;
 			}
 		}break;
 		case SKILL_AXIOM_ONE: {
+			AudioController::axiom_one.play();
 			skill_state->axiom_one_duration = 3 + 1;
 			if (from_enemy) {
 				gain_reduction_enemy(15, 3, true, source_index, SKILL_TYPE_PHYSICAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(true, source_index, id, combat_state);
+				apply_skill_status_to_enemy(source_index, id, 3 * 2 + 1, combat_state);
 			} else {
 				apply_skill_status_to_ally(source_index, id, 3 * 2 + 1, combat_state);
 				gain_reduction_ally(15, 3, true, source_index, SKILL_TYPE_PHYSICAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
@@ -751,11 +754,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Serial Keyller
 		case SKILL_BRUTE_FORCE: {
+			AudioController::brute_force.play();
 			int damage = 20;
 			deal_damage_to_target(target_index, source_index, damage, SKILL_DMG_NORMAL, id, combat_state);
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
 		case SKILL_BUFFER_OVERFLOW: {
+			AudioController::buffer_overflow.play();
 			deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_PIERCING, id, combat_state);
 			if (from_enemy) {
 				apply_status_to_ally(target_index, SKILL_CONDITION_STUN, 1, combat_state);
@@ -766,6 +771,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_DDOS_ATTACK: {
+			AudioController::ddos_attack.play();
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (!is_targetable_by_skill(SKILL_DDOS_ATTACK, i, combat_state))
 					continue;
@@ -781,6 +787,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Ray Tracey
 		case SKILL_PARTICLE_RENDERING: {
+			AudioController::particle_rendering.play();
 			deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_NORMAL, id, combat_state);
 			if (from_enemy) {
 				gain_invulnerability_enemy(source_index, 1, SKILL_TYPE_PHYSICAL, combat_state);
@@ -795,6 +802,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 						gain_reflection_enemy(i, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				}
 			} else {
+				AudioController::diffuse_reflection.play();
 				for (int i = 0; i < NUM_ALLIES; ++i) {
 					if (is_targetable_by_skill(SKILL_DIFFUSE_REFLECTION, i, combat_state)) {
 						gain_reflection_ally(i, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
@@ -804,6 +812,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_DYNAMIC_FRUSTUM_ATTACK: {
+			AudioController::dynamic_frustum.play();
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (is_targetable_by_skill(SKILL_DYNAMIC_FRUSTUM_ATTACK, i, combat_state))
 					deal_damage_to_target(i, source_index, 35, SKILL_DMG_NORMAL, id, combat_state);
@@ -812,6 +821,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// A-Star
 		case SKILL_Q_PUNCH: {
+			AudioController::q_punch.play();
 			int damage = 20;
 			int cumulative_damage = 5;
 			if (from_enemy) {
@@ -831,10 +841,12 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_PERCEPTRON: {
+			AudioController::perceptron.play();
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_CRUSHING, id, combat_state);
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
 		case SKILL_NEURAL_NETWORK: {
+			AudioController::neural_network.play();
 			skill_state->neural_network_duration = 4 + 1;
 			if (from_enemy) {
 				for (int i = 0; i < NUM_ALLIES; ++i) {
@@ -857,6 +869,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			
 		// Deadlock
 		case SKILL_PREEMPTION: {
+			AudioController::preemption.play();
 			// @ ask wtf is CONTROL
 			// Caso ele tenha alguma habilidade com duração CONTROL, elimina a habilidade e este sofre status SLEEP por 2 turnos.
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
@@ -867,6 +880,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_MUTEX: {
+			AudioController::mutex.play();
 			// @todo UNIQUE
 			// Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.
 			int random = rand() % (NUM_ENEMIES);
@@ -880,6 +894,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_THREAD_SCHEDULING: {
+			AudioController::thread_scheduling.play();
 			if (from_enemy) {
 				// @ gotta sent this via network
 				// random calculated on the sender
@@ -899,6 +914,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Norma
 		case SKILL_PUMPING_UP: {
+			AudioController::pumping_up.play();
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_PIERCING, id, combat_state);
 			// @todo replace random
 			int random = rand() % 10000;
@@ -914,6 +930,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_AUTOMATA_SUMMON: {
+			AudioController::automata_summon.play();
 			skill_state->automata_summon_duration = 1 + 1;
 			if (from_enemy) {
 				skill_counter_enemy.automata_summon_norma_index = source_index;
@@ -923,10 +940,11 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 				skill_counter_ally.automata_summon_norma_index = source_index;
 				gain_absorption_ally(15, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(false, source_index, id, combat_state);
-				apply_skill_status_to_ally(source_index, id, 1 * 2, combat_state);
+				apply_skill_status_to_ally(source_index, id, 1 * 2 + 1, combat_state);
 			}
 		}break;
 		case SKILL_TURING_MACHINE: {
+			AudioController::turing_machine.play();
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (is_targetable_by_skill(SKILL_TURING_MACHINE, i, combat_state)) {
 					deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
@@ -937,6 +955,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Hazard
 		case SKILL_TMR: {
+			AudioController::tmr.play();
 			int num_targets = 0;
 			if (from_enemy) num_targets = NUM_ALLIES;
 			else num_targets = NUM_ENEMIES;
@@ -958,6 +977,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_REDUNDANCY: {
+			AudioController::redundancy.play();
 			if (from_enemy) {
 				for (int i = 0; i < NUM_ENEMIES; ++i) {
 					if (is_targetable_by_skill(SKILL_REDUNDANCY, i, combat_state)) {
@@ -977,6 +997,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_ROLLBACK: {
+			AudioController::rollback.play();
 			u32 status = SKILL_CONDITION_NORMAL | SKILL_CONDITION_BURN | SKILL_CONDITION_FREEZE | SKILL_CONDITION_POISON |
 				SKILL_CONDITION_PARALYZE | SKILL_CONDITION_SLEEP | SKILL_CONDITION_STUN;
 			if (from_enemy) {
@@ -990,6 +1011,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Qwerty
 		case SKILL_ALT: {
+			AudioController::alt.play();
 			if (from_enemy) {
 				gain_reduction_enemy(40, 4, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				apply_skill_status_to_enemy(source_index, id, 4 * 2, combat_state);
@@ -999,6 +1021,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_CTRL: {
+			AudioController::ctrl.play();
 			if (from_enemy) {
 				apply_skill_status_to_ally(target_index, id, 2 * 2 + 1, combat_state);
 			} else {
@@ -1006,6 +1029,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_DELETE: {
+			AudioController::del.play();
 			if (from_enemy) {
 				layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], 0);
 				layout_ally_die(target_index);
@@ -1019,6 +1043,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		
 		// Big O
 		case SKILL_BEST_BOUND_FIST: {
+			AudioController::best_bount_fist.play();
 			/*
 			Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN.
 			Se o alvo já possui status BURN, este sofre 10 de dano crushing adicional.
@@ -1059,6 +1084,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			
 		}break;
 		case SKILL_DUAL_SIMPLEX: {
+			AudioController::dual_simplex.play();
 			/*
 			Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um 
 			aliado, recupera 25 de energia e atribui status FROZEN por 2 turnos.
@@ -1088,6 +1114,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_GRAPH_COLORING: {
+			AudioController::graph_coloring.play();
 			// No próximo turno, recebe 4 orbs de energia : uma de cada categoria.
 			if (!from_enemy) {
 				skill_state_ally.graph_coloring = true;
@@ -1098,6 +1125,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// New
 		case SKILL_SPRINT_BURST: {
+			AudioController::sprint_burst.play();
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
 			if (from_enemy) {
 				gain_reduction_enemy(10, 1, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
@@ -1114,11 +1142,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 				skill_counter_ally.inheritante_target = target_index;
 				skill_counter_ally.inheritance_new_index = source_index;
 			} else {
+				AudioController::inheritance.play();
 				skill_counter_enemy.inheritante_target = target_index;
 				skill_counter_enemy.inheritance_new_index = source_index;
 			}
 		}break;
 		case SKILL_OVERRIDE: {
+			AudioController::override_.play();
 			u32 status = SKILL_CONDITION_NORMAL | SKILL_CONDITION_BURN | SKILL_CONDITION_FREEZE | SKILL_CONDITION_POISON |
 				SKILL_CONDITION_PARALYZE | SKILL_CONDITION_SLEEP | SKILL_CONDITION_STUN;
 			if (from_enemy) {
@@ -1130,6 +1160,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 
 		// Clockboy
 		case SKILL_CLOCK_PULSE: {
+			AudioController::clock_pulse.play();
 			s32 dmg = 20;
 			if (skill_state->overclock_duration > 0) {
 				dmg *= 5;
@@ -1145,6 +1176,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_PIPELINE: {
+			AudioController::pipeline.play();
 			// @todo wierd shit
 			if (from_enemy) {
 				apply_skill_status_to_enemy(source_index, id, 2 * 2, combat_state);
@@ -1153,6 +1185,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_OVERCLOCK: {
+			AudioController::overclock.play();
 			if (from_enemy) {
 				int half_max_hp = combat_state->enemy.max_hp[source_index] / 2;
 				layout_set_enemy_hp(source_index, combat_state->enemy.max_hp[source_index], half_max_hp);
@@ -1173,18 +1206,19 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 
 		// Invulnerability skills
-		case SKILL_BRANCH_DAMAGE:
-		case SKILL_POLIMORPHISM:
-		case SKILL_KNAPSACK_HIDEOUT:
-		case SKILL_ESC:
-		case SKILL_ROLLFORWARD:
-		case SKILL_NON_DETERMINISM:
-		case SKILL_FORK:
-		case SKILL_HILL_CLIMBING:
-		case SKILL_RASTERIZATION:
-		case SKILL_ENCRYPTION:
-		case SKILL_TRUE_ENDURANCE:
+		case SKILL_BRANCH_DAMAGE:		AudioController::branch_prediction.play();
+		case SKILL_POLIMORPHISM:		AudioController::polymorphism.play();
+		case SKILL_KNAPSACK_HIDEOUT:	AudioController::knapsack_hideout.play();
+		case SKILL_ESC:					AudioController::esc.play();
+		case SKILL_ROLLFORWARD:			AudioController::rollforward.play();
+		case SKILL_NON_DETERMINISM:		AudioController::non_determinism.play();
+		case SKILL_FORK:				AudioController::fork.play();
+		case SKILL_HILL_CLIMBING:		AudioController::hill_climbing.play();
+		case SKILL_RASTERIZATION:		AudioController::rasterization.play();
+		case SKILL_ENCRYPTION:			AudioController::encryption.play();
+		case SKILL_TRUE_ENDURANCE:		AudioController::true_endurance.play();
 		case SKILL_VOID_BARRIER: {
+										AudioController::void_barrier.play();
 			if (from_enemy) {
 				apply_skill_status_to_enemy(source_index, id, 2, combat_state);
 				gain_invulnerability_enemy(source_index, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);

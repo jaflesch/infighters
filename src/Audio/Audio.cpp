@@ -1,5 +1,8 @@
 #include "Audio.h"
 #include <SFML/Audio.hpp>
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
 
 Audio::Audio(std::string path, AudioType type, unsigned int volume)
 {
@@ -9,8 +12,11 @@ Audio::Audio(std::string path, AudioType type, unsigned int volume)
 	if (type == AudioType::SOUND)
 	{
 		if (!this->buffer.loadFromFile(path)) {
-
-			printf("Sound Error. Path: %s", path.c_str());
+			char buffer[1024] = {};
+			sprintf(buffer, "Sound Error. Path: %s\n", path.c_str());
+#if defined(_WIN32) || defined(_WIN64)
+			OutputDebugStringA(buffer);
+#endif
 		}
 
 		this->sound.setBuffer(buffer);
@@ -19,7 +25,11 @@ Audio::Audio(std::string path, AudioType type, unsigned int volume)
 	else if (type == AudioType::MUSIC)
 	{
 		if (!music.openFromFile(path)) {
-			printf("Error");
+			char buffer[1024] = {};
+			sprintf(buffer, "Music Error. Path: %s\n", path.c_str());
+#if defined(_WIN32) || defined(_WIN64)
+			OutputDebugStringA(buffer);
+#endif
 		}
 		this->setVolume(volume);
 	}
