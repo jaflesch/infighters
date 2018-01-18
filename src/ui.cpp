@@ -17,6 +17,7 @@ void hide_all_windows() {
 	gw.char_info_skill_cost->setActive(false);
 
 	// combat
+	gw.historico->setActive(false);
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		gw.allies[i]->setActive(false);
 		gw.allies_info[i]->setActive(false);
@@ -1076,6 +1077,18 @@ void init_combat_mode()
 		combat_state.skill_info_title = skill_title_div;
 		combat_state.skill_info_desc = skill_desc_div;
 		combat_state.skill_info_group = skill_group_div;
+	}
+
+	{
+		// Historico
+		hm::vec4 combat_info_bar_color(15.0f / 255.0f, 17.0f / 255.0f, 42.0f / 255.0f, 1.0f);
+		linked::Window* historico = new linked::Window(window_info.width, 200, hm::vec2(0, 660), hm::vec4(0,0,0,0), 0, 0, linked::W_UNFOCUSABLE);
+		linked::WindowDiv* historico_div = new linked::WindowDiv(*historico, window_info.width, 180, 0, 0, hm::vec2(0, 0), combat_info_bar_color, linked::DIV_ANCHOR_LEFT | linked::DIV_CENTER_Y);
+		historico->divs.push_back(historico_div);
+		gw.historico = historico;
+		linked::Label* historic_label = new linked::Label(*historico_div, (u8*)"Hello World\nHello World\nHello World", sizeof("Hello World\nHello World\nHello World"),
+			hm::vec2(400, 20), hm::vec4(1, 1, 1, 1), FONT_OSWALD_BOLD_18, 0, 0);
+		historico_div->getLabels().push_back(historic_label);
 	}
 
 	init_sacrifice_orbs_modal();

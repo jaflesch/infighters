@@ -32,6 +32,20 @@ static Skill_State skill_state_enemy = { };
 static Skill_Counter skill_counter_ally = { };
 static Skill_Counter skill_counter_enemy = {};
 
+static u8  historic_buffer[2048] = {};
+static s32 historic_buffer_index = 0;
+
+void push_historic(char* str) {
+	s32 len = strlen(str);
+	memcpy(historic_buffer + historic_buffer_index, str, len);
+	historic_buffer_index += len;
+}
+
+void push_historic(s32 value) {
+	s32 len = s32_to_str_base10(value, (char*)(historic_buffer + historic_buffer_index));
+	historic_buffer_index += len;
+}
+
 s32 calculate_absorption(s32 initial, s32 absorption, s32* extra_on_hp) {
 	*extra_on_hp = 0;
 	if (initial > absorption) {
@@ -643,8 +657,20 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			(skill_state_ally.requiem_duration > 0 && target_index == skill_counter_enemy.contradiction_zero_index && !on_enemy))  {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
 			printf("enemy countered by contradiction!\n");
+			
+			push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			push_historic(" atingido por contradiction");
+
 			const int extra = 1;	// needed because it updates at the start of the player turn
-			deal_damage_to_target_enemy(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
+			s32 dmg = deal_damage_to_target_enemy(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
+			if (dmg > 0) {
+				push_historic(" recebendo ");
+				push_historic(dmg);
+				push_historic(" de dano");
+				push_historic(" e status PARALYZE.\n");
+			} else {
+				push_historic(" e recebeu status PARALYZE.\n");
+			}
 			apply_status_to_enemy(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
 			push_skill_animation(true, source_index, SKILL_CONTRADICTION, combat_state);
 			return 0;
@@ -652,23 +678,43 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_enemy.tautology_target) {
 			// sofre 15 de dano crushing
 			printf("enemy countered by tautology!\n");
-			deal_damage_to_target_enemy(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
+			push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			push_historic(" atingido por tautology");
+
+			s32 dmg = deal_damage_to_target_enemy(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
+			if (dmg > 0) {
+				push_historic(" recebendo ");
+				push_historic(dmg);
+				push_historic(" de dano");
+			}
+			push_historic(".\n");
 			push_skill_animation(true, source_index, SKILL_TAUTOLOGY, combat_state);
 		}
 		if ((needs_targets.all && skill_counter_ally.automata_summon_norma_index != -1)|| skill_counter_ally.automata_summon_norma_index == target_index) {
 			printf("enemy countered by automata summon!\n");
+			push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			push_historic(" atingido por automata summon recebeu status POISON.\n");
+
 			apply_status_to_enemy(source_index, SKILL_CONDITION_POISON, 2, combat_state);
 			skill_counter_ally.automata_summon_norma_index = -1;
 		}
 		if (source_index == skill_counter_enemy.inheritante_target) {
 			printf("enemy countered by inheritance");
 			printf("copied skill of id %d\n", id);
+			push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			push_historic(" atingido por inheritance");
+
 			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
+				push_historic(" não teve sua habilidade copiada por ser UNIQUE.\n");
 				skill_state_ally.cooldown_counter[SKILL_INHERITANCE] = 0;
 				skill_state_ally.inheritance_copy = id;
 				skill_state_ally.inheritance_duration = 2;
 				linked::Button* b = gw.allies_skills[skill_counter_enemy.inheritance_new_index * NUM_SKILLS + 1]->divs[0]->getButtons()[0];
 				b->setAllBGTexture(skill_textures[id]);
+			} else {
+				push_historic(" teve sua habilidade");
+				push_historic(skill_names[id]);
+				push_historic(" copiada por New().\n");
 			}
 		}
 	} else {
@@ -677,8 +723,20 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			(skill_state_enemy.requiem_duration > 0 && target_index == skill_counter_ally.contradiction_zero_index && on_enemy)) {
 			// ally source receives 20 dmg, do nothing and receive status paralyze
 			printf("ally countered by contradiction!\n");
+
+			push_historic(char_names[char_sel_state.selections[source_index]]);
+			push_historic(" atingido por contradiction");
+
 			const int extra = 1;	// needed because it updates at the start of the player turn
-			deal_damage_to_target_ally(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
+			s32 dmg = deal_damage_to_target_ally(source_index, target_index, 20, skill_groups[id].damage, id, combat_state);
+			if (dmg > 0) {
+				push_historic(" recebendo ");
+				push_historic(dmg);
+				push_historic(" de dano");
+				push_historic(" e status PARALYZE.\n");
+			} else {
+				push_historic(" e recebeu status PARALYZE.\n");
+			}
 			apply_status_to_ally(source_index, SKILL_CONDITION_PARALYZE, 1 + extra, combat_state);
 			push_skill_animation(false, source_index, SKILL_CONTRADICTION, combat_state);
 			return 0;
@@ -686,20 +744,43 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		if (source_index == skill_counter_ally.tautology_target) {
 			// sofre 15 de dano crushing
 			printf("ally countered by tatology!\n");
-			deal_damage_to_target_ally(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
+
+			push_historic(char_names[char_sel_state.selections[source_index]]);
+			push_historic(" atingido por tautology");
+
+			s32 dmg = deal_damage_to_target_ally(source_index, target_index, 15, SKILL_DMG_CRUSHING, id, combat_state);
+			if (dmg > 0) {
+				push_historic(" recebendo ");
+				push_historic(dmg);
+				push_historic(" de dano");
+			}
+			push_historic(".\n");
 			push_skill_animation(false, source_index, SKILL_TAUTOLOGY, combat_state);
 		}
 		if ((needs_targets.all && skill_counter_enemy.automata_summon_norma_index != -1) || skill_counter_enemy.automata_summon_norma_index == target_index) {
 			printf("ally countered! by automata summon\n");
+
+			push_historic(char_names[char_sel_state.selections[source_index]]);
+			push_historic(" atingido por automata summon recebeu status POISON.\n");
+
 			apply_status_to_ally(source_index, SKILL_CONDITION_POISON, 2, combat_state);
 			skill_counter_enemy.automata_summon_norma_index = -1;
 		}
 		if (source_index == skill_counter_ally.inheritante_target) {
 			printf("ally countered by inheritance\n");
 			printf("copied skill of id %d\n", id);
+
+			push_historic(char_names[char_sel_state.selections[source_index]]);
+			push_historic(" atingido por inheritance");
+
 			if (skill_groups[id].unique == SKILL_NOT_UNIQUE) {
+				push_historic(" não teve sua habilidade copiada por ser UNIQUE.\n");
 				skill_state_enemy.inheritance_copy = id;
 				skill_state_enemy.inheritance_duration = 2;
+			} else {
+				push_historic(" teve sua habilidade");
+				push_historic(skill_names[id]);
+				push_historic(" copiada por New().\n");
 			}
 		}
 	}
@@ -710,17 +791,47 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_FALSE_RUSH: {
 			AudioController::false_rush.play();
 			// if requiem is still active, affect all enemies (AoE)
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou False Rush em ");
+			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou False Rush em ");
+			}
 			if (skill_state->requiem_duration > 0) {
 				int num_targets = (from_enemy) ? NUM_ENEMIES : NUM_ALLIES;
 				for (int i = 0; i < num_targets; ++i) {
 					if (is_targetable_by_skill(SKILL_FALSE_RUSH, i, combat_state)) {
-						deal_damage_to_target(i, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+
+						push_historic(char_names[char_sel_state.enemy_selections[i]]);
+
+						s32 dmg = deal_damage_to_target(i, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+						if (dmg > 0) {
+							push_historic(", causando ");
+							push_historic(dmg);
+							push_historic(" de dano");
+							if (i + 2 < num_targets)
+								push_historic(", ");
+							else if(i + 1 < num_targets)
+								push_historic(" e ");
+						}
 						push_skill_animation(!from_enemy, i, id, combat_state);
 					}
 				}
+				push_historic(".\n");
 			} else {
 				// Normal behavior
-				deal_damage_to_target(target_index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+				if(from_enemy)
+					push_historic(char_names[char_sel_state.selections[target_index]]);
+				else
+					push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+
+				s32 dmg = deal_damage_to_target(target_index, source_index, 20, SKILL_DMG_NORMAL, id, combat_state);
+				if (dmg > 0) {
+					push_historic(" e causou ");
+					push_historic(dmg);
+					push_historic(" de dano.\n");
+				}
 				push_skill_animation(!from_enemy, target_index, id, combat_state);
 			}
 		}break;
@@ -738,16 +849,27 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					skill_counter_ally.contradiction_zero_index = source_index;
 				}
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Contradiction em ");
 				AudioController::contradiction.play();
 				if (skill_state->requiem_duration > 0) {
 					for (int i = 0; i < num_targets; ++i) {
 						if (is_targetable_by_skill(id, i, combat_state)) {
+							push_historic(char_names[char_sel_state.selections[i]]);
+							if (i + 2 < num_targets) {
+								push_historic(", ");
+							} else if (i + 1 < num_targets) {
+								push_historic(" e ");
+							}
 							apply_skill_status_to_enemy(i, id, 2, combat_state);
 							skill_counter_enemy.contradiction_target = i;
 							skill_counter_enemy.contradiction_zero_index = source_index;
 						}
 					}
+					push_historic(".\n");
 				} else {
+					push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+					push_historic(".\n");
 					apply_skill_status_to_enemy(target_index, id, 2, combat_state);
 					skill_counter_enemy.contradiction_target = target_index;
 					skill_counter_enemy.contradiction_zero_index = source_index;
@@ -757,6 +879,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_REQUIEM_ZERO: {
 			skill_state->requiem_duration = 3 + 1;
 			if (!from_enemy) {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Requiem Zero.\n");
 				AudioController::requiem_zero.play();
 				apply_skill_status_to_ally(source_index, SKILL_REQUIEM_ZERO, 3 * 2 + 1, combat_state);
 				//apply_skill_status_to_ally(source_index, id, 3 + 1, combat_state);
@@ -767,7 +891,16 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		// One
 		case SKILL_TRUTH_SLASH: {
 			AudioController::truth_slash.play();
-			deal_damage_to_target(target_index, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Truth Slash em ");
+			} else {
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+			}
+			s32 dmg = deal_damage_to_target(target_index, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
+			push_historic(", causando ");
+			push_historic(dmg);
+			push_historic(" de dano.\n");
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
 		case SKILL_TAUTOLOGY: {
@@ -775,6 +908,10 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			if (from_enemy) {
 				skill_counter_ally.tautology_target = target_index;
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Tautology em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+				push_historic(".\n");
 				AudioController::tautology.play();
 				apply_skill_status_to_enemy(target_index, id, 1 * 2, combat_state);
 				skill_counter_enemy.tautology_target = target_index;
@@ -784,10 +921,14 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			AudioController::axiom_one.play();
 			skill_state->axiom_one_duration = 3 + 1;
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Axiom One, recebendo 15 pontos de redução.\n");
 				gain_reduction_enemy(15, 3, true, source_index, SKILL_TYPE_PHYSICAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(true, source_index, id, combat_state);
 				apply_skill_status_to_enemy(source_index, id, 3 * 2 + 1, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Axiom One, recebendo 15 pontos de redução.\n");
 				apply_skill_status_to_ally(source_index, id, 3 * 2 + 1, combat_state);
 				gain_reduction_ally(15, 3, true, source_index, SKILL_TYPE_PHYSICAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(false, source_index, id, combat_state);
@@ -798,43 +939,98 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_BRUTE_FORCE: {
 			AudioController::brute_force.play();
 			int damage = 20;
-			deal_damage_to_target(target_index, source_index, damage, SKILL_DMG_NORMAL, id, combat_state);
+			s32 dmg = deal_damage_to_target(target_index, source_index, damage, SKILL_DMG_NORMAL, id, combat_state);
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Brute Force em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Brute Force em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+			}
+
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
 		case SKILL_BUFFER_OVERFLOW: {
 			AudioController::buffer_overflow.play();
 			deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_PIERCING, id, combat_state);
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Buffer Overflow em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+				push_historic(", causando status STUN.\n");
+
 				apply_status_to_ally(target_index, SKILL_CONDITION_STUN, 1, combat_state);
 				push_skill_animation(false, target_index, id, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Buffer Overflow em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+				push_historic(", causando status STUN.\n");
+
 				apply_status_to_enemy(target_index, SKILL_CONDITION_STUN, 1, combat_state);
 				push_skill_animation(true, target_index, id, combat_state);
 			}
 		}break;
 		case SKILL_DDOS_ATTACK: {
 			AudioController::ddos_attack.play();
+			push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			push_historic(" utilizou DDos Attack em ");
+
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (!is_targetable_by_skill(SKILL_DDOS_ATTACK, i, combat_state))
 					continue;
 				if (from_enemy) {
+					push_historic(char_names[char_sel_state.selections[i]]);
+					push_historic(", causando status PARALYZE");
+
 					apply_status_to_ally(i, SKILL_CONDITION_PARALYZE, 3, combat_state);
 					push_skill_animation(false, i, id, combat_state);
 				} else {
+					push_historic(char_names[char_sel_state.enemy_selections[i]]);
+					push_historic(", causando status PARALYZE");
+
 					apply_status_to_enemy(i, SKILL_CONDITION_PARALYZE, 3, combat_state);
 					push_skill_animation(true, i, id, combat_state);
 				}
+				if (i + 2 < NUM_ENEMIES) {
+					push_historic(", ");
+				} else if (i + 1 < NUM_ENEMIES) {
+					push_historic(" e ");
+				}
 			}
+			push_historic(".\n");
 		}break;
 
 		// Ray Tracey
 		case SKILL_PARTICLE_RENDERING: {
 			AudioController::particle_rendering.play();
-			deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_NORMAL, id, combat_state);
+			s32 dmg = deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_NORMAL, id, combat_state);
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Particle Rendering em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+				if (dmg > 0) {
+					push_historic(", causando ");
+					push_historic(dmg);
+					push_historic(" de dano");
+				}
+				push_historic(" e ficando invulnerável a ataques físicos.\n");
+
 				gain_invulnerability_enemy(source_index, 1, SKILL_TYPE_PHYSICAL, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Particle Rendering em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+				if (dmg > 0) {
+					push_historic(", causando ");
+					push_historic(dmg);
+					push_historic(" de dano");
+				}
+				push_historic(" e ficando invulnerável a ataques físicos.\n");
+
 				gain_invulnerability_ally(source_index, 1, SKILL_TYPE_PHYSICAL, combat_state);
 			}
 		}break;
@@ -845,22 +1041,49 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 						gain_reflection_enemy(i, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				}
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Particle Rendering em ");
 				AudioController::diffuse_reflection.play();
 				for (int i = 0; i < NUM_ALLIES; ++i) {
 					if (is_targetable_by_skill(SKILL_DIFFUSE_REFLECTION, i, combat_state)) {
 						gain_reflection_ally(i, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 						apply_skill_status_to_ally(i, id, 1 * 2, combat_state);
 						push_skill_animation(false, i, id, combat_state);
+						if(from_enemy)
+							push_historic(char_names[char_sel_state.enemy_selections[i]]);
+						else
+							push_historic(char_names[char_sel_state.selections[i]]);
+						if (i + 2 < NUM_ALLIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ALLIES) {
+							push_historic(" e ");
+						}
 					}
 				}
 			}
 		}break;
 		case SKILL_DYNAMIC_FRUSTUM_ATTACK: {
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+			}
+			push_historic(" utilizou Particle Rendering em ");
 			AudioController::dynamic_frustum.play();
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				if (is_targetable_by_skill(SKILL_DYNAMIC_FRUSTUM_ATTACK, i, combat_state)) {
-					deal_damage_to_target(i, source_index, 35, SKILL_DMG_NORMAL, id, combat_state);
+					s32 dmg = deal_damage_to_target(i, source_index, 35, SKILL_DMG_NORMAL, id, combat_state);
 					push_skill_animation(!from_enemy, i, id, combat_state);
+					if (from_enemy) {
+						push_historic(char_names[char_sel_state.selections[i]]);
+					} else {
+						push_historic(char_names[char_sel_state.enemy_selections[i]]);
+					}
+					if (i + 2 < NUM_ENEMIES) {
+						push_historic(", ");
+					}else if (i + 1 < NUM_ENEMIES) {
+						push_historic(" e ");
+					}
 				}
 			}
 		}break;
@@ -871,16 +1094,39 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			int damage = 20;
 			int cumulative_damage = 5;
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Q-Punch em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+
 				int num_accumulated = combat_state->player.cumulative_skill[target_index][SKILL_Q_PUNCH];
 				cumulative_damage *= num_accumulated;
-				deal_damage_to_target(target_index, source_index, damage + cumulative_damage, SKILL_DMG_NORMAL, id, combat_state);
+				s32 dmg = deal_damage_to_target(target_index, source_index, damage + cumulative_damage, SKILL_DMG_NORMAL, id, combat_state);
+
+				if (dmg > 0) {
+					push_historic(", causando ");
+					push_historic(dmg);
+					push_historic(" de dano");
+				}
+				push_historic(".\n");
 				combat_state->player.cumulative_skill[target_index][SKILL_Q_PUNCH] += 1;
 				push_skill_animation(false, target_index, id, combat_state);
 				apply_skill_status_to_ally(target_index, id, INT_MAX, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Q-Punch em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+
 				int num_accumulated = combat_state->enemy.cumulative_skill[target_index][SKILL_Q_PUNCH];
 				cumulative_damage *= num_accumulated;
-				deal_damage_to_target(target_index, source_index, damage + cumulative_damage, SKILL_DMG_NORMAL, id, combat_state);
+				s32 dmg = deal_damage_to_target(target_index, source_index, damage + cumulative_damage, SKILL_DMG_NORMAL, id, combat_state);
+
+				if (dmg > 0) {
+					push_historic(", causando ");
+					push_historic(dmg);
+					push_historic(" de dano");
+				}
+				push_historic(".\n");
+
 				combat_state->enemy.cumulative_skill[target_index][SKILL_Q_PUNCH] += 1;
 				push_skill_animation(true, target_index, id, combat_state);
 				apply_skill_status_to_enemy(target_index, id, INT_MAX, combat_state);
@@ -1310,6 +1556,14 @@ void update_negative_status_enemy() {
 }
 
 void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
+	// Historico
+	if (historic_buffer_index > 0) {
+		gw.historico->setActive(true);
+		gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
+		gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index);
+		historic_buffer_index = 0;
+	}
+
 	for (int i = 0; i < SKILL_NUMBER; ++i) {
 		if(skill_state_enemy.cooldown_counter[i] > 0)
 			skill_state_enemy.cooldown_counter[i] --;
@@ -1356,6 +1610,14 @@ void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 }
 
 void update_skill_state_end_turn(Combat_State* combat_state) {
+	// Historico
+	if (historic_buffer_index > 0) {
+		gw.historico->setActive(true);
+		gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
+		gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index);
+		historic_buffer_index = 0;
+	}
+
 	for (int i = 0; i < SKILL_NUMBER; ++i) {
 		if(skill_state_ally.cooldown_counter[i] > 0)
 			skill_state_ally.cooldown_counter[i] --;

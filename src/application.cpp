@@ -2131,6 +2131,13 @@ void update_game_mode(double frametime)
 			layout_update_hp_animations(frametime);
 			layout_set_timer_percentage((r32)(turn_time / TURN_DURATION));
 
+			if (gw.historico_timer > 0) {
+				gw.historico_timer -= frametime;
+			} else {
+				gw.historico_timer = 0.0;
+				gw.historico->setActive(0);
+			}
+
 			// enemy targeting
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
 				const r32 animation_speed = 0.05f;

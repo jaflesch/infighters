@@ -419,6 +419,8 @@ struct Game_Windows {
 	linked::Window* combat_bottom_info;
 	linked::Window* timer_window;
 	linked::Window* player_name_window;
+	linked::Window* historico;
+	double historico_timer;
 
 	linked::WindowDiv* allies_indicator[NUM_ALLIES];
 	linked::WindowDiv* enemies_indicator[NUM_ENEMIES];
