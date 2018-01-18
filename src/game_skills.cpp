@@ -221,7 +221,7 @@ static bool is_ally_targetable_by_skill(Skill_ID skill, s32 ally_index, Combat_S
 	if (skill == SKILL_ROLLBACK || skill == SKILL_DUAL_SIMPLEX || skill == SKILL_OVERRIDE)
 		return true;
 	Skill_Target target = skill_need_targeting(skill, combat_state);
-	if (target.self)
+	if (target.ally || target.self)
 		return true;
 	return false;
 }
@@ -330,11 +330,15 @@ void layout_remove_all_status_from_ally(s32 target_index, Combat_State* combat_s
 	}
 }
 
+static void push_status_animation(bool enemy, int index, Skill_Condition cond, Combat_State* combat_state);
+
 void apply_status_to_enemy(s32 target_index, Skill_Condition status, s32 duration, Combat_State* combat_state) {
 	if (combat_state->enemy.hp[target_index] <= 0)
 		return;
 	combat_state->enemy.status[target_index] |= status;
 	combat_state->enemy.status_duration[target_index][status] = duration;
+
+	push_status_animation(true, target_index, status, combat_state);
 
 	// Layout
 	for (int i = 0; i < MAX_STATUS; ++i) {
@@ -375,6 +379,8 @@ void apply_status_to_ally(s32 target_index, Skill_Condition status, s32 duration
 		return;
 	combat_state->player.status[target_index] |= status;
 	combat_state->player.status_duration[target_index][status] = duration;
+
+	push_status_animation(false, target_index, status, combat_state);
 
 	for (int i = 0; i < MAX_STATUS; ++i) {
 		if (g_layout_status.ally_status[target_index][i] == status) {
@@ -596,6 +602,22 @@ static void push_skill_animation(bool enemy, int index, Skill_ID id, Combat_Stat
 	}
 }
 
+static void push_status_animation(bool enemy, int index, Skill_Condition cond, Combat_State* combat_state) {
+	for (int i = 0; i < MAX(NUM_ALLIES, NUM_ENEMIES); ++i) {
+		if (enemy) {
+			if (combat_state->enemy.receiving_status[index][i] == SKILL_CONDITION_NONE) {
+				combat_state->enemy.receiving_status[index][i] = cond;
+				return;
+			}
+		} else {
+			if (combat_state->player.receiving_status[index][i] == SKILL_CONDITION_NONE) {
+				combat_state->player.receiving_status[index][i] = cond;
+				return;
+			}
+		}
+	}
+}
+
 s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State* combat_state, bool from_enemy, bool on_enemy) {
 	Skill_State* skill_state = 0;
 	s32(*deal_damage_to_target)(int, int, int, Skill_Damage, Skill_ID, Combat_State*) = 0;// (void(*)(int, int, Skill_Damage, Skill_ID, Combat_State*))0;
@@ -617,7 +639,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 	// Counter
 	if (from_enemy) {
 		// if the counter comes from enemy, source_index gotta be checked against skill_counter_enemy
-		if (source_index == skill_counter_enemy.contradiction_target && target_index == skill_counter_enemy.contradiction_zero_index) {
+		if ((source_index == skill_counter_enemy.contradiction_target && target_index == skill_counter_enemy.contradiction_zero_index && !on_enemy) ||
+			(skill_state_ally.requiem_duration > 0 && target_index == skill_counter_enemy.contradiction_zero_index && !on_enemy))  {
 			// enemy source receives 20 dmg, do nothing and receive status paralyze
 			printf("enemy countered by contradiction!\n");
 			const int extra = 1;	// needed because it updates at the start of the player turn
@@ -650,7 +673,8 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}
 	} else {
 		// if the counter comes from ally, source_index gotta be checked against skill_counter_ally
-		if (source_index == skill_counter_ally.contradiction_target&& target_index == skill_counter_ally.contradiction_zero_index) {
+		if ((source_index == skill_counter_ally.contradiction_target && target_index == skill_counter_ally.contradiction_zero_index && on_enemy) ||
+			(skill_state_enemy.requiem_duration > 0 && target_index == skill_counter_ally.contradiction_zero_index && on_enemy)) {
 			// ally source receives 20 dmg, do nothing and receive status paralyze
 			printf("ally countered by contradiction!\n");
 			const int extra = 1;	// needed because it updates at the start of the player turn
@@ -702,21 +726,39 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_CONTRADICTION: {
 			// mark enemy but ally is marked when receiving this
+			int num_targets = (from_enemy) ? NUM_ENEMIES : NUM_ALLIES;
 			if (from_enemy) {
-				skill_counter_ally.contradiction_target = target_index;
-				skill_counter_ally.contradiction_zero_index = source_index;
+				if (skill_state->requiem_duration > 0) {
+					for (int i = 0; i < num_targets; ++i) {
+						skill_counter_ally.contradiction_target = i;
+						skill_counter_ally.contradiction_zero_index = source_index;
+					}
+				} else {
+					skill_counter_ally.contradiction_target = target_index;
+					skill_counter_ally.contradiction_zero_index = source_index;
+				}
 			} else {
 				AudioController::contradiction.play();
-				apply_skill_status_to_enemy(target_index, id, 2, combat_state);
-				skill_counter_enemy.contradiction_target = target_index;
-				skill_counter_enemy.contradiction_zero_index = source_index;
+				if (skill_state->requiem_duration > 0) {
+					for (int i = 0; i < num_targets; ++i) {
+						if (is_targetable_by_skill(id, i, combat_state)) {
+							apply_skill_status_to_enemy(i, id, 2, combat_state);
+							skill_counter_enemy.contradiction_target = i;
+							skill_counter_enemy.contradiction_zero_index = source_index;
+						}
+					}
+				} else {
+					apply_skill_status_to_enemy(target_index, id, 2, combat_state);
+					skill_counter_enemy.contradiction_target = target_index;
+					skill_counter_enemy.contradiction_zero_index = source_index;
+				}
 			}
 		}break;
 		case SKILL_REQUIEM_ZERO: {
 			skill_state->requiem_duration = 3 + 1;
 			if (!from_enemy) {
 				AudioController::requiem_zero.play();
-				apply_skill_status_to_ally(0, SKILL_REQUIEM_ZERO, 3 * 2 + 1, combat_state);
+				apply_skill_status_to_ally(source_index, SKILL_REQUIEM_ZERO, 3 * 2 + 1, combat_state);
 				//apply_skill_status_to_ally(source_index, id, 3 + 1, combat_state);
 				push_skill_animation(false, source_index, id, combat_state);
 			}
@@ -789,6 +831,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_PARTICLE_RENDERING: {
 			AudioController::particle_rendering.play();
 			deal_damage_to_target(target_index, source_index, 15, SKILL_DMG_NORMAL, id, combat_state);
+			push_skill_animation(!from_enemy, target_index, id, combat_state);
 			if (from_enemy) {
 				gain_invulnerability_enemy(source_index, 1, SKILL_TYPE_PHYSICAL, combat_state);
 			} else {
@@ -807,6 +850,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					if (is_targetable_by_skill(SKILL_DIFFUSE_REFLECTION, i, combat_state)) {
 						gain_reflection_ally(i, 1, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 						apply_skill_status_to_ally(i, id, 1 * 2, combat_state);
+						push_skill_animation(false, i, id, combat_state);
 					}
 				}
 			}
@@ -814,8 +858,10 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		case SKILL_DYNAMIC_FRUSTUM_ATTACK: {
 			AudioController::dynamic_frustum.play();
 			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				if (is_targetable_by_skill(SKILL_DYNAMIC_FRUSTUM_ATTACK, i, combat_state))
+				if (is_targetable_by_skill(SKILL_DYNAMIC_FRUSTUM_ATTACK, i, combat_state)) {
 					deal_damage_to_target(i, source_index, 35, SKILL_DMG_NORMAL, id, combat_state);
+					push_skill_animation(!from_enemy, i, id, combat_state);
+				}
 			}
 		}break;
 
@@ -945,10 +991,17 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_TURING_MACHINE: {
 			AudioController::turing_machine.play();
-			for (int i = 0; i < NUM_ENEMIES; ++i) {
-				if (is_targetable_by_skill(SKILL_TURING_MACHINE, i, combat_state)) {
+			if (from_enemy) {
+				for (int i = 0; i < NUM_ALLIES; ++i) {
 					deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
 					push_skill_animation(!from_enemy, i, id, combat_state);
+				}
+			} else {
+				for (int i = 0; i < NUM_ENEMIES; ++i) {
+					if (is_targetable_by_skill(SKILL_TURING_MACHINE, i, combat_state)) {
+						deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
+						push_skill_animation(!from_enemy, i, id, combat_state);
+					}
 				}
 			}
 		}break;
@@ -1015,13 +1068,16 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			if (from_enemy) {
 				gain_reduction_enemy(40, 4, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				apply_skill_status_to_enemy(source_index, id, 4 * 2, combat_state);
+				push_skill_animation(true, source_index, id, combat_state);
 			} else {
 				gain_reduction_ally(40, 4, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				apply_skill_status_to_ally(source_index, id, 4 * 2, combat_state);
+				push_skill_animation(false, source_index, id, combat_state);
 			}
 		}break;
 		case SKILL_CTRL: {
 			AudioController::ctrl.play();
+			push_skill_animation(!from_enemy, target_index, id, combat_state);
 			if (from_enemy) {
 				apply_skill_status_to_ally(target_index, id, 2 * 2 + 1, combat_state);
 			} else {
@@ -1030,6 +1086,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_DELETE: {
 			AudioController::del.play();
+			push_skill_animation(!from_enemy, target_index, id, combat_state);
 			if (from_enemy) {
 				layout_set_ally_hp(target_index, combat_state->player.max_hp[target_index], 0);
 				layout_ally_die(target_index);
@@ -1126,14 +1183,13 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		// New
 		case SKILL_SPRINT_BURST: {
 			AudioController::sprint_burst.play();
+			push_skill_animation(!from_enemy, target_index, id, combat_state);
 			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
 			if (from_enemy) {
 				gain_reduction_enemy(10, 1, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
-				//combat_state->player.receiving_skill[target_index] = id;
 				apply_skill_status_to_enemy(source_index, id, 1 * 2, combat_state);
 			} else {
 				gain_reduction_ally(10, 1, false, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
-				//combat_state->enemy.receiving_skill[target_index] = id;
 				apply_skill_status_to_ally(source_index, id, 1 * 2, combat_state);
 			}
 		}break;
@@ -1142,6 +1198,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 				skill_counter_ally.inheritante_target = target_index;
 				skill_counter_ally.inheritance_new_index = source_index;
 			} else {
+				push_skill_animation(true, target_index, id, combat_state);
 				AudioController::inheritance.play();
 				skill_counter_enemy.inheritante_target = target_index;
 				skill_counter_enemy.inheritance_new_index = source_index;
@@ -1149,6 +1206,7 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 		}break;
 		case SKILL_OVERRIDE: {
 			AudioController::override_.play();
+			push_skill_animation(from_enemy, target_index, id, combat_state);
 			u32 status = SKILL_CONDITION_NORMAL | SKILL_CONDITION_BURN | SKILL_CONDITION_FREEZE | SKILL_CONDITION_POISON |
 				SKILL_CONDITION_PARALYZE | SKILL_CONDITION_SLEEP | SKILL_CONDITION_STUN;
 			if (from_enemy) {

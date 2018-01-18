@@ -1104,8 +1104,35 @@ static void init_animation_indices(Skill_ID skill) {
 	}
 }
 
+static void init_status_animation_indices(Skill_Condition skill) {
+	int maxx = gw.status_animations[skill]->m_num_cols;
+	int maxy = gw.status_animations[skill]->m_num_rows;
+	int i = 0;
+	for (int y = maxy - 1; y >= 0; --y) {
+		for (int x = 0; x < maxx; ++x) {
+			gw.status_animations[skill]->state_offsets[i] = hm::vec2(x, y);
+			++i;
+			if (i >= gw.status_animations[skill]->m_num_indices)
+				return;
+		}
+	}
+}
+
 void init_animations() {
 	gw.animation = new Mesh(new Quad(hm::vec3(0, 0, 0), 160.0f, 160.0f, 1, 0));
+
+	gw.status_animations[SKILL_CONDITION_BURN] = new Animation("../../../res/status_animations/burn.png", 3, 5, 15, 15);
+	init_status_animation_indices(SKILL_CONDITION_BURN);
+	gw.status_animations[SKILL_CONDITION_FREEZE] = new Animation("../../../res/status_animations/frozen.png", 3, 5, 13, 17);
+	init_status_animation_indices(SKILL_CONDITION_FREEZE);
+	gw.status_animations[SKILL_CONDITION_PARALYZE] = new Animation("../../../res/status_animations/paralyze.png", 3, 5, 15, 15);
+	init_status_animation_indices(SKILL_CONDITION_PARALYZE);
+	gw.status_animations[SKILL_CONDITION_POISON] = new Animation("../../../res/status_animations/poison.png", 3, 5, 14, 15);
+	init_status_animation_indices(SKILL_CONDITION_POISON);
+	gw.status_animations[SKILL_CONDITION_SLEEP] = new Animation("../../../res/status_animations/sleep.png", 3, 5, 14, 15);
+	init_status_animation_indices(SKILL_CONDITION_SLEEP);
+	gw.status_animations[SKILL_CONDITION_STUN] = new Animation("../../../res/status_animations/stun.png", 1, 5, 5, 20);
+	init_status_animation_indices(SKILL_CONDITION_STUN);
 
 	// Zer0
 	gw.skills_animations[SKILL_FALSE_RUSH] = new Animation("../../../res/skills_animations/zero/false_rush.png", 3, 5, 15, 15);
@@ -1139,6 +1166,14 @@ void init_animations() {
 	init_animation_indices(SKILL_ENCRYPTION);
 
 	// Ray Tracey
+	gw.skills_animations[SKILL_PARTICLE_RENDERING] = new Animation("../../../res/skills_animations/ray_tracey/particle_rendering.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_PARTICLE_RENDERING);
+	gw.skills_animations[SKILL_DIFFUSE_REFLECTION] = new Animation("../../../res/skills_animations/ray_tracey/diffuse_reflection.png", 3, 5, 15, 10);
+	init_animation_indices(SKILL_DIFFUSE_REFLECTION);
+	gw.skills_animations[SKILL_DYNAMIC_FRUSTUM_ATTACK] = new Animation("../../../res/skills_animations/ray_tracey/dynamic_frustum.png", 2, 5, 10, 18);
+	init_animation_indices(SKILL_DYNAMIC_FRUSTUM_ATTACK);
+	gw.skills_animations[SKILL_RASTERIZATION] = new Animation("../../../res/skills_animations/ray_tracey/rasterization.png", 1, 5, 5, 25);
+	init_animation_indices(SKILL_RASTERIZATION);
 
 	// A-Star
 	gw.skills_animations[SKILL_Q_PUNCH] = new Animation("../../../res/skills_animations/astar/q_punch.png", 1, 3, 3, 30);
@@ -1181,6 +1216,14 @@ void init_animations() {
 	init_animation_indices(SKILL_ROLLFORWARD);
 
 	// Qwerty
+	gw.skills_animations[SKILL_ALT] = new Animation("../../../res/skills_animations/qwerty/alt.png", 2, 5, 8, 20);
+	init_animation_indices(SKILL_ALT);
+	gw.skills_animations[SKILL_CTRL] = new Animation("../../../res/skills_animations/qwerty/ctrl.png", 2, 5, 10, 15);
+	init_animation_indices(SKILL_CTRL);
+	gw.skills_animations[SKILL_DELETE] = new Animation("../../../res/skills_animations/qwerty/del.png", 3, 5, 11, 18);
+	init_animation_indices(SKILL_DELETE);
+	gw.skills_animations[SKILL_ESC] = new Animation("../../../res/skills_animations/qwerty/esc.png", 1, 5, 3, 30);
+	init_animation_indices(SKILL_ESC);
 
 	// Big 0
 	gw.skills_animations[SKILL_BEST_BOUND_FIST] = new Animation("../../../res/skills_animations/big_o/best_bound_fist.png", 2, 5, 9, 20);
@@ -1193,6 +1236,14 @@ void init_animations() {
 	init_animation_indices(SKILL_KNAPSACK_HIDEOUT);
 
 	// New
+	gw.skills_animations[SKILL_SPRINT_BURST] = new Animation("../../../res/skills_animations/new/sprint_burst.png", 2, 5, 10, 20);
+	init_animation_indices(SKILL_BEST_BOUND_FIST);
+	gw.skills_animations[SKILL_INHERITANCE] = new Animation("../../../res/skills_animations/new/inheritance.png", 4, 5, 16, 8);
+	init_animation_indices(SKILL_INHERITANCE);
+	gw.skills_animations[SKILL_OVERRIDE] = new Animation("../../../res/skills_animations/new/override.png", 4, 5, 20, 6);
+	init_animation_indices(SKILL_OVERRIDE);
+	gw.skills_animations[SKILL_POLIMORPHISM] = new Animation("../../../res/skills_animations/new/polymorphism.png", 3, 5, 15, 10);
+	init_animation_indices(SKILL_POLIMORPHISM);
 
 	// Clockboy
 	gw.skills_animations[SKILL_CLOCK_PULSE] = new Animation("../../../res/skills_animations/clockboy/clock_pulse.png", 2, 5, 9, 15);

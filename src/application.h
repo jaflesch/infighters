@@ -341,6 +341,8 @@ struct Player {
 
 	// Skill animation
 	Skill_ID receiving_skill[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
+	// Status animation
+	Skill_Condition receiving_status[NUM_ALLIES][MAX(NUM_ALLIES, NUM_ENEMIES)];
 };
 
 struct Combat_State {
@@ -426,6 +428,7 @@ struct Game_Windows {
 	Texture* bg_normal;
 	Mesh* animation;
 	Animation* skills_animations[NUM_SKILLS * NUM_CHARS];
+	Animation* status_animations[SKILL_CONDITION_NUMBER];
 
 	// intro window
 	linked::Window* intro_logo;

@@ -107,7 +107,7 @@ char* skill_names[NUM_CHARS * NUM_SKILLS] = {
 	"CLOCK PULSE",
 	"PIPELINE",
 	"OVERCLOCK",
-	"BRANCH DAMAGE"
+	"BRANCH PREDICTION"
 };
 
 int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
@@ -169,7 +169,7 @@ int skill_names_length[sizeof(skill_names) / sizeof(char*)] = {
 	sizeof "CLOCK PULSE",
 	sizeof "PIPELINE",
 	sizeof "OVERCLOCK",
-	sizeof "BRANCH DAMAGE"
+	sizeof "BRANCH PREDICTION"
 };
 
 char** skill_desc = 0;
@@ -1581,8 +1581,10 @@ void init_combat_state() {
 		combat_state.enemy.char_id[i] = (Character_ID)index;
 		combat_state.enemy.max_hp[i] = 100;
 		combat_state.enemy.hp[i] = 100;
-		for(int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j)
+		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j) {
 			combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
+			combat_state.enemy.receiving_status[i][j] = SKILL_CONDITION_NONE;
+		}
 	}
 	for (int i = 0; i < NUM_ALLIES; ++i) {
 		int index = char_sel_state.selections[i];
@@ -1592,8 +1594,10 @@ void init_combat_state() {
 		combat_state.player.hp[i] = 100;
 		combat_state.player.targeting = false;
 		combat_state.player.targets[i].skill_used = SKILL_NONE;
-		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j)
+		for (int j = 0; j < MAX(NUM_ALLIES, NUM_ENEMIES); ++j) {
 			combat_state.player.receiving_skill[i][j] = SKILL_NONE;
+			combat_state.player.receiving_status[i][j] = SKILL_CONDITION_NONE;
+		}
 		for(int k = 0; k < NUM_ALLIES; ++k)
 			combat_state.player.targets[i].ally_target_index[k] = -1;
 		for (int k = 0; k < NUM_ALLIES; ++k)
@@ -2153,6 +2157,21 @@ void render_overlay(double frametime) {
 				}
 				return;
 			}
+			Skill_Condition recv_condition = combat_state.player.receiving_status[i][j];
+			if (recv_condition != SKILL_CONDITION_NONE) {
+				if (gw.status_animations[recv_condition] == 0) {
+					combat_state.player.receiving_status[i][j] = SKILL_CONDITION_NONE;
+					return;
+				}
+				hm::vec2 pos = gw.allies[i]->getPosition();
+				linked::Window::m_animationShader->update(pos, gw.status_animations[recv_condition]);
+				gw.animation->render();
+				bool ended = gw.status_animations[recv_condition]->animate();
+				if (ended) {
+					combat_state.player.receiving_status[i][j] = SKILL_CONDITION_NONE;
+				}
+				return;
+			}
 		}
 		
 	}
@@ -2170,6 +2189,21 @@ void render_overlay(double frametime) {
 				bool ended = gw.skills_animations[receiving]->animate();
 				if (ended) {
 					combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
+				}
+				return;
+			}
+			Skill_Condition recv_condition = combat_state.enemy.receiving_status[i][j];
+			if (recv_condition != SKILL_CONDITION_NONE) {
+				if (gw.status_animations[recv_condition] == 0) {
+					combat_state.enemy.receiving_status[i][j] = SKILL_CONDITION_NONE;
+					return;
+				}
+				hm::vec2 pos = gw.enemies[i]->getPosition();
+				linked::Window::m_animationShader->update(pos, gw.status_animations[recv_condition]);
+				gw.animation->render();
+				bool ended = gw.status_animations[recv_condition]->animate();
+				if (ended) {
+					combat_state.enemy.receiving_status[i][j] = SKILL_CONDITION_NONE;
 				}
 				return;
 			}
