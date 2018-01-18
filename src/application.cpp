@@ -799,6 +799,8 @@ static GameState ggs = {};
 static Char_Selection_State char_sel_state = {};
 extern Combat_State combat_state = {};
 static Game_Windows gw = {};
+static Settings settings = {};
+static Settings temp_settings = {};
 
 #include "game_skills.cpp"
 
@@ -956,6 +958,168 @@ static void button_combat_start_mode(void* arg)
 	change_game_mode(MODE_COMBAT);
 }
 
+static void toggle_language() {
+	if (gw.language == LANGUAGE_EN) {
+		char_descriptions = char_descriptions_pt;
+		char_descriptions_length = char_descriptions_pt_length;
+
+		skill_desc = skill_desc_pt;
+		skill_desc_length = skill_desc_pt_length;
+		gw.language = LANGUAGE_PT;
+	}
+	else {
+		char_descriptions = char_descriptions_en;
+		char_descriptions_length = char_descriptions_en_length;
+
+		skill_desc = skill_desc_en;
+		skill_desc_length = skill_desc_en_length;
+		gw.language = LANGUAGE_EN;
+	}
+}
+
+void button_arrows_settings(void* arg) {
+	const int left_idioma    = 0;
+	const int left_sfx       = 2;
+	const int left_bgm       = 4;
+	const int left_animation = 6;
+
+	const int right_idioma    = 1;
+	const int right_sfx       = 3;
+	const int right_bgm       = 5;
+	const int right_animation = 7;
+
+	int id = ((linked::Button_Info*)arg)->id;
+	AudioController::navigationAudio.play();
+	switch (id) {
+		case right_idioma:	
+		case left_idioma: {
+			u8* text = gw.settings_ui->idioma_value->getText();
+			if (gw.language == LANGUAGE_PT) {
+				strcpy((char*)text, "ENGLISH");	
+				gw.settings_ui->idioma_value->setTextLength(sizeof("ENGLISH"));
+			} else if(gw.language == LANGUAGE_EN) {
+				strcpy((char*)text, "PORTUGUÊS");
+				gw.settings_ui->idioma_value->setTextLength(sizeof("PORTUGUÊS"));
+			}
+			toggle_language();
+			temp_settings.language = gw.language;
+		}break;
+		case left_sfx: {
+			temp_settings.volume_sfx -= 5;
+			if (temp_settings.volume_sfx < 0)
+				temp_settings.volume_sfx = 0;
+			AudioController::setSoundVolume(temp_settings.volume_sfx);
+			u8* text = gw.settings_ui->vol_sfx_value->getText();
+			int n = s32_to_str_base10(temp_settings.volume_sfx, (char*)text);
+			gw.settings_ui->vol_sfx_value->setTextLength(n + 1);
+		}break;
+		case left_bgm: {
+			temp_settings.volume_bmg -= 5;
+			if (temp_settings.volume_bmg < 0)
+				temp_settings.volume_bmg = 0;
+			AudioController::setMusicVolume(temp_settings.volume_bmg);
+			u8* text = gw.settings_ui->vol_bmg_value->getText();
+			int n = s32_to_str_base10(temp_settings.volume_bmg, (char*)text);
+			gw.settings_ui->vol_bmg_value->setTextLength(n + 1);
+		}break;
+
+		case right_sfx: {
+			temp_settings.volume_sfx += 5;
+			if (temp_settings.volume_sfx > 100)
+				temp_settings.volume_sfx = 100;
+			AudioController::setSoundVolume(temp_settings.volume_sfx);
+			u8* text = gw.settings_ui->vol_sfx_value->getText();
+			int n = s32_to_str_base10(temp_settings.volume_sfx, (char*)text);
+			gw.settings_ui->vol_sfx_value->setTextLength(n + 1);
+		}break;
+		case right_bgm: {
+			temp_settings.volume_bmg += 5;
+			if (temp_settings.volume_bmg > 100)
+				temp_settings.volume_bmg = 100;
+			AudioController::setMusicVolume(temp_settings.volume_bmg);
+			u8* text = gw.settings_ui->vol_bmg_value->getText();
+			int n = s32_to_str_base10(temp_settings.volume_bmg, (char*)text);
+			gw.settings_ui->vol_bmg_value->setTextLength(n + 1);
+		}break;
+
+		case left_animation:
+		case right_animation: {
+			u8* text = gw.settings_ui->animations_value->getText();
+			if (gw.language == LANGUAGE_PT) {
+				if (temp_settings.animations) {
+					strcpy((char*)text, "INATIVO");
+					gw.settings_ui->animations_value->setTextLength(sizeof("INATIVO"));
+				} else {
+					strcpy((char*)text, "ATIVO");
+					gw.settings_ui->animations_value->setTextLength(sizeof("ATIVO"));
+				}
+			} else if (gw.language == LANGUAGE_EN) {
+				if (temp_settings.animations) {
+					strcpy((char*)text, "INACTIVE");
+					gw.settings_ui->animations_value->setTextLength(sizeof("INACTIVE"));
+				} else {
+					strcpy((char*)text, "ACTIVE");
+					gw.settings_ui->animations_value->setTextLength(sizeof("ACTIVE"));
+				}
+			}
+			temp_settings.animations = !temp_settings.animations;
+		}break;
+
+	}
+}
+
+void button_settings_save(void* arg) {
+	settings = temp_settings;
+	change_game_mode(ggs.last_mode);
+}
+
+void button_settings_cancel(void* arg) {
+	AudioController::setMusicVolume(settings.volume_bmg);
+	AudioController::setSoundVolume(settings.volume_sfx);
+
+	u8* text = gw.settings_ui->vol_sfx_value->getText();
+	int n = s32_to_str_base10(settings.volume_sfx, (char*)text);
+	gw.settings_ui->vol_sfx_value->setTextLength(n + 1);
+	text = gw.settings_ui->vol_bmg_value->getText();
+	n = s32_to_str_base10(settings.volume_bmg, (char*)text);
+	gw.settings_ui->vol_bmg_value->setTextLength(n + 1);
+
+	if(settings.language != gw.language){
+		u8* text = gw.settings_ui->idioma_value->getText();
+		if (gw.language == LANGUAGE_PT) {
+			strcpy((char*)text, "ENGLISH");
+			gw.settings_ui->idioma_value->setTextLength(sizeof("ENGLISH"));
+		} else if (gw.language == LANGUAGE_EN) {
+			strcpy((char*)text, "PORTUGUÊS");
+			gw.settings_ui->idioma_value->setTextLength(sizeof("PORTUGUÊS"));
+		}
+		toggle_language();
+	}
+
+	if (temp_settings.animations != settings.animations) {
+		u8* text = gw.settings_ui->animations_value->getText();
+		if (gw.language == LANGUAGE_PT) {
+			if (temp_settings.animations) {
+				strcpy((char*)text, "INATIVO");
+				gw.settings_ui->animations_value->setTextLength(sizeof("INATIVO"));
+			} else {
+				strcpy((char*)text, "ATIVO");
+				gw.settings_ui->animations_value->setTextLength(sizeof("ATIVO"));
+			}
+		} else if (gw.language == LANGUAGE_EN) {
+			if (temp_settings.animations) {
+				strcpy((char*)text, "INACTIVE");
+				gw.settings_ui->animations_value->setTextLength(sizeof("INACTIVE"));
+			} else {
+				strcpy((char*)text, "ACTIVE");
+				gw.settings_ui->animations_value->setTextLength(sizeof("ACTIVE"));
+			}
+		}
+		settings.animations = !settings.animations;
+	}
+	change_game_mode(ggs.last_mode);
+}
+
 static void button_callback_exchange_orb_cancel(void* arg) {
 	printf("Exchange Cancel!\n");
 	gw.exchange_orb_ui->window->setActive(false);
@@ -996,6 +1160,7 @@ static void button_callback_exchange_orb_confirm(void* arg) {
 	layout_update_cooldowns(true);
 }
 static void button_callback_exchange_orb_arrow_left(void* arg) {
+	AudioController::navigationAudio.play();
 	printf("Exchange Arrow Left\n");
 	int id = ((linked::Button_Info*)arg)->id;
 
@@ -1030,6 +1195,7 @@ static void button_callback_exchange_orb_arrow_left(void* arg) {
 	}
 }
 static void button_callback_exchange_orb_arrow_right(void* arg) {
+	AudioController::navigationAudio.play();
 	printf("Exchange Arrow Right\n");
 	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
 
@@ -1098,6 +1264,7 @@ static void button_callback_exchange_orb(void* arg) {
 }
 
 static void button_callback_sacrifice_orb_arrow_left(void* arg) {
+	AudioController::navigationAudio.play();
 	printf("Sacrifice Arrow Left\n");
 	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
 
@@ -1125,6 +1292,7 @@ static void button_callback_sacrifice_orb_arrow_left(void* arg) {
 	}
 }
 static void button_callback_sacrifice_orb_arrow_right(void* arg) {
+	AudioController::navigationAudio.play();
 	printf("Sacrifice Arrow Right\n");
 	Orb_ID id = (Orb_ID)((linked::Button_Info*)arg)->id;
 	// the button was really active?
@@ -1159,6 +1327,7 @@ static void button_callback_sacrifice_orb_arrow_right(void* arg) {
 	gw.sacrifice_orb_ui->orb_number_label->getText()[0] = combat_state.total_null_orbs_in_temp_use - sum - 1 + 0x30;
 }
 static void button_callback_sacrifice_orb_cancel(void* arg) {
+	AudioController::cancelAudio.play();
 	gw.sacrifice_orb_ui->window->setActive(false);
 	// Put the skills used in place
 	for (s32 i = 0; i < NUM_ALLIES; ++i) {
@@ -1166,6 +1335,7 @@ static void button_callback_sacrifice_orb_cancel(void* arg) {
 	}
 }
 static void button_callback_sacrifice_orb_endturn(void* arg) {
+	AudioController::navigationAudio.play();
 	s32 sum = 0;
 	for (s32 i = 0; i < ORB_NUMBER - 1; ++i) {
 		sum += combat_state.sacrifice_orbs_state.orb_right_amount[i];
@@ -1656,12 +1826,17 @@ void init_application()
 	ggs.mode = MODE_NONE;
 	ggs.last_mode = MODE_NONE;
 
-	AudioController::introAudio.setVolume(10);
-	AudioController::charselectAudio.setVolume(5);
-	AudioController::confirmAudio.setVolume(20);
-	AudioController::cancelAudio.setVolume(20);
-	AudioController::navigationAudio.setVolume(30);
-	AudioController::combat1Audio.setVolume(10);
+	settings.volume_bmg = 100;
+	settings.volume_sfx = 100;
+	settings.animations = true;
+	temp_settings = settings;
+
+	AudioController::introAudio.setVolume(100);
+	AudioController::charselectAudio.setVolume(100);
+	AudioController::confirmAudio.setVolume(100);
+	AudioController::cancelAudio.setVolume(100);
+	AudioController::navigationAudio.setVolume(100);
+	AudioController::combat1Audio.setVolume(100);
 
 	// background @temporary
 	linked::Window* bgwindow = new linked::Window(window_info.width, window_info.height, hm::vec2(0, 0), hm::vec4(0, 0, 0, 0.5f), 0, 0, W_UNFOCUSABLE);
@@ -1672,6 +1847,8 @@ void init_application()
 	bgdiv->setBackgroundTexture(gw.bg_logo);
 	gw.bgwindow = bgwindow;
 
+	
+
 	char_sel_state.enemy_selections[0] = CHAR_BIG_O;
 	char_sel_state.enemy_selections[1] = CHAR_ONE;
 	char_sel_state.enemy_selections[2] = CHAR_ZERO;
@@ -1680,6 +1857,7 @@ void init_application()
 	init_char_selection_mode();
 	init_char_information_mode();
 	init_combat_mode();
+	init_settings_mode();
 
 #if 1
 	for(int i = 0; i < ORB_NUMBER; ++i)
@@ -1709,11 +1887,11 @@ void init_application()
 	layout_change_orb_amount(ORB_ALL, 1);
 #endif
 
-	char_descriptions = char_descriptions_en;
-	char_descriptions_length = char_descriptions_en_length;
+	char_descriptions = char_descriptions_pt;
+	char_descriptions_length = char_descriptions_pt_length;
 
-	skill_desc = skill_desc_en;
-	skill_desc_length = skill_desc_en_length;
+	skill_desc = skill_desc_pt;
+	skill_desc_length = skill_desc_pt_length;
 
 	// init console chat
 	chat_window = chat.init_chat();
@@ -2082,6 +2260,7 @@ void change_game_mode(Game_Mode mode)
 		case MODE_CHAR_SELECT: {
 			if (ggs.last_mode != MODE_CHAR_INFO) {
 				AudioController::pauseAllMusic();
+				AudioController::charselectAudio.rewind();
 				AudioController::charselectAudio.play();
 			}
 			gw.char_selected_window->setActive(true);
@@ -2099,12 +2278,26 @@ void change_game_mode(Game_Mode mode)
 			gw.char_info_window_bot->setActive(true);
 			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_normal);
 		}break;
+		case MODE_SETTINGS: {
+			if (ggs.last_mode != MODE_CHAR_SELECT) {
+				AudioController::pauseAllMusic();
+				AudioController::charselectAudio.rewind();
+				AudioController::charselectAudio.play();
+			}
+			temp_settings = settings;
+			temp_settings.language = gw.language;
+			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_settings);
+			gw.settings_window->setActive(true);
+		} break;
 		case MODE_COMBAT: {
 			AudioController::pauseAllMusic();
 			AudioController::combat1Audio.rewind();
 			AudioController::combat1Audio.play();
 			gw.bgwindow->divs[0]->setBackgroundTexture(gw.bg_normal);
-			init_combat_state();
+
+			if (ggs.last_mode != MODE_SETTINGS)
+				init_combat_state();
+
 			for (int i = 0; i < NUM_ALLIES; ++i) {
 				int index = char_sel_state.selections[i];
 				Texture* t = char_textures[index];
@@ -2150,7 +2343,8 @@ void render_overlay(double frametime) {
 				}
 				hm::vec2 pos = gw.allies[i]->getPosition();
 				linked::Window::m_animationShader->update(pos, gw.skills_animations[receiving]);
-				gw.animation->render();
+				if(settings.animations)
+					gw.animation->render();
 				bool ended = gw.skills_animations[receiving]->animate();
 				if (ended) {
 					combat_state.player.receiving_skill[i][j] = SKILL_NONE;
@@ -2165,7 +2359,8 @@ void render_overlay(double frametime) {
 				}
 				hm::vec2 pos = gw.allies[i]->getPosition();
 				linked::Window::m_animationShader->update(pos, gw.status_animations[recv_condition]);
-				gw.animation->render();
+				if (settings.animations)
+					gw.animation->render();
 				bool ended = gw.status_animations[recv_condition]->animate();
 				if (ended) {
 					combat_state.player.receiving_status[i][j] = SKILL_CONDITION_NONE;
@@ -2185,7 +2380,8 @@ void render_overlay(double frametime) {
 				}
 				hm::vec2 pos = gw.enemies[i]->getPosition();
 				linked::Window::m_animationShader->update(pos, gw.skills_animations[receiving]);
-				gw.animation->render();
+				if (settings.animations)
+					gw.animation->render();
 				bool ended = gw.skills_animations[receiving]->animate();
 				if (ended) {
 					combat_state.enemy.receiving_skill[i][j] = SKILL_NONE;
@@ -2200,7 +2396,8 @@ void render_overlay(double frametime) {
 				}
 				hm::vec2 pos = gw.enemies[i]->getPosition();
 				linked::Window::m_animationShader->update(pos, gw.status_animations[recv_condition]);
-				gw.animation->render();
+				if (settings.animations)
+					gw.animation->render();
 				bool ended = gw.status_animations[recv_condition]->animate();
 				if (ended) {
 					combat_state.enemy.receiving_status[i][j] = SKILL_CONDITION_NONE;
@@ -2234,7 +2431,15 @@ void input()
 	}
 	if (keyboard_state.key_event[KEY_ESCAPE]) {
 		keyboard_state.key_event[KEY_ESCAPE] = false;
-		change_game_mode(ggs.last_mode);
+		if (ggs.mode == MODE_COMBAT) {
+			change_game_mode(MODE_SETTINGS);
+		} else {
+			change_game_mode(ggs.last_mode);
+		}
+	}
+	if (keyboard_state.key_event[VK_F5]) {
+		keyboard_state.key_event[VK_F5] = false;
+		change_game_mode(MODE_SETTINGS);
 	}
 
 	if (keyboard_state.key_event[KEY_SPACE]) {
@@ -2245,6 +2450,7 @@ void input()
 			change_game_mode(MODE_CHAR_INFO);
 		}
 	}
+
 	if (keyboard_state.key_event[VK_F2]) {
 		keyboard_state.key_event[VK_F2] = false;
 		end_turn();
@@ -2252,21 +2458,7 @@ void input()
 	if (keyboard_state.key_event[VK_F3]) {
 		keyboard_state.key_event[VK_F3] = false;
 
-		if (gw.language == LANGUAGE_EN) {
-			char_descriptions = char_descriptions_pt;
-			char_descriptions_length = char_descriptions_pt_length;
-
-			skill_desc = skill_desc_pt;
-			skill_desc_length = skill_desc_pt_length;
-			gw.language = LANGUAGE_PT;
-		} else {
-			char_descriptions = char_descriptions_en;
-			char_descriptions_length = char_descriptions_en_length;
-
-			skill_desc = skill_desc_en;
-			skill_desc_length = skill_desc_en_length;
-			gw.language = LANGUAGE_EN;
-		}
+		toggle_language();
 	}
 
 	static int turn = 0;

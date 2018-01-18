@@ -9,74 +9,17 @@
 #include "Audio/AudioController.h"
 #include "WindowApi/Animation.h"
 
-struct Camera {
-	mat4 view_matrix;
-	mat4 projection_matrix;
-
-	hm::vec3 cam_position;
-	hm::vec3 cam_orientation;
-	hm::vec3 cam_up;
-
-	bool locked;
-
-	float current_speed;
-	float current_turn_speed;
-
-	float fov;
-	float far_plane;
-	float near_plane;
-
-	void set_cam_position(hm::vec3 newpos);
-	void set_cam_orientation(hm::vec3 newori);
-
-	void move_forward_and_back(float amt);
-	void move_sideways(float amt);
-	void rotate_x(float amt);
-	void rotate_y(float amt);
-};
-
-
-struct Vertex3D {
-	float pos[3];
-	float normal[3];
-	float tex[2];
-};
-
-class Texture;
-
-struct IndexedModel3D {
-	GLuint vao;
-	GLuint vbo;
-	GLuint ebo;
-
-	Vertex3D* vertices;
-	u16* indices;
-
-	int num_vertices;
-	int num_indices;
-
-	bool is_colliding;
-	int colliding_with_index = -1;
-
-	hm::vec3 position;
-	hm::vec3 last_pos;
-	hm::vec3 orientation;
-	Quaternion rotation = Quaternion(0,0,0,1);
-
-	float scale;
-	mat4 model_matrix;
-
-	bool simulating = false;
-	bool static_object = false;
-	hm::vec3 velocity = hm::vec3(0.0f, 0.0f, 0.0f);
-	float time = 0.0f;
-	Texture* texture;
-};
 
 void init_application();
 void update_and_render(double frametime);
 void render_overlay(double frametime);
 void input();
+
+enum Language {
+	LANGUAGE_PT = 0,
+	LANGUAGE_EN,
+	LANGUAGE_NUMBER
+};
 
 enum Orb_ID {
 	ORB_NONE = -1,
@@ -88,7 +31,6 @@ enum Orb_ID {
 	ORB_NUMBER,
 	ORB_ALL,
 };
-
 
 enum Skill_Type {
 	SKILL_TYPE_NONE     = 0,
@@ -241,6 +183,7 @@ enum Game_Mode {
 	MODE_CHAR_SELECT,
 	MODE_CHAR_INFO,
 	MODE_COMBAT,
+	MODE_SETTINGS,
 };
 
 // Game layout functions
@@ -314,6 +257,13 @@ struct Target {
 	s32				enemy_target_index[NUM_ENEMIES]; // -1 if none
 	linked::Window* ally_target_image[NUM_ALLIES];
 	linked::Window* enemy_target_image[NUM_ENEMIES];
+};
+
+struct Settings {
+	s32 volume_sfx;
+	s32 volume_bmg;
+	bool animations;
+	Language language;
 };
 
 struct Player {
@@ -411,10 +361,22 @@ struct Sacrifice_Orbs_UI {
 	Texture* empty_skill_texture;
 };
 
-enum Language {
-	LANGUAGE_PT = 0,
-	LANGUAGE_EN,
-	LANGUAGE_NUMBER
+struct Settings_UI {
+	linked::Window* settings_window;
+	linked::WindowDiv* settings_div;
+
+	linked::Label* idioma;			// LANGUAGE / IDIOMA
+	linked::Label* vol_sfx;
+	linked::Label* vol_bmg;
+	linked::Label* animations;		// ANIMATIONS / ANIMAÇÕES
+
+	linked::Label* idioma_value;	// ENGLISH / PORTUGUÊS
+	linked::Label* vol_sfx_value;	// 0 - 100
+	linked::Label* vol_bmg_value;	// 0 - 100
+	linked::Label* animations_value;// ACTIVE / INACTIVE / ATIVO / INATIVO
+
+	linked::Button* confirm;
+	linked::Button* cancel;
 };
 
 struct Game_Windows {
@@ -424,11 +386,15 @@ struct Game_Windows {
 	u32 framebuffer_texture;
 	// background window
 	linked::Window* bgwindow;
+	Texture* bg_settings;
 	Texture* bg_logo;
 	Texture* bg_normal;
 	Mesh* animation;
 	Animation* skills_animations[NUM_SKILLS * NUM_CHARS];
 	Animation* status_animations[SKILL_CONDITION_NUMBER];
+
+	// Settings window
+	linked::Window* settings_window;
 
 	// intro window
 	linked::Window* intro_logo;
@@ -460,6 +426,8 @@ struct Game_Windows {
 	// Modais
 	Exchange_Orbs_UI* exchange_orb_ui;
 	Sacrifice_Orbs_UI* sacrifice_orb_ui;
+
+	Settings_UI* settings_ui;
 
 	Texture* end_turn_button_player_turn;
 	Texture* end_turn_button_enemy_turn;

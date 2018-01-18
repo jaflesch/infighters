@@ -97,6 +97,65 @@ void AudioController::setSoundVolume(unsigned int volume)
 	AudioController::navigationAudio.setVolume(volume);
 	AudioController::cancelAudio.setVolume(volume);
 	AudioController::confirmAudio.setVolume(volume);
+	AudioController::q_punch.setVolume(volume);
+	AudioController::neural_network.setVolume(volume);
+	AudioController::hill_climbing.setVolume(volume);
+	AudioController::perceptron.setVolume(volume);
+	// BigO
+	AudioController::best_bount_fist.setVolume(volume);
+	AudioController::dual_simplex.setVolume(volume);
+	AudioController::graph_coloring.setVolume(volume);
+	AudioController::knapsack_hideout.setVolume(volume);
+	// Clockboy
+	AudioController::branch_prediction.setVolume(volume);
+	AudioController::clock_pulse.setVolume(volume);
+	AudioController::overclock.setVolume(volume);
+	AudioController::pipeline.setVolume(volume);
+	// Deadlock
+	AudioController::fork.setVolume(volume);
+	AudioController::mutex.setVolume(volume);
+	AudioController::preemption.setVolume(volume);
+	AudioController::thread_scheduling.setVolume(volume);
+	// Hazard
+	AudioController::redundancy.setVolume(volume);
+	AudioController::rollback.setVolume(volume);
+	AudioController::rollforward.setVolume(volume);
+	AudioController::tmr.setVolume(volume);
+	// New
+	AudioController::inheritance.setVolume(volume);
+	AudioController::override_.setVolume(volume);
+	AudioController::polymorphism.setVolume(volume);
+	AudioController::sprint_burst.setVolume(volume);
+	// Norma
+	AudioController::automata_summon.setVolume(volume);
+	AudioController::non_determinism.setVolume(volume);
+	AudioController::pumping_up.setVolume(volume);
+	AudioController::turing_machine.setVolume(volume);
+	// One
+	AudioController::axiom_one.setVolume(volume);
+	AudioController::tautology.setVolume(volume);
+	AudioController::true_endurance.setVolume(volume);
+	AudioController::truth_slash.setVolume(volume);
+	// Qwerty
+	AudioController::alt.setVolume(volume);
+	AudioController::ctrl.setVolume(volume);
+	AudioController::del.setVolume(volume);
+	AudioController::esc.setVolume(volume);
+	// Ray Tracey
+	AudioController::diffuse_reflection.setVolume(volume);
+	AudioController::dynamic_frustum.setVolume(volume);
+	AudioController::particle_rendering.setVolume(volume);
+	AudioController::rasterization.setVolume(volume);
+	// Serial Keyller
+	AudioController::brute_force.setVolume(volume);
+	AudioController::buffer_overflow.setVolume(volume);
+	AudioController::ddos_attack.setVolume(volume);
+	AudioController::encryption.setVolume(volume);
+	// Zero
+	AudioController::contradiction.setVolume(volume);
+	AudioController::false_rush.setVolume(volume);
+	AudioController::requiem_zero.setVolume(volume);
+	AudioController::void_barrier.setVolume(volume);
 }
 
 unsigned int AudioController::getSoundVolume()

@@ -2,6 +2,8 @@
 void hide_all_windows() {
 	//gw.bgwindow->setActive(false);
 
+	gw.settings_window->setActive(false);
+
 	gw.intro_logo->setActive(false);
 
 	// character selection
@@ -1254,4 +1256,155 @@ void init_animations() {
 	init_animation_indices(SKILL_OVERCLOCK);
 	gw.skills_animations[SKILL_BRANCH_DAMAGE] = new Animation("../../../res/skills_animations/clockboy/branch_prediction.png", 1, 5, 5, 20);
 	init_animation_indices(SKILL_BRANCH_DAMAGE);
+}
+
+static Settings_UI settings_ui;
+
+static void init_settings_mode()
+{
+	using namespace linked;
+	Texture* bg_settings = new Texture("../../../res/textures/bg_settings.jpg");
+	gw.bg_settings = bg_settings;
+
+	static u8 config_label[] = "SETTINGS";
+	static u8 idioma_label[] = "LANGUAGE";
+	static u8 animations_label[] = "ANIMATIONS";
+
+	hm::vec4 transparent_window_color = char_window_color;
+	transparent_window_color.w = 0.9f;
+
+	gw.settings_ui = &settings_ui;
+
+	Window* settings = new Window(600, 350, hm::vec2((r32)window_info.width / 2.0f - 300.0f, window_info.height / 2.0f - 150.0f), transparent_window_color, config_label, sizeof(config_label), W_UNFOCUSABLE | W_BORDER | W_HEADER);
+	settings->setTitleCentered(true);
+	settings->setTitleColor(hm::vec4(11.0f/255.0f, 114.0f/255.0f, 121.0f/255.0f, 1.0f));
+	settings->setBorderColor(cyan);
+	gw.settings_window = settings;
+	settings_ui.settings_window = settings;
+
+	WindowDiv* settings_div = new WindowDiv(*settings, 400, 280, 0, 0, hm::vec2(0, 0), hm::vec4(0,0,0,0), DIV_CENTER_X| DIV_CENTER_Y);
+	settings->divs.push_back(settings_div);
+	settings_ui.settings_div = settings_div;
+	Label* idioma = new Label(*settings_div, (u8*)idioma_label, sizeof(idioma_label), hm::vec2(0, 0), hm::vec4(11.0f / 255.0f, 114.0f / 255.0f, 121.0f / 255.0f, 1.0f), FONT_OSWALD_REGULAR_18, 0, 0);
+	settings_div->getLabels().push_back(idioma);
+	settings_ui.idioma = idioma;
+	Label* volume_sfx = new Label(*settings_div, (u8*)"VOLUME SFX", sizeof("VOLUME SFX"), hm::vec2(0, 40), hm::vec4(11.0f / 255.0f, 114.0f / 255.0f, 121.0f / 255.0f, 1.0f), FONT_OSWALD_REGULAR_18, 0, 0);
+	settings_div->getLabels().push_back(volume_sfx);
+	settings_ui.vol_sfx = volume_sfx;
+	Label* volume_bgm= new Label(*settings_div, (u8*)"VOLUME BGM", sizeof("VOLUME BGM"), hm::vec2(0, 80), hm::vec4(11.0f / 255.0f, 114.0f / 255.0f, 121.0f / 255.0f, 1.0f), FONT_OSWALD_REGULAR_18, 0, 0);
+	settings_div->getLabels().push_back(volume_bgm);
+	settings_ui.vol_bmg = volume_bgm;
+	Label* animacoes = new Label(*settings_div, (u8*)animations_label, sizeof(animations_label), hm::vec2(0, 120), hm::vec4(11.0f / 255.0f, 114.0f / 255.0f, 121.0f / 255.0f, 1.0f), FONT_OSWALD_REGULAR_18, 0, 0);
+	settings_div->getLabels().push_back(animacoes);
+	settings_ui.animations = animacoes;
+
+	static u8 salvar_label[] = "SAVE\0\0";
+	static u8 cancel_label[] = "CANCEL\0\0";
+
+	Button* confirm = new Button(*settings_div, new Label(*settings_div, (u8*)salvar_label, sizeof(salvar_label), hm::vec2(68, 15), hm::vec4(1, 1, 1, 1), FONT_OSWALD_BOLD_18, 0, 0),
+		hm::vec2(0, 200), 185, 55, hm::vec4(1, 1, 1, 1), 0);
+	settings_ui.confirm = confirm;
+	confirm->setClickedCallback(button_settings_save);
+
+	Texture* confirm_button_texture = new Texture("../../../res/textures/playbutton_normal.png");
+	Texture* confirm_button_hover_texture = new Texture("../../../res/textures/playbutton_hover.png");
+	confirm->setAllBGTexture(confirm_button_hover_texture);
+	confirm->setNormalBGTexture(confirm_button_texture);
+	settings_div->getButtons().push_back(confirm);
+	gw.sacrifice_orb_ui->endturn = confirm;
+
+	Button* cancel = new Button(*settings_div, new Label(*settings_div, (u8*)cancel_label, sizeof(cancel_label), hm::vec2(66, 15), cyan, FONT_OSWALD_REGULAR_18, 0, 0),
+		hm::vec2(204, 200), 185, 55, hm::vec4(1, 1, 1, 1), 0);
+	cancel->setClickedCallback(button_settings_cancel);
+	Texture* cancel_button_texture = new Texture("../../../res/textures/cancel_action_modal.png");
+	cancel->setAllBGTexture(cancel_button_texture);
+	settings_div->getButtons().push_back(cancel);
+	gw.sacrifice_orb_ui->cancel = cancel;
+	settings_ui.cancel = cancel;
+
+	static u8 english_label[] = "PORTUGUÊS";
+	static u8 volume_sfx_value[] = "100";
+	static u8 volume_bgm_value[] = "100";
+	static u8 animacoes_value[] = "ATIVO\0\0\0\0";
+
+	Label* lang_label_value = new Label(*settings_div, (u8*)english_label, sizeof(english_label), hm::vec2(260.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
+	Label* volume_sfx_label_value = new Label(*settings_div, (u8*)volume_sfx_value, sizeof(volume_sfx_value), hm::vec2(285.0f, 40), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
+	Label* volume_bgm_label_value = new Label(*settings_div, (u8*)volume_bgm_value, sizeof(volume_bgm_value), hm::vec2(285.0f, 80), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
+	Label* animacoes_label_value = new Label(*settings_div, (u8*)animacoes_value, sizeof(animacoes_value), hm::vec2(275.0f, 120), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_18, 0, 0);
+	settings_div->getLabels().push_back(lang_label_value);
+	settings_div->getLabels().push_back(volume_sfx_label_value);
+	settings_div->getLabels().push_back(volume_bgm_label_value);
+	settings_div->getLabels().push_back(animacoes_label_value);
+	settings_ui.idioma_value = lang_label_value;
+	settings_ui.vol_sfx_value = volume_sfx_label_value;
+	settings_ui.vol_bmg_value = volume_bgm_label_value;
+	settings_ui.animations_value = animacoes_label_value;
+
+	Texture* arrow_left_normal = new Texture("../../../res/orbs/arrow_normal_left.png");
+	Texture* arrow_left_hover = new Texture("../../../res/orbs/arrow_active_left.png");
+	Texture* arrow_left_inactive = new Texture("../../../res/orbs/arrow_inactive_left.png");
+
+	Texture* arrow_right_normal = new Texture("../../../res/orbs/arrow_normal_right.png");
+	Texture* arrow_right_hover = new Texture("../../../res/orbs/arrow_active_right.png");
+	Texture* arrow_right_inactive = new Texture("../../../res/orbs/arrow_inactive_right.png");
+
+	Button* arrow_left_idioma = new Button(*settings_div, 0, hm::vec2(205.0f, 0.0f), 16, 24, hm::vec4(0, 0, 0, 1), 0);
+	arrow_left_idioma->setAllBGTexture(arrow_left_hover);
+	arrow_left_idioma->setNormalBGTexture(arrow_left_normal);
+	arrow_left_idioma->setInactiveTexture(arrow_left_inactive);
+	arrow_left_idioma->setClickedCallback(button_arrows_settings);
+
+	Button* arrow_right_idioma = new Button(*settings_div, 0, hm::vec2(375.0f, 0.0f), 16, 24, hm::vec4(0, 0, 0, 1), 1);
+	arrow_right_idioma->setAllBGTexture(arrow_right_hover);
+	arrow_right_idioma->setNormalBGTexture(arrow_right_normal);
+	arrow_right_idioma->setInactiveTexture(arrow_right_inactive);
+	arrow_right_idioma->setClickedCallback(button_arrows_settings);
+
+	settings_div->getButtons().push_back(arrow_left_idioma);
+	settings_div->getButtons().push_back(arrow_right_idioma);
+
+	Button* arrow_left_vsfx = new Button(*settings_div, 0, hm::vec2(205.0f, 40.0f), 16, 24, hm::vec4(0, 0, 0, 1), 2);
+	arrow_left_vsfx->setAllBGTexture(arrow_left_hover);
+	arrow_left_vsfx->setNormalBGTexture(arrow_left_normal);
+	arrow_left_vsfx->setInactiveTexture(arrow_left_inactive);
+	arrow_left_vsfx->setClickedCallback(button_arrows_settings);
+
+	Button* arrow_right_vsfx = new Button(*settings_div, 0, hm::vec2(375.0f, 40.0f), 16, 24, hm::vec4(0, 0, 0, 1), 3);
+	arrow_right_vsfx->setAllBGTexture(arrow_right_hover);
+	arrow_right_vsfx->setNormalBGTexture(arrow_right_normal);
+	arrow_right_vsfx->setInactiveTexture(arrow_right_inactive);
+	arrow_right_vsfx->setClickedCallback(button_arrows_settings);
+
+	settings_div->getButtons().push_back(arrow_left_vsfx);
+	settings_div->getButtons().push_back(arrow_right_vsfx);
+
+	Button* arrow_left_bsfx = new Button(*settings_div, 0, hm::vec2(205.0f, 80.0f), 16, 24, hm::vec4(0, 0, 0, 1), 4);
+	arrow_left_bsfx->setAllBGTexture(arrow_left_hover);
+	arrow_left_bsfx->setNormalBGTexture(arrow_left_normal);
+	arrow_left_bsfx->setInactiveTexture(arrow_left_inactive);
+	arrow_left_bsfx->setClickedCallback(button_arrows_settings);
+
+	Button* arrow_right_bsfx = new Button(*settings_div, 0, hm::vec2(375.0f, 80.0f), 16, 24, hm::vec4(0, 0, 0, 1), 5);
+	arrow_right_bsfx->setAllBGTexture(arrow_right_hover);
+	arrow_right_bsfx->setNormalBGTexture(arrow_right_normal);
+	arrow_right_bsfx->setInactiveTexture(arrow_right_inactive);
+	arrow_right_bsfx->setClickedCallback(button_arrows_settings);
+
+	settings_div->getButtons().push_back(arrow_left_bsfx);
+	settings_div->getButtons().push_back(arrow_right_bsfx);
+
+	Button* arrow_left_animacoes = new Button(*settings_div, 0, hm::vec2(205.0f, 120.0f), 16, 24, hm::vec4(0, 0, 0, 1), 6);
+	arrow_left_animacoes->setAllBGTexture(arrow_left_hover);
+	arrow_left_animacoes->setNormalBGTexture(arrow_left_normal);
+	arrow_left_animacoes->setInactiveTexture(arrow_left_inactive);
+	arrow_left_animacoes->setClickedCallback(button_arrows_settings);
+
+	Button* arrow_right_animacoes = new Button(*settings_div, 0, hm::vec2(375.0f, 120.0f), 16, 24, hm::vec4(0, 0, 0, 1), 7);
+	arrow_right_animacoes->setAllBGTexture(arrow_right_hover);
+	arrow_right_animacoes->setNormalBGTexture(arrow_right_normal);
+	arrow_right_animacoes->setInactiveTexture(arrow_right_inactive);
+	arrow_right_animacoes->setClickedCallback(button_arrows_settings);
+
+	settings_div->getButtons().push_back(arrow_left_animacoes);
+	settings_div->getButtons().push_back(arrow_right_animacoes);
 }
