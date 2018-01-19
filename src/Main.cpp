@@ -182,6 +182,9 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 			MULTIPLAYER = atoi(cmd);
 			break;
 		}
+		else {
+			break;
+		}
 	}
 
 	bool is_running = true;
