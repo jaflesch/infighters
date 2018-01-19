@@ -20,7 +20,7 @@
 #define GAME_PORT 44444							// porta do jogo
 #define GAME_PORT_L "44444"
 //#define MULTIPLAYER 0
-extern int MULTIPLAYER = 0;
+extern int MULTIPLAYER;
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")

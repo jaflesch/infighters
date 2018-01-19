@@ -158,6 +158,8 @@ void application_state_update(double frametime)
 	wmesh->render();
 }
 
+extern int MULTIPLAYER;
+
 #ifdef _WIN64
 s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, int cmd_show)
 {
@@ -166,6 +168,21 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	FILE* pCout;
 	freopen_s(&pCout, "CONOUT$", "w", stdout);
 #endif
+
+	char* cmd = GetCommandLineA();
+	while (*cmd != 0) {
+		if (*cmd == '"') {
+			cmd++;
+			while (*cmd != '"')
+				cmd++;
+			cmd++;
+		}
+		if (*cmd == ' ') {
+			cmd++;
+			MULTIPLAYER = atoi(cmd);
+			break;
+		}
+	}
 
 	bool is_running = true;
 

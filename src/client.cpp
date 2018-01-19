@@ -1,6 +1,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "client.h"
 
+extern int MULTIPLAYER = 0;
 /* 
 	Conecta ao server de matching
 	Recebe informações de matching:

@@ -1732,16 +1732,15 @@ static void button_play_game(void* arg) {
 #include "ui.cpp"
 
 void init_combat_state() {
-	#if MULTIPLAYER
+	if (MULTIPLAYER) {
 		player = client_searching();
 		connection = connect(player);
 		exchange_char_selection(connection, player, &char_sel_state);
-		
+
 		combat_state.player_turn = player->first;
 		turn_time = TURN_DURATION;
-	#else 
+	} else 
 		combat_state.player_turn = true;
-	#endif
 
 	layout_update_endturn_button();
 		
@@ -1976,14 +1975,15 @@ static void apply_skills_and_send() {
 			}
 		}
 
-		#if MULTIPLAYER
+		if (MULTIPLAYER) {
 			if (combat_state.player_turn)
 				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, true);
 			else
 				execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, true, false);
-		#else
+		}
+		else
 			execute_skill(combat_state.player.targets[i].skill_used, target, combat_state.player.targets[i].attacking_character, &combat_state, false, target_enemy);
-		#endif
+
 	}
 	combat_state_reset_all_targets();
 }
@@ -2242,10 +2242,11 @@ void update_game_mode(double frametime)
 			combat_state.skill_info_desc->m_render = render_info;
 			combat_state.skill_info_group->m_render = render_info;
 
-#if MULTIPLAYER
-			if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
-					end_turn();			
-#endif
+			if (MULTIPLAYER) {
+				if (combat_state.player_turn == 0 && receive_struct(connection, combat_state.player.targets))
+					end_turn();
+			}
+
 		}break;
 	}
 }

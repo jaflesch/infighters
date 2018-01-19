@@ -1247,11 +1247,12 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			if (from_enemy) {
 				// @ gotta sent this via network
 				// random calculated on the sender
-#if MULTIPLAYER
-				int random = target_index;
-#else
-				int random = rand() % (NUM_ALLIES);
-#endif
+				int random = 0;
+				if( MULTIPLAYER)
+					random = target_index;
+				else
+					random = rand() % (NUM_ALLIES);
+
 				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
 				push_historic(" utilizou Thread Scheduling atingindo ");
 				push_historic(char_names[char_sel_state.selections[random]]);
