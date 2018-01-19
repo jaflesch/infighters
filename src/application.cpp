@@ -1847,7 +1847,6 @@ void init_application()
 	bgdiv->setBackgroundTexture(gw.bg_logo);
 	gw.bgwindow = bgwindow;
 
-	
 
 	char_sel_state.enemy_selections[0] = CHAR_BIG_O;
 	char_sel_state.enemy_selections[1] = CHAR_ONE;
@@ -1859,7 +1858,7 @@ void init_application()
 	init_combat_mode();
 	init_settings_mode();
 
-#if 1
+#if 0
 	for(int i = 0; i < ORB_NUMBER; ++i)
 		combat_state.orbs_amount_temp_added[i] = 0;
 	combat_state.total_orbs_temp_added = 0;
@@ -1875,16 +1874,20 @@ void init_application()
 	layout_change_orb_amount(ORB_BIOS, 10);
 	layout_change_orb_amount(ORB_ALL, 8 + 3 + 4 + 10);
 #else
+	for (int i = 0; i < ORB_NUMBER; ++i)
+		combat_state.orbs_amount_temp_added[i] = 0;
+	combat_state.total_orbs_temp_added = 0;
+
 	combat_state.orbs_amount[ORB_HARD] = 1;
-	combat_state.orbs_amount[ORB_SOFT] = 0;
-	combat_state.orbs_amount[ORB_VR] = 0;
+	combat_state.orbs_amount[ORB_SOFT] = 1;
+	combat_state.orbs_amount[ORB_VR] = 1;
 	combat_state.orbs_amount[ORB_BIOS] = 0;
-	combat_state.total_orbs = 1;
+	combat_state.total_orbs = 3;
 	layout_change_orb_amount(ORB_HARD, 1);
-	layout_change_orb_amount(ORB_SOFT, 0);
-	layout_change_orb_amount(ORB_VR, 0);
+	layout_change_orb_amount(ORB_SOFT, 1);
+	layout_change_orb_amount(ORB_VR, 1);
 	layout_change_orb_amount(ORB_BIOS, 0);
-	layout_change_orb_amount(ORB_ALL, 1);
+	layout_change_orb_amount(ORB_ALL, 3);
 #endif
 
 	char_descriptions = char_descriptions_pt;
@@ -1947,11 +1950,11 @@ static void apply_skills_and_send() {
 	print_targets();
 
 	for (int i = 0; i < NUM_ALLIES; ++i) {
-		#if MULTIPLAYER
+		if (MULTIPLAYER) {
 			if (combat_state.player_turn) {
 					send_struct(connection, combat_state.player.targets[i]);
 			}
-		#endif
+		}
 
 		if (combat_state.player.targets[i].skill_used == SKILL_NONE)
 			continue;

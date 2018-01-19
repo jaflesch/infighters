@@ -82,12 +82,14 @@ DWORD WINAPI ConectionManager(void* Socket)
 	
 	strcpy_s(ip.newplayer, ipstr);
 
+	/*
 	if (!strcmp(ip.newplayer, "127.0.0.1")) {
 		char szBuffer[1024];
 		gethostname(szBuffer, sizeof(szBuffer));
 		struct hostent *host = gethostbyname(szBuffer);
 		strcpy_s(ip.newplayer, inet_ntoa(*(struct in_addr *)*host->h_addr_list));
 	}
+	*/
 
 	// se o tamanho da fila eh dois -> espera esvaziar
 	while (messageQueue.size() == 2);

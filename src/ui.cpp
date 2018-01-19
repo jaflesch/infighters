@@ -744,10 +744,10 @@ void init_combat_mode()
 		player_name->divs.push_back(enemy_name_div);
 		gw.player_name_window = player_name;
 
-		linked::Label* player_label = new linked::Label(*player_name_div, (u8*)"Player Name", sizeof "Player Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_32, 0, 0);
+		linked::Label* player_label = new linked::Label(*player_name_div, (u8*)"You", sizeof "You", hm::vec2(50.0f, 0), ally_hp_bar_full_color, FONT_OSWALD_REGULAR_32, 0, 0);
 		player_name_div->getLabels().push_back(player_label);
 
-		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy Name", sizeof "Enemy Name", hm::vec2(50.0f, 0), hm::vec4(1, 1, 1, 1), FONT_OSWALD_REGULAR_32, 0, 0);
+		linked::Label* enemy_label = new linked::Label(*enemy_name_div, (u8*)"Enemy", sizeof "Enemy", hm::vec2(50.0f, 0), enem_hp_bar_full_color, FONT_OSWALD_REGULAR_32, 0, 0);
 		enemy_name_div->getLabels().push_back(enemy_label);
 
 		orb_alive_ally = new Texture("../../../res/orbs/alive_orb.png");
@@ -1087,7 +1087,7 @@ void init_combat_mode()
 		historico->divs.push_back(historico_div);
 		gw.historico = historico;
 		linked::Label* historic_label = new linked::Label(*historico_div, (u8*)"Hello World\nHello World\nHello World", sizeof("Hello World\nHello World\nHello World"),
-			hm::vec2(400, 20), hm::vec4(1, 1, 1, 1), FONT_OSWALD_BOLD_18, 0, 0);
+			hm::vec2(400, 30), hm::vec4(0, 1, 1, 1), FONT_OSWALD_BOLD_18, 0, 0);
 		historico_div->getLabels().push_back(historic_label);
 	}
 

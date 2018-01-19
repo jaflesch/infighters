@@ -949,6 +949,11 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 				push_historic(" utilizou Brute Force em ");
 				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
 			}
+			if (dmg > 0) {
+				push_historic(", causando ");
+				push_historic(dmg);
+				push_historic(" de dano");
+			}
 
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
@@ -1133,30 +1138,64 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			}
 		}break;
 		case SKILL_PERCEPTRON: {
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Perceptron em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Perceptron em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+			}
 			AudioController::perceptron.play();
-			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_CRUSHING, id, combat_state);
+			s32 dmg = deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_CRUSHING, id, combat_state);
+			if (dmg > 0) {
+				push_historic(", causando ");
+				push_historic(dmg);
+				push_historic(" de dano");
+			}
+			push_historic(".\n");
 			push_skill_animation(!from_enemy, target_index, id, combat_state);
 		}break;
 		case SKILL_NEURAL_NETWORK: {
 			AudioController::neural_network.play();
 			skill_state->neural_network_duration = 4 + 1;
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Neural Network em ");
 				for (int i = 0; i < NUM_ALLIES; ++i) {
 					if (is_ally_targetable_by_skill(id, i, combat_state)) {
 						push_skill_animation(false, i, id, combat_state);
 						apply_skill_status_to_ally(i, id, 4 * 2 + 1, combat_state);
+
+						push_historic(char_names[char_sel_state.selections[i]]);
+						if (i + 2 < NUM_ALLIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ALLIES) {
+							push_historic(" e ");
+						}
 					}
 				}
 				gain_absorption_enemy(30, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Neural Network em ");
 				for (int i = 0; i < NUM_ENEMIES; ++i) {
 					if (is_enemy_targetable_by_skill(id, i, combat_state)) {
 						push_skill_animation(!from_enemy, i, id, combat_state);
 						apply_skill_status_to_enemy(i, id, 4 * 2 + 1, combat_state);
+
+						push_historic(char_names[char_sel_state.enemy_selections[i]]);
+						if (i + 2 < NUM_ENEMIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ENEMIES) {
+							push_historic(" e ");
+						}
 					}
 				}
 				gain_absorption_ally(30, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 			}
+			push_historic(", também recebendo 30 de ABSORPTION.\n");
 		}break;
 			
 		// Deadlock
@@ -1164,11 +1203,20 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			AudioController::preemption.play();
 			// @ ask wtf is CONTROL
 			// Caso ele tenha alguma habilidade com duração CONTROL, elimina a habilidade e este sofre status SLEEP por 2 turnos.
-			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
+			s32 dmg = deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_NORMAL, id, combat_state);
 			if (from_enemy) {
-
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Preemption em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
 			} else {
-
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Preemption em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+			}
+			if (dmg > 0) {
+				push_historic(", causando ");
+				push_historic(dmg);
+				push_historic(" de dano.\n");
 			}
 		}break;
 		case SKILL_MUTEX: {
@@ -1178,12 +1226,21 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 			int random = rand() % (NUM_ENEMIES);
 			if (from_enemy) {
 				// @TODO chance stun to special condition
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Mutex atingindo ");
+				push_historic(char_names[char_sel_state.selections[random]]);
+
 				apply_status_to_ally(random, SKILL_CONDITION_STUN, 1, combat_state);
 				push_skill_animation(false, random, id, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Mutex atingindo ");
+				push_historic(char_names[char_sel_state.enemy_selections[random]]);
+
 				apply_status_to_enemy(random, SKILL_CONDITION_STUN, 1, combat_state);
 				push_skill_animation(true, random, id, combat_state);
 			}
+			push_historic(" e causando status STUN.\n");
 		}break;
 		case SKILL_THREAD_SCHEDULING: {
 			AudioController::thread_scheduling.play();
@@ -1195,22 +1252,49 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 #else
 				int random = rand() % (NUM_ALLIES);
 #endif
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Thread Scheduling atingindo ");
+				push_historic(char_names[char_sel_state.selections[random]]);
+
 				apply_status_to_ally(random, SKILL_CONDITION_PARALYZE, 3, combat_state);
 				push_skill_animation(false, random, id, combat_state);
 			} else {
 				int random = rand() % (NUM_ENEMIES);
+
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Thread Scheduling atingindo ");
+				push_historic(char_names[char_sel_state.enemy_selections[random]]);
+
 				apply_status_to_enemy(random, SKILL_CONDITION_PARALYZE, 3, combat_state);
 				push_skill_animation(true, random, id, combat_state);
 			}
+			push_historic(" e causando o status PARALYZE.\n");
 		}break;
 
 		// Norma
 		case SKILL_PUMPING_UP: {
 			AudioController::pumping_up.play();
-			deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_PIERCING, id, combat_state);
+
+			s32 dmg = deal_damage_to_target(target_index, source_index, 25, SKILL_DMG_PIERCING, id, combat_state);
+			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Pumping Up em ");
+				push_historic(char_names[char_sel_state.selections[target_index]]);
+			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Pumping Up em ");
+				push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+			}
+			if (dmg > 0) {
+				push_historic(", causando ");
+				push_historic(dmg);
+				push_historic(" de dano");
+			}
+
 			// @todo replace random
 			int random = rand() % 10000;
 			if (random % 2 == 0) {
+				push_historic(" e status BURN");
 				// cause burn for 3 turns
 				if (from_enemy) {
 					apply_status_to_ally(target_index, SKILL_CONDITION_BURN, 3, combat_state);
@@ -1220,50 +1304,112 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					push_skill_animation(true, target_index, id, combat_state);
 				}
 			}
+			push_historic(".\n");
 		}break;
 		case SKILL_AUTOMATA_SUMMON: {
 			AudioController::automata_summon.play();
 			skill_state->automata_summon_duration = 1 + 1;
+
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				
 				skill_counter_enemy.automata_summon_norma_index = source_index;
 				gain_absorption_enemy(15, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(true, source_index, id, combat_state);
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+
 				skill_counter_ally.automata_summon_norma_index = source_index;
 				gain_absorption_ally(15, source_index, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 				push_skill_animation(false, source_index, id, combat_state);
 				apply_skill_status_to_ally(source_index, id, 1 * 2 + 1, combat_state);
 			}
+			push_historic(" utilizou Automata Summon recebendo 15 pontos de defesa.\n");
 		}break;
 		case SKILL_TURING_MACHINE: {
 			AudioController::turing_machine.play();
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Turing Machine em ");
+
 				for (int i = 0; i < NUM_ALLIES; ++i) {
-					deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
-					push_skill_animation(!from_enemy, i, id, combat_state);
+					if (is_ally_targetable_by_skill(id, i, combat_state)) {
+						s32 dmg = deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
+						push_skill_animation(!from_enemy, i, id, combat_state);
+
+						push_historic(char_names[char_sel_state.selections[i]]);
+						if (dmg > 0) {
+							push_historic(", causando ");
+							push_historic(dmg);
+							push_historic(" de dano");
+						}
+
+						if (i + 2 < NUM_ALLIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ALLIES) {
+							push_historic(" e ");
+						}
+					}
 				}
 			} else {
 				for (int i = 0; i < NUM_ENEMIES; ++i) {
 					if (is_targetable_by_skill(SKILL_TURING_MACHINE, i, combat_state)) {
-						deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
+						s32 dmg = deal_damage_to_target(i, source_index, 30, SKILL_DMG_NORMAL, id, combat_state);
 						push_skill_animation(!from_enemy, i, id, combat_state);
+
+						push_historic(char_names[char_sel_state.enemy_selections[i]]);
+						if (dmg > 0) {
+							push_historic(", causando ");
+							push_historic(dmg);
+							push_historic(" de dano");
+						}
+						if (i + 2 < NUM_ALLIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ALLIES) {
+							push_historic(" e ");
+						}
 					}
 				}
 			}
+			push_historic(".\n");
 		}break;
 
 		// Hazard
 		case SKILL_TMR: {
 			AudioController::tmr.play();
 			int num_targets = 0;
-			if (from_enemy) num_targets = NUM_ALLIES;
-			else num_targets = NUM_ENEMIES;
+			if (from_enemy) {
+				num_targets = NUM_ALLIES;
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou TMR em ");
+			} else {
+				num_targets = NUM_ENEMIES;
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou TMR em ");
+			}
 
 			for (int i = 0; i < num_targets; ++i) {
 				if (!is_targetable_by_skill(SKILL_TMR, i, combat_state))
 					continue;
 
 				s32 dmg = deal_damage_to_target(i, source_index, 15, SKILL_DMG_NORMAL, id, combat_state);
+				if (from_enemy) {
+					push_historic(char_names[char_sel_state.selections[target_index]]);
+				} else {
+					push_historic(char_names[char_sel_state.enemy_selections[target_index]]);
+				}
+
+				if (dmg > 0) {
+					push_historic(", causando ");
+					push_historic(dmg);
+					push_historic(" de dano");
+				}
+				if (i + 2 < num_targets) {
+					push_historic(", ");
+				} else if (i + 1 < num_targets) {
+					push_historic(" e ");
+				}
+
 				push_skill_animation(!from_enemy, i, id, combat_state);
 				if (dmg > 0) {
 					// attack succeeded gain absorption
@@ -1274,26 +1420,50 @@ s32 execute_skill(Skill_ID id, int target_index, int source_index, Combat_State*
 					}
 				}
 			}
+			push_historic(".\n");
 		}break;
 		case SKILL_REDUNDANCY: {
 			AudioController::redundancy.play();
 			if (from_enemy) {
+				push_historic(char_names[char_sel_state.enemy_selections[source_index]]);
+				push_historic(" utilizou Redundancy em ");
+
 				for (int i = 0; i < NUM_ENEMIES; ++i) {
 					if (is_targetable_by_skill(SKILL_REDUNDANCY, i, combat_state)) {
 						gain_reduction_enemy(15, 3, false, i, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 						push_skill_animation(true, i, id, combat_state);
 						apply_skill_status_to_enemy(i, id, 3 * 2, combat_state);
+
+						push_historic(char_names[char_sel_state.enemy_selections[i]]);
+
+						if (i + 2 < NUM_ENEMIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ENEMIES) {
+							push_historic(" e ");
+						}
 					}
 				}
 			} else {
+				push_historic(char_names[char_sel_state.selections[source_index]]);
+				push_historic(" utilizou Redundancy em ");
+
 				for (int i = 0; i < NUM_ALLIES; ++i) {
 					if (is_targetable_by_skill(SKILL_REDUNDANCY, i, combat_state)) {
+						push_historic(char_names[char_sel_state.selections[i]]);
+
+						if (i + 2 < NUM_ALLIES) {
+							push_historic(", ");
+						} else if (i + 1 < NUM_ALLIES) {
+							push_historic(" e ");
+						}
+
 						gain_reduction_ally(15, 3, false, i, SKILL_TYPE_MENTAL | SKILL_TYPE_PHYSICAL | SKILL_TYPE_VIRTUAL, combat_state);
 						push_skill_animation(false, i, id, combat_state);
 						apply_skill_status_to_ally(i, id, 3 * 2, combat_state);
 					}
 				}
 			}
+			push_historic(".\n");
 		}break;
 		case SKILL_ROLLBACK: {
 			AudioController::rollback.play();
@@ -1557,12 +1727,12 @@ void update_negative_status_enemy() {
 
 void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 	// Historico
-	if (historic_buffer_index > 0) {
-		gw.historico->setActive(true);
-		gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
-		gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index);
-		historic_buffer_index = 0;
-	}
+	//if (historic_buffer_index > 0) {
+	//	gw.historico->setActive(true);
+	//	gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
+	//	gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index + 1);
+	//}
+	//	historic_buffer_index = 0;
 
 	for (int i = 0; i < SKILL_NUMBER; ++i) {
 		if(skill_state_enemy.cooldown_counter[i] > 0)
@@ -1611,12 +1781,12 @@ void update_skill_state_end_enemy_turn(Combat_State* combat_state) {
 
 void update_skill_state_end_turn(Combat_State* combat_state) {
 	// Historico
-	if (historic_buffer_index > 0) {
-		gw.historico->setActive(true);
-		gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
-		gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index);
+	//if (historic_buffer_index > 0) {
+	//	gw.historico->setActive(true);
+	//	gw.historico_timer = (r64)historic_buffer_index / 20.0 + 1.0;
+	//	gw.historico->divs[0]->getLabels()[0]->setText(historic_buffer, historic_buffer_index + 1);
+	//}
 		historic_buffer_index = 0;
-	}
 
 	for (int i = 0; i < SKILL_NUMBER; ++i) {
 		if(skill_state_ally.cooldown_counter[i] > 0)

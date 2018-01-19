@@ -218,8 +218,7 @@ static void layout_update_cooldowns(bool update_to_full_opacity = false);
 #define NUM_ALLIES 3
 #define NUM_ENEMIES 3
 #define MAX_STATUS 6
-#define TURN_DURATION 6000.0
-#define FAST 1
+#define TURN_DURATION 60.0
 
 struct GameState {
 	Game_Mode mode;
