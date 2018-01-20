@@ -169,23 +169,7 @@ s32 WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, 
 	freopen_s(&pCout, "CONOUT$", "w", stdout);
 #endif
 
-	char* cmd = GetCommandLineA();
-	while (*cmd != 0) {
-		if (*cmd == '"') {
-			cmd++;
-			while (*cmd != '"')
-				cmd++;
-			cmd++;
-		}
-		if (*cmd == ' ') {
-			cmd++;
-			MULTIPLAYER = atoi(cmd);
-			break;
-		}
-		else {
-			break;
-		}
-	}
+	MULTIPLAYER = 1;
 
 	bool is_running = true;
 
