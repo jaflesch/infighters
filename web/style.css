@@ -1,0 +1,238 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Oswald', sans-serif;
+}
+html { background: #000; }
+#wrap {
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+.container {
+	width: 1280px;
+	margin: 0 auto;
+	padding: 0 15px;
+	position: relative;
+}
+.text-center { text-align: center; }
+#banner {
+	background-image: url('bg.png');
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+	height: 100vh;
+	width: 100%;
+	position: relative;
+}
+.anchor  {
+	position: absolute;
+	font-size: 44px;
+	color: #fff;
+	bottom: 30px;
+	border-radius: 50%;
+	width: 44px;
+	height: 44px;
+	line-height: 48px;
+	border: 2px solid #f0f;
+	left: 50%;
+	text-align: center;
+	background: #f0f;
+	transform: translateX(-50%);
+	text-shadow: 0 0 0 rgba(0,0,0,0.2);
+	cursor: pointer;
+}
+.anchor:hover,#banner .anchor:focus {
+	background: #31d4e2;
+	border-color: #31d4e2;
+}
+
+/* SOBRE */
+#about {
+	background: #101846;
+	background-image: url('about-bg.png');
+	background-position: 100% 100%;
+	background-repeat: no-repeat;
+	background-size: 60vh;
+	height: 100vh;
+	position: relative;
+}
+#about .container {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+#about h1 {
+	font-size: 48px;
+	color: #fff;
+	margin: 0 0 20px;
+}
+#about hr {
+	background: transparent;
+	border-top: 4px solid;
+	width: 200px;
+}
+#about p {
+	font-size: 24px;
+	color: #099;
+	line-height: 175%;
+	text-align: center;
+	margin: 40px 0;
+	text-shadow: 0 0 0 rgba(0,0,0,.2);
+}
+
+/* DADOS */
+#data {
+	background: #fff;
+	background-image: url('data-bg.png');
+	background-position: -50px 100%;
+	background-repeat: no-repeat;
+	background-size: 75vh;
+	height: 100vh;
+	position: relative;
+}
+#data .container {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+#data h1 {
+	font-size: 48px;
+	color: #000;
+	margin: 0 0 20px;
+}
+#data hr {
+	background: transparent;
+	border: 0;
+	border-top: 4px solid;
+	width: 200px;
+}
+#data p {
+	font-size: 24px;
+	color: #5f405f;
+	line-height: 175%;
+	text-align: center;
+	margin: 40px 0;
+	text-shadow: 0 0 0 rgba(0,0,0,.2);
+}
+#data .gallery {
+	text-align: center;
+	margin: 0 -5px;
+}
+#data img {
+	width: 100px;
+	display: inline-block;
+	vertical-align: middle;
+	margin: 15px;
+}
+
+/* DOWNLOAD */
+#download {
+	background: #000;
+	background-image: url('download-bg.png');
+	background-position: 100% 100%;
+	background-repeat: no-repeat;
+	background-size: 60vh;
+	height: 100vh;
+	position: relative;
+}
+#download .container {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+#download h1 {
+	font-size: 48px;
+	color: #fff;
+	margin: 0 0 20px;
+}
+#download hr {
+	background: transparent;
+	border-top: 4px solid;
+	width: 200px;
+}
+#download p {
+	font-size: 24px;
+	font-weight: lighter;
+	color: #999;
+	line-height: 175%;
+	text-align: center;
+	margin: 40px 0;
+	text-shadow: 0 0 0 rgba(0,0,0,.2);
+}
+#download a {
+	background: #0f7e97;
+	color: #fff !important;
+	font-size: 24px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+	padding: 15px 30px;
+	margin: 0 4px;
+	min-width: 140px;
+	display: inline-block;
+}
+#download a:hover, #download a:focus {
+	background: #1ab5c3;
+}
+
+/* WIKI */
+#wiki {
+	background: #e64e6f;
+	background-image: url('wiki-bg.png');
+	background-position: 0% 100%;
+	background-repeat: no-repeat;
+	background-size: 50vh;
+	height: 100vh;
+	position: relative;
+}
+#wiki .container {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+#wiki h1 {
+	font-size: 48px;
+	color: #fff;
+	margin: 0 0 20px;
+}
+#wiki hr {
+	background: transparent;
+	border-top: 4px solid;
+	width: 200px;
+}
+#wiki p {
+	font-size: 24px;
+	font-weight: lighter;
+	color: #f2b8c5;
+	line-height: 175%;
+	text-align: center;
+	margin: 40px 0;
+	text-shadow: 0 0 0 rgba(0,0,0,.2);
+}
+#wiki a {
+	background: #f7cad4;
+	color: #000 !important;
+	font-size: 24px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+	padding: 15px 30px;
+	margin: 0 4px;
+	min-width: 140px;
+	display: inline-block;
+}
+#wiki a:hover, #download a:focus {
+	background: #fff;
+}
+
+footer {
+	background: #0f132d;
+	font-weight: lighter;
+	font-size: 14px;
+	color: #0cd;
+	width: 100%;
+	text-align: center;
+	padding: 10px 0;
+}
+footer img {
+	display: block;
+	margin: 0 auto 15px;
+}

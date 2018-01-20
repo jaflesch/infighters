@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>INFighters</title>
+	<meta charset="utf-8">
+	<!-- css -->
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<style type="text/css">
+		html, body {
+			background: #080c21;
+		}
+		.container {
+			background: #101846;
+		    border-left: 7px solid #ffb74c;
+		    border-right: 7px solid #ffb74c;
+			margin: 0 auto;
+			padding: 15px 100px;
+			color: #aaa;
+		}
+		h1, h2, h3 { font-weight: bold; }
+		h2 {
+			display: inline-block;
+			color: #fff;
+			padding: 0 50px 4px 2px;
+			border-bottom: 2px solid;
+		}
+		.pink { border-color: #f0f; }
+		.blue { border-color: #7ddbff; }
+		.green { border-color: #0bf1c6; }
+		.orange { border-color: #ffb74c; }
+		hr {
+		    border-top: 1px solid #077;
+    		width: 100px;
+		}
+		#intro strong, #energias strong { 
+			color: #fff;
+			margin-right: 10px; 
+		}
+		.char-box {
+			padding: 10px;
+			border: 1px solid #ddd;
+			margin-bottom: 15px;
+			background: -webkit-linear-gradient(-45deg, #101846, #);
+		    background: -o-linear-gradient(-45deg, #101846, #090910);
+		    background: -moz-linear-gradient(-45deg, #101846, #090910);
+		    background: linear-gradient(-45deg, #101846, #090910);
+		    border: 1px solid #077;
+		}
+		.avatar {
+			display: inline-block;
+			vertical-align: top;
+			width: 200px;
+			height: 200px;
+		    background-color: #0f132d;
+			background-repeat: no-repeat;
+			background-position: top;
+		    background-size: cover;
+		    box-shadow: inset 0 0 0 4px #0bf1c6;
+		}
+		.information {
+			display: inline-block;
+			margin-left: 15px;
+			width: calc(100% - 220px);
+		}
+		.information h3 {
+			margin-top: 0;
+			color: #fff;
+		}
+		.information h4 {
+			text-transform: uppercase;
+			font-size: 14px;
+			font-weight: bold;
+		}
+		.information .tab-pane p {
+			font-size: 12px;
+			margin: 0;
+		}
+		.information .nav-tabs.moves li.active a img {
+			opacity: 1;
+		}
+		.information .nav-tabs.moves li a img {
+			background: #000;
+			margin: 0 2px;
+			width: 75px;
+			opacity: 0.3;
+		}
+		.nav-tabs { border: 0; }
+		.nav-tabs>li>a { 
+			padding: 0; 
+			border: 0 !important;
+		}
+		.nav>li>a:focus, .nav>li>a:hover {
+			background-color: #0bf1c6;
+    		border-radius: 0;
+		}
+		.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover { background: transparent;  }
+		.inner-left, .inner-right {
+			display: inline-block;
+			vertical-align: top;
+		}
+		.inner-left { border-right: 4px solid #232b69; }
+		.inner-right {
+		    width: calc(100% - 345px);
+			padding-left: 10px;
+			 
+		}
+		.inner-right h4 { 
+			color: #fff;
+			margin: 0 0 15px; 
+		}
+
+		.pink-orb { 
+			background: #f0f;
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			border-radius: 50%;
+			vertical-align: middle;
+			margin: 0 1px;
+		}
+		.blue-orb { 
+			background: #7ddbff;
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			border-radius: 50%;
+			vertical-align: middle;
+			margin: 0 1px;
+		}
+		.green-orb { 
+			background: #0bf1c6;
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			border-radius: 50%;
+			vertical-align: middle;
+			margin: 0 1px;
+		}
+		.orange-orb { 
+			background: #ffb74c;
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			border-radius: 50%;
+			vertical-align: middle;
+			margin: 0 1px;
+		}
+		.null-orb { 
+			background: transparent;
+			border: 3px solid #fff;
+			width: 20px;
+			height: 20px;
+			display: inline-block;
+			border-radius: 50%;
+			vertical-align: middle;
+			margin: 0 1px;
+		}
+		h4 span {
+			float: right;
+			position: relative;
+			top: -3px;
+		}
+		.information .tab-pane p.mgb-desc {
+			text-align: justify;
+			margin-bottom: 20px;
+		}
+		.description {
+			text-transform: uppercase;
+		}
+	</style>
+
+	<!-- js -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<h1 class="text-center" style="color: #fff">INFighters</h1>
+		<section id="intro">
+			<h2 class="green"> Visão Geral </h2>
+			<br/><br/>
+			<p><strong>Jogadores:</strong> 2</p>
+			<p><strong>Estilo:</strong> Online Turn-Based Combat</p>
+			<br/>
+			
+			<p class="text-justify">
+				<strong>Ideia geral:</strong><br/>
+				Aproveitar a extensão da área computacional e, junto aos conhecimentos adquiridos ao longo do curso, prover um jogo no qual os personagens estão diretamente relacionadas a diversos campos da computação como engenharia de software, computação gráfica, sistemas operacionais, programação concorrente etc.
+			</p>
+			<br/>
+			<p><strong>Mecânica de jogo:</strong></p>
+			<ul>
+				<li> Dois jogadores, online, participarão do jogo. </li>
+				<li> Cada um escolherá três de um total de 12 personagens (estimativa inicial) disponíveis. </li>
+				<li> Aleatoriamente um jogador será selecionado para começar a partida. </li>
+				<li> A cada turno, o jogador recebe um ponto de energia para cada personagem presente em seu lado do campo.</li>
+				<li> Cada personagem possui 4 golpes, sendo um destes para ficar <a href="#invulneravel-link">invulnerável</a></li>
+				<li> Os golpes demandam pontos de energia para serem executados. Quanto mais poderoso, mais energia necessária para utilizá-lo.</li>
+				<li> O jogo termina quando todos os personagens de um jogador forem derrotados. Este, por sua vez, perde a partida.</li>
+			</ul>
+
+			<br/>
+			<hr/>
+		</section>
+		
+		<br/>
+		<br/>
+
+		<section id="personagens">
+			<h2 class="orange"> Personagens </h2>
+
+			<!-- Zer0 -->
+			<div id="char-zer0" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/zero.png');"></div>
+				<div class="information">
+					<h3> Zer0 </h3>
+					<p style="margin-bottom: 20px;"> O vilão que nunca tem suas condições atendidas! </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#zer0-1"><img src="assets/moves/zero/01.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-2"><img src="assets/moves/zero/02.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-3"><img src="assets/moves/zero/03.png"></a></li>
+							<li><a data-toggle="tab" href="#zer0-4"><img src="assets/moves/zero/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="zer0-1" class="tab-pane in active">
+								<h4> False Rush <span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e realiza 20 de dano.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Counter, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="zer0-2" class="tab-pane">
+								<h4> Contradiction <span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Marca um adversário e, se no próximo ele realizar um ataque em Zer0, seu golpe é negado, sofre 20 de dano e recebe status Paralyze por 1 turno.
+								</p>
+								<p>
+									<small class="description">Mental, Ranged, Counter, Paralyze, Control</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>	
+							</div>
+							<div id="zer0-3" class="tab-pane">
+								<h4> Requiem Zero <span class="orange-orb"></span><span class="orange-orb"></span></h4>
+								<p class="mgb-desc">
+									Cria uma atmosfera negativa no campo de batalha. <em>False Rush</em> e <em>Contradiction</em> acertam todos os adversários durante 3 turnos.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Ranged, Unique, Static</small>									
+									<small class="description pull-right ">Cooldown: 5</small>
+								</p>		
+							</div>
+							<div id="zer0-4" class="tab-pane">
+								<h4> Void Barrier <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Utilizando uma barreira criada após um vácuo, Zer0 fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Ranged, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- On1 -->
+			<div id="char-on1" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/one.png');background-position-y: -30px;"></div>
+				<div class="information">
+					<h3> On1 </h3>
+					<p style="margin-bottom: 20px;"> O super herói mais otimista possível! </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#on1-1"><img src="assets/moves/one/01.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-2"><img src="assets/moves/one/02.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-3"><img src="assets/moves/one/03.png"></a></li>
+							<li><a data-toggle="tab" href="#on1-4"><img src="assets/moves/one/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="on1-1" class="tab-pane in active">
+								<h4> Truth Slash <span class="null-orb"></span><span class="green-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e realiza 30 de dano.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Normal Dmg, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="on1-2" class="tab-pane">
+								<h4> Tautology <span class="null-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um inimigo e realiza 15 de dano piercing. Se, no próximo turno, o adversário utilizar qualquer habilidade, sofrerá 15 de dano crushing.
+								</p>
+								<p>
+									<small class="description">Mental, Ranged, Piercing, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="on1-3" class="tab-pane">
+								<h4> Axiom One <span class="orange-orb"></span></h4>
+								<p class="mgb-desc">
+									On1 canaliza sua positividade e aumenta suas habilidades. Por 3 turnos, On1 tem redução de dano de 15% e <em>Truth Slash</em> e <em>Tautology</em> gastam uma energia a menos.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, Unique, Status, Reduction, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>		
+							</div>
+							<div id="on1-4" class="tab-pane">
+								<h4> True Endurance <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Serial K3yll3R -->
+			<div id="char-serial" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/serial-keyller.png');background-position-y: -65px;"></div>
+				<div class="information">
+					<h3> Serial K3yll3R </h3>
+					<p style="margin-bottom: 20px;"> Possui um papagaio chamado Cracken. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#serial-1"><img src="assets/moves/serial_keyller/01.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-2"><img src="assets/moves/serial_keyller/02.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-3"><img src="assets/moves/serial_keyller/03.png"></a></li>
+							<li><a data-toggle="tab" href="#serial-4"><img src="assets/moves/serial_keyller/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="serial-1" class="tab-pane in active">
+								<h4> Brute Force <span class="green-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e realiza 20 de dano. Este golpe ignora INVUL. Porém, o adversário recebe 10 de dano se estiver nesse status.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Normal Dmg, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="serial-2" class="tab-pane">
+								<h4> Buffer Overflow <span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Infringe 15 de dano piercing a um oponente e adiciona status STUN por 1 turno.
+								</p>
+								<p>
+									<small class="description">Mental, Ranged, Piercing, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="serial-3" class="tab-pane">
+								<h4> DDOS Attack <span class="null-orb"></span><span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Todos os adversários recebem status PARALYZE por 3 turnos.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Ranged, Paralyze, Static</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>		
+							</div>
+							<div id="serial-4" class="tab-pane">
+								<h4> Encryption <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Envolto por uma densa camada encriptada, Serial K3yll3R fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- R4y Trac3y -->
+			<div id="char-r4y" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/ray-tracey.png');background-position-y: -30px;"></div>
+				<div class="information">
+					<h3> R4y Tr4c3y </h3>
+					<p style="margin-bottom: 20px;"> Fotogênica, ama câmeras e sempre anda pelas sombras. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#r4y-1"><img src="assets/moves/ray_tracey/01.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-2"><img src="assets/moves/ray_tracey/02.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-3"><img src="assets/moves/ray_tracey/03.png"></a></li>
+							<li><a data-toggle="tab" href="#r4y-4"><img src="assets/moves/ray_tracey/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="r4y-1" class="tab-pane in active">
+								<h4> Particle Rendering <span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente, realiza 15 de dano e R4y Tr4c3y fica invulnerável a golpes PHYSICAL por 1 turno.
+								</p>
+								<p>
+									<small class="description">Virtual, Ranged, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>
+							</div>
+							<div id="r4y-2" class="tab-pane">
+								<h4> Diffuse Reflection <span class="null-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Por 1 turno, todos os aliados recebem REFLEX DEFENSE.
+								</p>
+								<p>
+									<small class="description">Mental, Ranged, REFLEX, Static</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>	
+							</div>
+							<div id="r4y-3" class="tab-pane">
+								<h4> Dynamic Frustum Attack <span class="null-orb"></span><span class="null-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc">
+									Aplica um golpe em todos os inimigos e realiza 35 de dano normal.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Ranged, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>		
+							</div>
+							<div id="r4y-4" class="tab-pane">
+								<h4> Rasterization <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Usando suas técnicas de computação gráfica, R4y Tr4c3y fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, Unique, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- A-St4r -->
+			<div id="char-astar" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/astar.png'); background-position-y: -12px;"></div>
+				<div class="information">
+					<h3> A-St4r </h3>
+					<p style="margin-bottom: 20px;"> Em sua busca sistemática para achar o caminho do estrelato. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#astar-1"><img src="assets/moves/astar/01.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-2"><img src="assets/moves/astar/02.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-3"><img src="assets/moves/astar/03.png"></a></li>
+							<li><a data-toggle="tab" href="#astar-4"><img src="assets/moves/astar/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="astar-1" class="tab-pane in active">
+								<h4> Q-Punch <span class="orange-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e realiza 20 de dano. Para cada vez que um oponente recebe novamente este golpe, o dano é aumentado em 5 pontos. O efeito é acumulativo.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Constant</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="astar-2" class="tab-pane">
+								<h4> Perceptron <span class="null-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Produz 25 de dano crushing a um oponente.
+								</p>
+								<p>
+									<small class="description">Mental, Ranged, Unique, Crushing, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>	
+							</div>
+							<div id="astar-3" class="tab-pane">
+								<h4> Neural Network <span class="orange-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc">
+									Durante 4 turnos, todos os adversários atingidos por <em>Neural Network</em> podem receber o ataque <em>Perceptron</em>. A-St4r recebe 30 pontos de ABSORPTION.
+								</p>
+								
+								<p>
+									<small class="description">Mental, Ranged, Unique, Status, Absorption, Static</small>									
+									<small class="description pull-right ">Cooldown: 5</small>
+								</p>		
+							</div>
+							<div id="astar-4" class="tab-pane">
+								<h4> Hill Climbing <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Para se proteger, A-St4r corre até as colinas e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- D3ADL0CK -->
+			<div id="char-deadlock" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/deadlock.png');background-position-y: -15px;"></div>
+				<div class="information">
+					<h3> D3ADL0CK </h3>
+					<p style="margin-bottom: 20px;"> Graduado em direito, mestre em processos. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#deadlock-1"><img src="assets/moves/deadlock/01.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-2"><img src="assets/moves/deadlock/02.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-3"><img src="assets/moves/deadlock/03.png"></a></li>
+							<li><a data-toggle="tab" href="#deadlock-4"><img src="assets/moves/deadlock/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="deadlock-1" class="tab-pane in active">
+								<h4> Preemption <span class="null-orb"></span><span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e infringe 25 de dano. Caso ele tenha alguma habilidade com duração CONTROL,
+									elimina a habilidade e este sofre status SLEEP por 2 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Sleep, Constant</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="deadlock-2" class="tab-pane">
+								<h4> Mutex <span class="null-orb"></span><span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Atinge todos os adversários e, no próximo turno, apenas um pode utilizar alguma habilidade.
+								</p>
+								<p>
+									<small class="description">Virtual, Ranged, Unique, Constant</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="deadlock-3" class="tab-pane">
+								<h4> Thread Scheduling <span class="null-orb"></span><span class="blue-orb"></span></h4>
+								<p class="mgb-desc">
+									Acerta um inimigo aleatório e coloca o status SLEEP por 3 turnos.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Melee, Sleep, Static</small>									
+									<small class="description pull-right ">Cooldown: 2</small>
+								</p>		
+							</div>
+							<div id="deadlock-4" class="tab-pane">
+								<h4> Fork() <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									D3ADL0CK cria um clone seu para receber golpe no seu lugar, engana o adversário e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- N0rma -->
+			<div id="char-n0rma" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/norma.png');background-position-y: -95px;"></div>
+				<div class="information">
+					<h3> N0rma </h3>
+					<p style="margin-bottom: 20px;"> Uma máquina na arte da luta: simples e eficaz. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#n0rma-1"><img src="assets/moves/norma/01.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-2"><img src="assets/moves/norma/02.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-3"><img src="assets/moves/norma/03.png"></a></li>
+							<li><a data-toggle="tab" href="#n0rma-4"><img src="assets/moves/norma/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="n0rma-1" class="tab-pane in active">
+								<h4> Pumping Up <span class="null-orb"></span><span class="null-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente, realiza 25 de dano piercing e há 50% de chance de causar status BURN por 3 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Normal Dmg, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="n0rma-2" class="tab-pane">
+								<h4> Automata Summon <span class="null-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Invoca um aliado, garantindo 15 pontos de defesa ABSORPTION. O adversário que atacar N0rma recebe o status POISON por 2 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Poison, Absorption, Static</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>	
+							</div>
+							<div id="n0rma-3" class="tab-pane">
+								<h4> Turing Machine <span class="null-orb"></span><span class="null-orb"></span><span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Acerta todos os adversários com 30 de dano. Só pode ser utilizado enquanto a habilidade <em>Automata Summon</em> estiver ativa.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Ranged, Status, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>		
+							</div>
+							<div id="n0rma-4" class="tab-pane">
+								<h4> Non-Determinism <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Aproveitando o universo não-determinístico, N0rma se esconde num estado protegido e e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Haz4rd -->
+			<div id="char-haz4rd" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/hazard.png');background-position-y: -25px;"></div>
+				<div class="information">
+					<h3> Haz4rd </h3>
+					<p style="margin-bottom: 20px;"> Codinome catástrofe. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#haz4rd-1"><img src="assets/moves/hazard/01.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-2"><img src="assets/moves/hazard/02.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-3"><img src="assets/moves/hazard/03.png"></a></li>
+							<li><a data-toggle="tab" href="#haz4rd-4"><img src="assets/moves/hazard/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="haz4rd-1" class="tab-pane in active">
+								<h4> TMR <span class="orange-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca todos os oponentes e realiza 15 de dano. Haz4rd recebe 5 pontos de defesa ABSORPTION por cada ataque bem sucedido.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Absorption, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="haz4rd-2" class="tab-pane">
+								<h4> Redundancy <span class="null-orb"></span><span class="green-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Cria uma barreira redundante para os aliados. Cada personagem recebe 15 pontos de redução de defesa por 3 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Ranged, Reduction, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>	
+							</div>
+							<div id="haz4rd-3" class="tab-pane">
+								<h4> Rollback <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Cura qualquer status negativo de um aliado.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Melee, Status, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>		
+							</div>
+							<div id="haz4rd-4" class="tab-pane">
+								<h4> Rollforward <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Qwerty -->
+			<div id="char-qwerty" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/qwerty.png');background-position-y: -65px;"></div>
+				<div class="information">
+					<h3> Qwerty </h3>
+					<p style="margin-bottom: 20px;"> I/OLO </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#qwerty-1"><img src="assets/moves/qwerty/01.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-2"><img src="assets/moves/qwerty/02.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-3"><img src="assets/moves/qwerty/03.png"></a></li>
+							<li><a data-toggle="tab" href="#qwerty-4"><img src="assets/moves/qwerty/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="qwerty-1" class="tab-pane in active">
+								<h4> Alt <span class="null-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Qwerty altera sua forma física e ganha redução de dano de 40 pontos por 4 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Reduction, Constant</small>									
+									<small class="description pull-right ">Cooldown: 5</small>
+								</p>
+							</div>
+							<div id="qwerty-2" class="tab-pane">
+								<h4> CTRL <span class="null-orb"></span><span class="green-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Controla um inimigo por dois turnos. <em>DELETE</em> pode ser usado no adversário controlado.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Control</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="qwerty-3" class="tab-pane">
+								<h4> Delete <span class="green-orb"></span><span class="green-orb"></span></h4>
+								<p class="mgb-desc">
+									Mata instantaneamente qualquer adversário que recebe este golpe, desde que esteja sob efeito de <em>CTRL</em>.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, Unique, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>		
+							</div>
+							<div id="qwerty-4" class="tab-pane">
+								<h4> ESC <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- =Big-O= -->
+			<div id="char-bigo" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/big-o.png');"></div>
+				<div class="information">
+					<h3> =Big-O= </h3>
+					<p style="margin-bottom: 20px;"> Temperamental, complexo de se relacionar. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#bigo-1"><img src="assets/moves/big_o/01.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-2"><img src="assets/moves/big_o/02.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-3"><img src="assets/moves/big_o/03.png"></a></li>
+							<li><a data-toggle="tab" href="#bigo-4"><img src="assets/moves/big_o/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="bigo-1" class="tab-pane in active">
+								<h4> Best Bound Fist <span class="null-orb"></span><span class="green-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca o oponente com menor HP e realiza 20 de dano. Por 2 turnos, o alvo fica com status BURN. Se o alvo já possui
+									status BURN, este sofre 10 de dano crushing adicional.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Burn, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="bigo-2" class="tab-pane">
+								<h4> Dual Simplex <span class="null-orb"></span><span class="pink-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Se utilizado em um adversário, gera status BURN por 3 turnos. Se, em um aliado, recupera 25 de energia e atribui
+									status FROZEN por 2 turnos.
+								</p>
+								<p>
+									<small class="description">Virtual, Melee, Unique, Status, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="bigo-3" class="tab-pane">
+								<h4> Graph Coloring <span class="null-orb"></span><span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									No próximo turno, recebe 4 orbs de energia: uma de cada categoria.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Melee, Status, Static</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>		
+							</div>
+							<div id="bigo-4" class="tab-pane">
+								<h4> Knapsack Hideout <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Concentrando toda sua energia positiva, On1 obtém uma defesa absoluta e fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- New() -->
+			<div id="char-new" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/new.png');background-position-y: -95px;"></div>
+				<div class="information">
+					<h3> New() </h3>
+					<p style="margin-bottom: 20px;"> Elegante, cheia de classe. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#new-1"><img src="assets/moves/new/01.png"></a></li>
+							<li><a data-toggle="tab" href="#new-2"><img src="assets/moves/new/02.png"></a></li>
+							<li><a data-toggle="tab" href="#new-3"><img src="assets/moves/new/03.png"></a></li>
+							<li><a data-toggle="tab" href="#new-4"><img src="assets/moves/new/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="new-1" class="tab-pane in active">
+								<h4> Sprint Burst <span class="null-orb"></span><span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Ataca um oponente e realiza 25 de dano. New() recebe redução de dano de 10 pontos no próximo turno.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Reduction, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>
+							</div>
+							<div id="new-2" class="tab-pane">
+								<h4> Inheritance <span class="orange-orb"></span><span class="blue-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Seleciona um inimigo e se, no próximo turno, ele utilizar um ataque que não seja UNIQUE nem exija uma técnica de preparação, sua habilidade será copiada e poderá ser usada por New() também.
+								</p>
+								<p>
+									<small class="description">Virtual, Ranged, Counter, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>	
+							</div>
+							<div id="new-3" class="tab-pane">
+								<h4> Override <span class="orange-orb"></span></h4>
+								<p class="mgb-desc">
+									Cura todos os status negativos de um aliado.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Ranged, Status, Static</small>									
+									<small class="description pull-right ">Cooldown: -</small>
+								</p>		
+							</div>
+							<div id="new-4" class="tab-pane">
+								<h4> Polimorphism <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Alterando sua estrutura física de forma dinâmica, New() fica invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Virtual, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Cl0ckb0y -->
+			<div id="char-new" class="char-box">
+				<div class="avatar" style="background-image: url('assets/chars/clockboy.png');background-position-y: -40px;"></div>
+				<div class="information">
+					<h3> Cl0ckb0y </h3>
+					<p style="margin-bottom: 20px;"> Nunca se atrasou para o ENEM. </p>
+					<div class="inner-left">
+						<ul class="nav nav-tabs moves">
+							<li class="active"><a data-toggle="tab" href="#clockboy-1"><img src="assets/moves/clockboy/01.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-2"><img src="assets/moves/clockboy/02.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-3"><img src="assets/moves/clockboy/03.png"></a></li>
+							<li><a data-toggle="tab" href="#clockboy-4"><img src="assets/moves/clockboy/04.png"></a></li>
+						</ul>
+					</div>
+					<div class="inner-right">
+						<div class="tab-content">
+							<div id="clockboy-1" class="tab-pane in active">
+								<h4> Clock Pulse <span class="null-orb"></span><span class="orange-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Desfera 20 de dano a um adversário. Atribui status PARALYZE por 2 turnos.
+								</p>
+								<p>
+									<small class="description">Physical, Ranged, Unique, Paralyze, Static</small>									
+									<small class="description pull-right ">Cooldown: 1</small>
+								</p>
+							</div>
+							<div id="clockboy-2" class="tab-pane">
+								<h4> Pipeline <span class="orange-orb"></span></h4>
+								<p class="mgb-desc"> 
+									Durante 2 turnos, nenhum golpe de Cl0ckB0y sofre COUNTER.
+								</p>
+								<p>
+									<small class="description">Physical, Melee, Status, Control</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>	
+							</div>
+							<div id="clockboy-3" class="tab-pane">
+								<h4> Overclock <span class="null-orb"></span><span class="orange-orb"></span></h4>
+								<p class="mgb-desc">
+									Cl0ckb0y fica invulnerável por 2 turnos, perde 50% de sua energia e seus ataques causam 500% a mais de dano.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, Unique, Status, Reduction, Static</small>									
+									<small class="description pull-right ">Cooldown: 3</small>
+								</p>		
+							</div>
+							<div id="clockboy-4" class="tab-pane">
+								<h4> Branch Damage <span class="null-orb"></span></h4>
+								<p class="mgb-desc">
+									Assumindo que a batalha levou a uma condição de dano, Cl0ckB0y faz um pulo condicional que o torna invulnerável por 1 turno.
+								</p>
+								
+								<p>
+									<small class="description">Physical, Melee, INV, Static</small>									
+									<small class="description pull-right ">Cooldown: 4</small>
+								</p>								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<br/>
+		<hr/>
+		<br/>
+		<br/>
+
+		<section id="energias">
+			<h2 class="blue"> Energias </h2>
+			<ul>
+				<li style="padding: 5px 0;">
+					<span class="green-orb" style="margin-right: 10px;"></span><strong style="display: inline-block; width: 70px;">Hard Orb:</strong> Necessário para realizar golpes físicos, práticos.
+				</li>
+				<li style="padding: 5px 0;">
+					<span class="blue-orb" style="margin-right: 10px;"></span><strong style="display: inline-block; width: 70px;">Soft Orb:</strong> Utilizado para aplicar técnicas virtuais e teóricas.
+				</li>
+				<li style="padding: 5px 0;">
+					<span class="pink-orb" style="margin-right: 10px;"></span><strong style="display: inline-block; width: 70px;">VR Orb:</strong> É requisito para golpes mentais, que alteram e/ou criam realidades alternativas.
+				</li>
+				<li style="padding: 5px 0;">
+					<span class="orange-orb" style="margin-right: 10px;"></span><strong style="display: inline-block; width: 70px;">BIOS Orb:</strong> Energia utilizada para realizar golpes únicos e raros.
+				</li>
+				<li style="padding: 5px 0;">
+					<span class="null-orb" style="margin-right: 10px;"></span><strong style="display: inline-block; width: 70px;">Null Orb:</strong> Existe apenas para balanceamento de habilidades
+				</li>
+			</ul>
+		</section>
+		<br/>
+		<hr/>
+		<br/>
+		<br/>
+
+		<section id="assets">
+			<h2 class="pink"> Créditos </h2>
+
+			<h3 style="font-size: 20px;color:#fff;"> Tipografia </h3>
+			<ul>
+				<li> Oswald </li>
+				<li> Open Sans </li>
+			</ul>
+
+			<h3 style="font-size: 20px;color:#fff;"> Imagens </h3>
+			<ul>
+				<li> Eiichiro Oda </li>
+				<li> Hiro Mashima </li>
+				<li> Hiroya Oku </li>
+				<li> Kazue Kato </li>
+				<li> Masashi Kishimoto </li>
+				<li> Takashi Takeuchi </li>
+				<li> Yusuke Murata </li>
+				devgear https://devgear.deviantart.com/art/Trinity-Blood-Inks-527650565
+
+			</ul>
+
+			<h3 style="font-size: 20px;color:#fff;"> Músicas </h3>
+			<ul>
+				<li>
+					<span style="display: inline-block; width: 250px;"> 
+						<a href="https://www.youtube.com/watch?v=ucGV9iBWqhE" target="_blank">FM Attack - Sleepless Nights</a>
+					</span> 
+					<small>[Intro]</small>
+				</li>
+				<li>
+					<span style="display: inline-block; width: 250px;">
+						<a href="https://www.youtube.com/watch?v=O8trQhjgYPU" target="_blank"> Artemus Gordon - Deathrace2000 </a>
+					</span> 
+					<small>[Character Selection]</small>
+				</li>
+				<li>
+					<span style="display: inline-block; width: 250px;"> 
+						<a href="https://www.youtube.com/watch?v=gIqx-0KwbBA" target="_blank">Toxxify - Cyborg Chase</a>
+					</span> 
+					<small>[Duel]</small>
+				</li>
+				<li>
+					<span style="display: inline-block; width: 250px;"> 
+						<a href="https://www.youtube.com/watch?v=mTWWI5LWZ8k" target="_blank">BIODRIVE - Neon City</a>
+					</span> 
+					<small>[Duel]</small>
+				</li>
+				<li>
+					<span style="display: inline-block; width: 250px;"> 
+						<a href="https://www.youtube.com/watch?v=MYY2mczSP_U" target="_blank">Speed Machine - Cybertronic</a>
+					</span> 
+					<small>[Duel]</small>
+				</li>
+				<li>
+					<span style="display: inline-block; width: 250px;"> 
+						<a href="https://www.youtube.com/watch?v=NZf15xVrOW8" target="_blank">Zombie Hyperdrive - Red Eyes</a>
+					</span> 
+					<small>[Duel]</small>
+				</li>
+			</ul>
+		</section>
+		<br/>
+		<hr/>
+		<br/>
+		
+	</div>
+</body>
+</html>
